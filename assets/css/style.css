@@ -1,0 +1,90 @@
+:root {
+    --brand-white: #FFFFFF;
+    --brand-lavender-light: #E8DFEA;
+    --brand-lavender: #C6A4CF;
+    --brand-plum: #371446;
+    --brand-black: #100E12;
+
+    --brand-blush: #FFF8F4;
+    --brand-cream: #FFFDFC;
+    --brand-mist: #F4F0F5;
+    --brand-muted-purple: #9B8DA3;
+    --brand-charcoal: #272629;
+
+
+    /*  LIGHT MODE
+       Accessible semantic colours  */
+
+    --background: #F4F0F5;
+
+    --surface: #FFFFFF;
+    --surface-soft: #FFFDFC;
+
+    --text: #100E12;
+
+    --text-secondary: #655A6B;
+
+    --primary: #371446;
+    --primary-hover: #100E12;
+
+    --accent: #C6A4CF;
+    --accent-soft: #E8DFEA;
+
+    --border: #D8CDDB;
+
+    --input-background: #F4F0F5;
+
+    --placeholder: #6D6372;
+
+    --focus: #6E3F7D;
+
+    --danger: #7A2948;
+    --danger-hover: #5F1F38;
+    --danger-background: #FFF0F4;
+
+    --success: #355B42;
+    --success-background: #EEF6F0;
+
+    --shadow: rgba(55, 20, 70, 0.08);
+    --shadow-hover: rgba(55, 20, 70, 0.14);
+}
+
+
+/* 2. DARK MODE  */
+
+body.dark-mode {
+
+    --background: #100E12;
+
+    --surface: #272629;
+    --surface-soft: #211F23;
+
+    --text: #FFFDFC;
+
+    --text-secondary: #D2C7D5;
+
+    --primary: #E8DFEA;
+    --primary-hover: #FFFFFF;
+
+    --accent: #C6A4CF;
+    --accent-soft: #371446;
+
+    --border: #5B505F;
+
+    --input-background: #1B191D;
+
+    --placeholder: #BDB1C1;
+
+    --focus: #C6A4CF;
+
+    --danger: #F2B6CB;
+    --danger-hover: #FFD5E3;
+    --danger-background: #3A202C;
+
+    --success: #B9DFC6;
+    --success-background: #233229;
+
+    --shadow: rgba(0, 0, 0, 0.30);
+    --shadow-hover: rgba(0, 0, 0, 0.45);
+}
+
