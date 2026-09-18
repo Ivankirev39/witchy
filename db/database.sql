@@ -1,7 +1,8 @@
 CREATE DATABASE IF NOT EXISTS witchy;
 USE witchy;
 
-CREATE TABLE user (
+
+CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -10,20 +11,24 @@ CREATE TABLE user (
     rank VARCHAR(50),
     bio TEXT,
     profile_image VARCHAR(255)
-)
+);
 
-CREATE TABLE post(
+
+CREATE TABLE post (
     post_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL, image VARCHAR(255),
-    title VARCHAR(150) NOT NULL, description TEXT,
+    user_id INT NOT NULL,
+    image VARCHAR(255),
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_hot BOOLEAN DEFAULT FALSE,
     is_sticky BOOLEAN DEFAULT FALSE,
 
     FOREIGN KEY (user_id)
-    REFERENCES user(user_id)
-    ON DELETE CASCADE
-)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+);
+
 
 CREATE TABLE comment (
     comment_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -33,29 +38,30 @@ CREATE TABLE comment (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_id)
-    REFERENCES user(user_id)
-    ON DELETE CASCADE,
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
 
     FOREIGN KEY (post_id)
-    REFERENCES post(post_id)
-    ON DELETE CASCADE
-)
+        REFERENCES post(post_id)
+        ON DELETE CASCADE
+);
 
-CREATE TABLE `like` (
+
+CREATE TABLE post_like (
     user_id INT NOT NULL,
     post_id INT NOT NULL,
 
     PRIMARY KEY (user_id, post_id),
 
     FOREIGN KEY (user_id)
-    REFERENCES user(user_id)
-    ON DELETE CASCADE,
-
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
 
     FOREIGN KEY (post_id)
-    REFERENCES post(post_id)
-    ON DELETE CASCADE
-)
+        REFERENCES post(post_id)
+        ON DELETE CASCADE
+);
+
 
 CREATE TABLE save (
     user_id INT NOT NULL,
@@ -65,13 +71,14 @@ CREATE TABLE save (
     PRIMARY KEY (user_id, post_id),
 
     FOREIGN KEY (user_id)
-    REFERENCES user(user_id)
-    ON DELETE CASCADE,
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
 
     FOREIGN KEY (post_id)
-    REFERENCES post(post_id)
-    ON DELETE CASCADE
-)
+        REFERENCES post(post_id)
+        ON DELETE CASCADE
+);
+
 
 CREATE TABLE follow (
     follower_id INT NOT NULL,
@@ -81,19 +88,20 @@ CREATE TABLE follow (
     PRIMARY KEY (follower_id, following_id),
 
     FOREIGN KEY (follower_id)
-    REFERENCES user(user_id)
-    ON DELETE CASCADE,
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
 
     FOREIGN KEY (following_id)
-    REFERENCES user(user_id)
-    ON DELETE CASCADE
-)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+);
+
 
 CREATE TABLE badge (
     badge_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     image VARCHAR(255)
-)
+);
 
 
 CREATE TABLE user_badge (
@@ -104,19 +112,20 @@ CREATE TABLE user_badge (
     PRIMARY KEY (user_id, badge_id),
 
     FOREIGN KEY (user_id)
-    REFERENCES user(user_id)
-    ON DELETE CASCADE,
-
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
 
     FOREIGN KEY (badge_id)
-    REFERENCES badge(badge_id)
-    ON DELETE CASCADE
-)
+        REFERENCES badge(badge_id)
+        ON DELETE CASCADE
+);
+
 
 CREATE TABLE rule (
     rule_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(150) NOT NULL, description TEXT NOT NULL
-)
+    title VARCHAR(150) NOT NULL,
+    description TEXT NOT NULL
+);
 
 
 CREATE TABLE ban (
@@ -127,7 +136,6 @@ CREATE TABLE ban (
     expires_at DATETIME NULL,
 
     FOREIGN KEY (user_id)
-    REFERENCES user(user_id)
-    ON DELETE CASCADE
-)
-
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+);
