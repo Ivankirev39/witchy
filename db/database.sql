@@ -73,4 +73,61 @@ CREATE TABLE save (
     ON DELETE CASCADE
 )
 
+CREATE TABLE follow (
+    follower_id INT NOT NULL,
+    following_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (follower_id, following_id),
+
+    FOREIGN KEY (follower_id)
+    REFERENCES user(user_id)
+    ON DELETE CASCADE,
+
+    FOREIGN KEY (following_id)
+    REFERENCES user(user_id)
+    ON DELETE CASCADE
+)
+
+CREATE TABLE badge (
+    badge_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    image VARCHAR(255)
+)
+
+
+CREATE TABLE user_badge (
+    user_id INT NOT NULL,
+    badge_id INT NOT NULL,
+    earned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (user_id, badge_id),
+
+    FOREIGN KEY (user_id)
+    REFERENCES user(user_id)
+    ON DELETE CASCADE,
+
+
+    FOREIGN KEY (badge_id)
+    REFERENCES badge(badge_id)
+    ON DELETE CASCADE
+)
+
+CREATE TABLE rule (
+    rule_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(150) NOT NULL, description TEXT NOT NULL
+)
+
+
+CREATE TABLE ban (
+    ban_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    reason TEXT NOT NULL,
+    banned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME NULL,
+
+    FOREIGN KEY (user_id)
+    REFERENCES user(user_id)
+    ON DELETE CASCADE
+)
 
