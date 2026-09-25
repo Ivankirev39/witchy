@@ -12,6 +12,16 @@ if (isset($_SESSION["user_id"])) {
 }
 
 
+// =========================
+// REGISTRATION TIMER
+// =========================
+
+// Remember when the user opened the register page.
+if ($_SERVER["REQUEST_METHOD"] === "GET") {
+    $_SESSION["register_form_started"] = time();
+}
+
+
 $error = "";
 $username = "";
 $email = "";
@@ -57,10 +67,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
     // =========================
+    // TIME-BASED BOT CHECK
+    // =========================
+
+    $formStarted =
+        $_SESSION["register_form_started"] ?? 0;
+
+    $secondsTaken =
+        time() - $formStarted;
+
+
+    if (
+        $formStarted === 0 ||
+        $secondsTaken < 3
+    ) {
+
+        $error =
+            "Please wait a moment before creating your account, then try again.";
+
+        // Start a new timer for the next attempt.
+        $_SESSION["register_form_started"] = time();
+    }
+
+
+    // =========================
     // SERVER-SIDE VALIDATION
     // =========================
 
-    if (
+    elseif (
         $username === "" ||
         $email === "" ||
         $password === "" ||
@@ -71,7 +105,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     } elseif (!preg_match('/^[A-Za-z0-9_]{3,50}$/', $username)) {
 
-        $error = "Username must be 3-50 characters and only contain letters, numbers or underscores.";
+        $error =
+            "Username must be 3-50 characters and only contain letters, numbers or underscores.";
 
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
@@ -113,11 +148,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (!$stmt) {
 
-            // Log real database error privately.
+            // Log the real database error privately.
             error_log($conn->error);
 
-            // Do not expose database details to visitor.
-            $error = "Something went wrong. Please try again.";
+            // Do not show database details to the visitor.
+            $error =
+                "Something went wrong. Please try again.";
 
         } else {
 
@@ -127,14 +163,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $email
             );
 
+
             $stmt->execute();
 
-            $result = $stmt->get_result();
+
+            $result =
+                $stmt->get_result();
 
 
             if ($result->num_rows > 0) {
 
-                $error = "Username or email is already in use.";
+                $error =
+                    "Username or email is already in use.";
 
             } else {
 
@@ -143,16 +183,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 // HASH PASSWORD
                 // =========================
 
-                // Never store the real password.
-                $hashedPassword = password_hash(
-                    $password,
-                    PASSWORD_DEFAULT
-                );
+                $hashedPassword =
+                    password_hash(
+                        $password,
+                        PASSWORD_DEFAULT
+                    );
 
 
                 if ($hashedPassword === false) {
 
-                    $error = "Something went wrong. Please try again.";
+                    $error =
+                        "Something went wrong. Please try again.";
 
                 } else {
 
@@ -162,8 +203,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     // =========================
 
                     // Rank is controlled by PHP.
-                    // A visitor cannot register themselves
-                    // as an admin.
+                    // Users cannot register themselves as admin.
                     $rank = "user";
 
 
@@ -173,20 +213,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     $sql = "
                         INSERT INTO users
-                            (username, email, password, rank)
+                            (
+                                username,
+                                email,
+                                password,
+                                rank
+                            )
                         VALUES
                             (?, ?, ?, ?)
                     ";
 
 
-                    $stmt = $conn->prepare($sql);
+                    $stmt =
+                        $conn->prepare($sql);
 
 
                     if (!$stmt) {
 
                         error_log($conn->error);
 
-                        $error = "Something went wrong. Please try again.";
+                        $error =
+                            "Something went wrong. Please try again.";
 
                     } else {
 
@@ -201,16 +248,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                         if ($stmt->execute()) {
 
-                            // Account created successfully.
-                            // User must log in normally.
-                            header("Location: login.php?registered=1");
+                            // Registration finished,
+                            // so the timer is no longer needed.
+                            unset(
+                                $_SESSION["register_form_started"]
+                            );
+
+
+                            header(
+                                "Location: login.php?registered=1"
+                            );
+
                             exit;
 
                         } else {
 
-                            error_log($stmt->error);
+                            error_log(
+                                $stmt->error
+                            );
 
-                            $error = "Something went wrong. Please try again.";
+                            $error =
+                                "Something went wrong. Please try again.";
                         }
                     }
                 }
@@ -234,7 +292,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Register | Witchy</title>
+    <title>
+        Register | Witchy
+    </title>
 
     <link
         rel="stylesheet"
@@ -276,7 +336,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 
                 <p>
-                    Discover ideas, save inspiration, share what you know, and explore with a community built around curiosity.
+                    Discover ideas, save inspiration,
+                    share what you know, and explore
+                    with a community built around curiosity.
                 </p>
 
 
@@ -366,7 +428,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 >
 
 
-                    <!-- CSRF TOKEN -->
+                    <!-- =========================
+                         CSRF TOKEN
+                         ========================= -->
 
                     <input
                         type="hidden"
@@ -392,6 +456,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <label for="website">
                             Website
                         </label>
+
 
                         <input
                             type="text"
@@ -647,15 +712,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     </main>
 
-
-    <!--
-        Load JavaScript AFTER the HTML.
-
-        This lets auth.js find:
-        - the theme toggle
-        - password eye #1
-        - password eye #2
-    -->
 
     <script src="assets/js/auth.js"></script>
 
