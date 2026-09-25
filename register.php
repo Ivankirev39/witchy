@@ -26,6 +26,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
 
+    // Honeypot anti-bot check
+    $website = trim($_POST["website"] ?? "");
+
+    if ($website !== "") {
+        http_response_code(400);
+        exit("Invalid request.");
+    }
+
+
     // Get form values
     $username = trim($_POST["username"] ?? "");
     $email = trim($_POST["email"] ?? "");
@@ -231,6 +240,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             "UTF-8"
                         ) ?>"
                     >
+
+                    <!-- Honeypot field -->
+                     <div class="honeypot" aria-hidden="true">
+
+                    <label for="website">
+                      Website
+                     </label>
+
+                   <input
+                   type="text"
+                   id="website"
+                   name="website"
+                   tabindex="-1"
+                    autocomplete="off"
+                    >
+
+</div>
 
 
                     <div class="form-group">
