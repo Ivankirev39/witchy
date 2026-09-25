@@ -104,11 +104,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 <head>
 
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+    <link rel="stylesheet" href="assets/css/style.css">
 
     <title>Login | Witchy</title>
 
@@ -117,100 +117,166 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <body>
 
-    <h1>Welcome back</h1>
+    <main class="auth-page">
 
-    <p>Log in to Witchy.</p>
+        <section class="auth-brand">
 
-
-    <?php if (
-        isset($_GET["registered"]) &&
-        $_GET["registered"] === "1"
-    ): ?>
-
-        <p>
-            Account created. You can now log in.
-        </p>
-
-    <?php endif; ?>
+            <div class="brand-logo">
+                ☾ Witchy
+            </div>
 
 
-    <?php if ($error): ?>
+            <div class="brand-content">
 
-        <p>
-            <?= htmlspecialchars(
-                $error,
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>
-        </p>
+                <div class="brand-symbol">
+                    ☾
+                </div>
 
-    <?php endif; ?>
+                <h1>
+                    A home for modern witches
+                </h1>
 
+                <p>
+                    Share. Discover. Learn. Belong.
+                    Explore practices, ideas and inspiration
+                    in a community built around curiosity
+                    and connection.
+                </p>
 
-    <form method="POST">
-
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= htmlspecialchars(
-                csrf_token(),
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
-        >
+            </div>
 
 
-        <label for="login">
-            Email or username
-        </label>
+            <div class="brand-footer">
+                Good energy. Great company.
+            </div>
 
-        <input
-            type="text"
-            id="login"
-            name="login"
-            value="<?= htmlspecialchars(
-                $login,
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
-            autocomplete="username"
-            required
-        >
+        </section>
 
 
-        <br><br>
+        <section class="auth-main">
+
+            <div class="auth-container">
+
+                <header class="auth-header">
+
+                    <h2>Welcome back</h2>
+
+                    <p>
+                        Log in to continue exploring Witchy.
+                    </p>
+
+                </header>
 
 
-        <label for="password">
-            Password
-        </label>
+                <?php if (
+                    isset($_GET["registered"]) &&
+                    $_GET["registered"] === "1"
+                ): ?>
 
-        <input
-            type="password"
-            id="password"
-            name="password"
-            autocomplete="current-password"
-            required
-        >
+                    <div class="auth-message auth-success">
+                        Account created. You can now log in.
+                    </div>
 
-
-        <br><br>
+                <?php endif; ?>
 
 
-        <button type="submit">
-            Log in
-        </button>
+                <?php if ($error): ?>
 
-    </form>
+                    <div class="auth-message auth-error">
+
+                        <?= htmlspecialchars(
+                            $error,
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>
+
+                    </div>
+
+                <?php endif; ?>
 
 
-    <p>
-        Don't have an account?
+                <form
+                    method="POST"
+                    class="auth-form"
+                >
 
-        <a href="register.php">
-            Register
-        </a>
-    </p>
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= htmlspecialchars(
+                            csrf_token(),
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                    >
+
+
+                    <div class="form-group">
+
+                        <label for="login">
+                            Email or username
+                        </label>
+
+                        <input
+                            type="text"
+                            id="login"
+                            name="login"
+                            value="<?= htmlspecialchars(
+                                $login,
+                                ENT_QUOTES,
+                                "UTF-8"
+                            ) ?>"
+                            placeholder="Enter your email or username"
+                            autocomplete="username"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="password">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="auth-button"
+                    >
+                        Log in
+                    </button>
+
+                </form>
+
+
+                <p class="auth-switch">
+
+                    New to Witchy?
+
+                    <a href="register.php">
+                        Create an account
+                    </a>
+
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
 
 </body>
 

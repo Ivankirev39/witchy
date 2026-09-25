@@ -1,3 +1,7 @@
+/* =========================
+   WITCHY COLOURS
+   ========================= */
+
 :root {
     --brand-white: #FFFFFF;
     --brand-lavender-light: #E8DFEA;
@@ -11,80 +15,443 @@
     --brand-muted-purple: #9B8DA3;
     --brand-charcoal: #272629;
 
-
-    /*  LIGHT MODE
-       Accessible semantic colours  */
-
     --background: #F4F0F5;
-
     --surface: #FFFFFF;
     --surface-soft: #FFFDFC;
-
     --text: #100E12;
-
     --text-secondary: #655A6B;
-
     --primary: #371446;
     --primary-hover: #100E12;
-
     --accent: #C6A4CF;
     --accent-soft: #E8DFEA;
-
     --border: #D8CDDB;
-
     --input-background: #F4F0F5;
-
     --placeholder: #6D6372;
-
     --focus: #6E3F7D;
-
     --danger: #7A2948;
     --danger-hover: #5F1F38;
     --danger-background: #FFF0F4;
-
     --success: #355B42;
     --success-background: #EEF6F0;
-
     --shadow: rgba(55, 20, 70, 0.08);
     --shadow-hover: rgba(55, 20, 70, 0.14);
 }
 
 
-/* 2. DARK MODE  */
-
 body.dark-mode {
-
     --background: #100E12;
-
     --surface: #272629;
     --surface-soft: #211F23;
-
     --text: #FFFDFC;
-
     --text-secondary: #D2C7D5;
-
     --primary: #E8DFEA;
     --primary-hover: #FFFFFF;
-
     --accent: #C6A4CF;
     --accent-soft: #371446;
-
     --border: #5B505F;
-
     --input-background: #1B191D;
-
     --placeholder: #BDB1C1;
-
     --focus: #C6A4CF;
-
     --danger: #F2B6CB;
     --danger-hover: #FFD5E3;
     --danger-background: #3A202C;
-
     --success: #B9DFC6;
     --success-background: #233229;
-
     --shadow: rgba(0, 0, 0, 0.30);
     --shadow-hover: rgba(0, 0, 0, 0.45);
 }
 
+
+/* =========================
+   BASE
+   ========================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: var(--background);
+    color: var(--text);
+}
+
+
+/* =========================
+   AUTH PAGE
+   ========================= */
+
+.auth-page {
+    min-height: 100vh;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+
+/* =========================
+   BRAND SIDE
+   ========================= */
+
+.auth-brand {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    padding: 48px 60px;
+
+    background: var(--surface-soft);
+
+    overflow: hidden;
+}
+
+
+/* soft decorative circle */
+
+.auth-brand::after {
+    content: "";
+
+    position: absolute;
+    width: 420px;
+    height: 420px;
+
+    border-radius: 50%;
+
+    background: var(--accent-soft);
+
+    right: -180px;
+    bottom: -180px;
+
+    opacity: 0.55;
+}
+
+
+.brand-logo {
+    position: relative;
+    z-index: 1;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 25px;
+    font-weight: 500;
+
+    color: var(--text);
+}
+
+
+.brand-content {
+    position: relative;
+    z-index: 1;
+
+    max-width: 470px;
+}
+
+
+.brand-symbol {
+    margin-bottom: 18px;
+
+    font-size: 38px;
+
+    color: var(--primary);
+}
+
+
+.brand-content h1 {
+    margin: 0 0 18px;
+
+    max-width: 430px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(42px, 5vw, 68px);
+    font-weight: 400;
+    line-height: 0.98;
+
+    color: var(--text);
+}
+
+
+.brand-content p {
+    max-width: 400px;
+
+    margin: 0;
+
+    color: var(--text-secondary);
+
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+
+.brand-footer {
+    position: relative;
+    z-index: 1;
+
+    color: var(--text-secondary);
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   FORM SIDE
+   ========================= */
+
+.auth-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 48px 32px;
+
+    background: var(--background);
+}
+
+
+.auth-container {
+    width: 100%;
+    max-width: 430px;
+}
+
+
+.auth-header {
+    margin-bottom: 32px;
+}
+
+
+.auth-header h2 {
+    margin: 0 0 8px;
+
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 38px;
+    font-weight: 400;
+
+    color: var(--text);
+}
+
+
+.auth-header p {
+    margin: 0;
+
+    color: var(--text-secondary);
+
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+
+/* =========================
+   FORM
+   ========================= */
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+
+    color: var(--text);
+}
+
+
+.form-group input {
+    width: 100%;
+    height: 48px;
+
+    padding: 0 15px;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    background: var(--input-background);
+    color: var(--text);
+
+    font: inherit;
+    font-size: 14px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+
+.form-group input::placeholder {
+    color: var(--placeholder);
+}
+
+
+.form-group input:focus {
+    border-color: var(--focus);
+
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+
+/* =========================
+   BUTTON
+   ========================= */
+
+.auth-button {
+    width: 100%;
+    height: 48px;
+
+    margin-top: 4px;
+
+    border: none;
+    border-radius: 9px;
+
+    background: var(--primary);
+    color: var(--surface);
+
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.15s ease;
+}
+
+
+.auth-button:hover {
+    background: var(--primary-hover);
+}
+
+
+.auth-button:active {
+    transform: translateY(1px);
+}
+
+
+/* =========================
+   MESSAGES
+   ========================= */
+
+.auth-message {
+    margin-bottom: 22px;
+
+    padding: 12px 14px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+.auth-error {
+    background: var(--danger-background);
+    color: var(--danger);
+
+    border: 1px solid var(--danger);
+}
+
+
+.auth-success {
+    background: var(--success-background);
+    color: var(--success);
+
+    border: 1px solid var(--success);
+}
+
+
+/* =========================
+   BOTTOM LINK
+   ========================= */
+
+.auth-switch {
+    margin-top: 26px;
+
+    text-align: center;
+
+    color: var(--text-secondary);
+
+    font-size: 14px;
+}
+
+
+.auth-switch a {
+    color: var(--primary);
+
+    font-weight: 600;
+    text-decoration: none;
+}
+
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 800px) {
+
+    .auth-page {
+        display: block;
+    }
+
+
+    .auth-brand {
+        min-height: auto;
+
+        padding: 28px 24px;
+
+        background: var(--surface-soft);
+    }
+
+
+    .brand-content,
+    .brand-footer {
+        display: none;
+    }
+
+
+    .auth-brand::after {
+        display: none;
+    }
+
+
+    .auth-main {
+        min-height: calc(100vh - 85px);
+
+        padding: 45px 24px;
+
+        align-items: flex-start;
+    }
+
+
+    .auth-container {
+        max-width: 480px;
+    }
+
+
+    .auth-header h2 {
+        font-size: 34px;
+    }
+}

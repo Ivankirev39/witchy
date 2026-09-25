@@ -143,6 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+    <link rel="stylesheet" href="assets/css/style.css">
 
     <title>Register | Witchy</title>
 
@@ -151,128 +152,199 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <body>
 
-    <h1>Join Witchy</h1>
+    <main class="auth-page">
 
-    <p>Create your account.</p>
+        <section class="auth-brand">
 
-
-    <?php if ($error): ?>
-
-        <p>
-            <?= htmlspecialchars(
-                $error,
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>
-        </p>
-
-    <?php endif; ?>
+            <div class="brand-logo">
+                ☾ Witchy
+            </div>
 
 
-    <form method="POST">
+            <div class="brand-content">
 
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= htmlspecialchars(
-                csrf_token(),
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
-        >
+                <div class="brand-symbol">
+                    ☾
+                </div>
 
+                <h1>
+                    Find your place in Witchy
+                </h1>
 
-        <label for="username">
-            Username
-        </label>
+                <p>
+                    Discover ideas, save inspiration,
+                    share your practice and connect with
+                    a community built for learning and exploration.
+                </p>
 
-        <input
-            type="text"
-            id="username"
-            name="username"
-            value="<?= htmlspecialchars(
-                $username,
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
-            minlength="3"
-            maxlength="50"
-            required
-        >
+            </div>
 
 
-        <br><br>
+            <div class="brand-footer">
+                Share. Discover. Learn. Belong.
+            </div>
+
+        </section>
 
 
-        <label for="email">
-            Email
-        </label>
+        <section class="auth-main">
 
-        <input
-            type="email"
-            id="email"
-            name="email"
-            value="<?= htmlspecialchars(
-                $email,
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
-            maxlength="100"
-            required
-        >
+            <div class="auth-container">
+
+                <header class="auth-header">
+
+                    <h2>Join Witchy</h2>
+
+                    <p>
+                        Create your account and start exploring.
+                    </p>
+
+                </header>
 
 
-        <br><br>
+                <?php if ($error): ?>
+
+                    <div class="auth-message auth-error">
+
+                        <?= htmlspecialchars(
+                            $error,
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>
+
+                    </div>
+
+                <?php endif; ?>
 
 
-        <label for="password">
-            Password
-        </label>
+                <form
+                    method="POST"
+                    class="auth-form"
+                >
 
-        <input
-            type="password"
-            id="password"
-            name="password"
-            minlength="8"
-            autocomplete="new-password"
-            required
-        >
-
-
-        <br><br>
-
-
-        <label for="confirm_password">
-            Confirm password
-        </label>
-
-        <input
-            type="password"
-            id="confirm_password"
-            name="confirm_password"
-            minlength="8"
-            autocomplete="new-password"
-            required
-        >
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= htmlspecialchars(
+                            csrf_token(),
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                    >
 
 
-        <br><br>
+                    <div class="form-group">
+
+                        <label for="username">
+                            Username
+                        </label>
+
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            value="<?= htmlspecialchars(
+                                $username,
+                                ENT_QUOTES,
+                                "UTF-8"
+                            ) ?>"
+                            placeholder="Choose a username"
+                            minlength="3"
+                            maxlength="50"
+                            autocomplete="username"
+                            required
+                        >
+
+                    </div>
 
 
-        <button type="submit">
-            Create account
-        </button>
+                    <div class="form-group">
 
-    </form>
+                        <label for="email">
+                            Email
+                        </label>
+
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="<?= htmlspecialchars(
+                                $email,
+                                ENT_QUOTES,
+                                "UTF-8"
+                            ) ?>"
+                            placeholder="Enter your email"
+                            maxlength="100"
+                            autocomplete="email"
+                            required
+                        >
+
+                    </div>
 
 
-    <p>
-        Already have an account?
+                    <div class="form-group">
 
-        <a href="login.php">
-            Log in
-        </a>
-    </p>
+                        <label for="password">
+                            Password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="At least 8 characters"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="confirm_password">
+                            Confirm password
+                        </label>
+
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Enter your password again"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="auth-button"
+                    >
+                        Create account
+                    </button>
+
+                </form>
+
+
+                <p class="auth-switch">
+
+                    Already have an account?
+
+                    <a href="login.php">
+                        Log in
+                    </a>
+
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
 
 </body>
 
