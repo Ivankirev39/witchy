@@ -4,7 +4,7 @@ require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/config/db.php";
 
 if (isset($_SESSION["user_id"])) {
-    header("Location: index.php");
+    header("Location: feed.php");
     exit;
 }
 

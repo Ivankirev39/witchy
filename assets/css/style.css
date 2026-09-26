@@ -1429,6 +1429,45 @@ body.dark-mode .community-card {
     font-size: 12px;
 }
 
+/*user dashboard*/
+
+
+.user-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.user-sidebar {
+    width: 220px;
+    padding: 24px;
+    border-right: 1px solid #ddd;
+}
+
+.user-main {
+    flex: 1;
+    padding: 32px;
+}
+
+.user-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.user-nav a {
+    padding: 10px 12px;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.user-nav a.active {
+    background: #eee;
+}
+
+.user-sidebar-bottom {
+    margin-top: 40px;
+}
+
 
 /* ========================================
    RESPONSIVE
