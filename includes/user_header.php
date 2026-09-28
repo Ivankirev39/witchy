@@ -48,10 +48,10 @@ $currentPage = basename($_SERVER["PHP_SELF"]);
             </a>
 
             <a
-                href="upload.php"
-                class="<?= $currentPage === "upload.php" ? "active" : "" ?>"
+                href="rules.php"
+                class="<?= $currentPage === "rules.php" ? "active" : "" ?>"
             >
-                Create
+                Rules
             </a>
 
             <a
