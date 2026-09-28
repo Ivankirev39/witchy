@@ -12,6 +12,7 @@ $currentPage = basename($_SERVER["PHP_SELF"]);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle ?? "Witchy", ENT_QUOTES, "UTF-8") ?></title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/upload.css">
 
     <script>
         const savedTheme = localStorage.getItem("theme");
