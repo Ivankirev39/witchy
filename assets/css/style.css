@@ -1679,7 +1679,30 @@ html.dark-mode .create-post-button:hover {
     background: var(--brand-lavender);
 }
 
+.site-logo {
+    width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
 
+.site-logo img {
+    display: block;
+    width: auto;
+    height: 40px;
+}
+
+.logo-dark {
+    display: none;
+}
+
+html.dark-mode .logo-light {
+    display: none;
+}
+
+html.dark-mode .logo-dark {
+    display: block;
+}
 
 
 /* FOOTER */

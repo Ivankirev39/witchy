@@ -24,19 +24,19 @@ $isLoggedIn = isset($_SESSION["user_id"]);
     >
 </head>
 <body>
-<header class="site-header">
-    <a
-        href="index.php"
-        class="site-logo"
-        aria-label="Witchy home"
-    >
-        <span
-            class="site-logo-symbol"
+    <a href="index.php" class="site-logo" aria-label="Witchy home">
+        <img
+            src="assets/images/Horizontal black.svg"
+            alt="Witchy"
+            class="logo-light"
+        >
+
+        <img
+            src="assets/images/Horizontal White.svg"
+            alt=""
+            class="logo-dark"
             aria-hidden="true"
         >
-            ☾
-        </span>
-        <span>Witchy</span>
     </a>
 
     <nav
