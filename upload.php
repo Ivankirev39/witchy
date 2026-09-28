@@ -228,8 +228,14 @@ require_once __DIR__ . "/includes/user_header.php";
             </label>
 
          <div id="imagePreview" hidden>
-            <img id="imagePreviewImage" alt="Selected image preview">
-         </div>
+          <img id="imagePreviewImage" alt="Selected image preview">
+          <button
+           type="button"
+           id="removeImage"
+           aria-label="Remove selected image"
+           title="Remove image"
+            >×</button>
+        </div>
 
         </section>
 
@@ -413,32 +419,8 @@ require_once __DIR__ . "/includes/user_header.php";
 
 </section>
 
-<script>
-const imageInput = document.getElementById("image");
-const preview = document.getElementById("imagePreview");
-const previewImage = document.getElementById("imagePreviewImage");
-let previewUrl;
 
-imageInput.addEventListener("change", () => {
-    if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-        previewUrl = null;
-    }
-
-    const file = imageInput.files[0];
-
-    if (!file) {
-        preview.hidden = true;
-        previewImage.removeAttribute("src");
-        return;
-    }
-
-    previewUrl = URL.createObjectURL(file);
-    previewImage.src = previewUrl;
-    preview.hidden = false;
-});
-</script>
-
+<script src="assets/js/upload.js" defer></script>
 
 <?php
 require_once __DIR__ . "/includes/user_footer.php";
