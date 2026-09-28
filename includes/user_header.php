@@ -14,6 +14,7 @@ $currentPage = basename($_SERVER["PHP_SELF"]);
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/upload.css">
     <link rel="stylesheet" href="assets/css/feed.css">
+    <link rel="stylesheet" href="assets/css/rules.css">
 
     <script>
         const savedTheme = localStorage.getItem("theme");
