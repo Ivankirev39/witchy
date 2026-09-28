@@ -15,6 +15,12 @@ $currentPage = basename($_SERVER["PHP_SELF"]);
     <link rel="stylesheet" href="assets/css/upload.css">
     <link rel="stylesheet" href="assets/css/feed.css">
     <link rel="stylesheet" href="assets/css/rules.css">
+    <?php if (!empty($pageCss)): ?>
+    <link
+        rel="stylesheet"
+        href="assets/css/<?= htmlspecialchars($pageCss, ENT_QUOTES, "UTF-8") ?>"
+    >
+<?php endif; ?>
 
     <script>
         const savedTheme = localStorage.getItem("theme");
