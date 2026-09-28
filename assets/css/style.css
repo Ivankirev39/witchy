@@ -1401,16 +1401,21 @@ body.dark-mode .footer-logo .logo-dark {
 
 
 /* SIDEBAR */
-
 .user-sidebar {
     width: 220px;
-    min-height: 100vh;
-    padding: 28px 20px;
-    border-right: 1px solid var(--border);
-    background: var(--surface-soft);
+    height: 100vh;
+
+    position: sticky;
+    top: 0;
+
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+
+    padding: 28px 20px;
+
+    border-right: 1px solid var(--border);
+    background: var(--surface-soft);
 }
 
 /* ========================================
