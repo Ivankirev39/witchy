@@ -1,4 +1,6 @@
-/* FEED */
+/* ========================================
+   FEED
+   ======================================== */
 
 .feed-page {
     max-width: 760px;
@@ -11,14 +13,20 @@
 
 .feed-page h1 {
     margin: 0 0 10px;
-    font-family: Georgia, serif;
+    font-family: var(--font-display);
     font-size: 36px;
+    font-weight: 500;
     color: var(--text);
 }
 
 .feed-page p {
     color: var(--text-secondary);
 }
+
+
+/* ========================================
+   FEED TABS
+   ======================================== */
 
 .feed-tabs {
     display: flex;
@@ -42,7 +50,9 @@
 }
 
 
-/* POST CARD */
+/* ========================================
+   POST CARD
+   ======================================== */
 
 .post-card {
     overflow: hidden;
@@ -80,12 +90,6 @@
     color: var(--text-secondary);
 }
 
-.post-actions {
-    display: flex;
-    gap: 18px;
-    padding: 14px 16px 8px;
-}
-
 .post-body {
     padding: 0 16px 18px;
 }
@@ -95,56 +99,8 @@
 }
 
 
-html.dark-mode .feed-page h1 {
-    color: #f1e8dc;
-}
-
-html.dark-mode .feed-page p {
-    color: #aaa2aa;
-}
-
-html.dark-mode .feed-tabs {
-    border-bottom-color: #302d35;
-}
-
-html.dark-mode .feed-tab {
-    color: #aaa2aa;
-}
-
-html.dark-mode .feed-tab.active {
-    color: #f1e8dc;
-    border-bottom-color: #c5a6ca;
-}
-
-html.dark-mode .post-card {
-    background: #1f1d24;
-    border-color: #343039;
-}
-
-html.dark-mode .post-avatar {
-    background: #493f46;
-}
-
-html.dark-mode .post-author strong {
-    color: #f1e8dc;
-}
-
-html.dark-mode .post-author p {
-    color: #aaa2aa;
-}
-
-html.dark-mode .post-image-placeholder {
-    background: #29262d;
-    color: #aaa2aa;
-}
-
-html.dark-mode .post-body {
-    color: #f1e8dc;
-}
-
-
 /* ========================================
-   FEED ACTIONS
+   POST ACTIONS
    ======================================== */
 
 .post-actions {
@@ -167,14 +123,19 @@ html.dark-mode .post-body {
     gap: 5px;
     min-height: 36px;
     padding: 6px 10px;
+
     border: none;
     border-radius: 8px;
+
     background: transparent;
     color: var(--text-secondary);
+
     font: inherit;
     font-size: 14px;
+
     text-decoration: none;
     cursor: pointer;
+
     transition:
         background-color 0.2s ease,
         color 0.2s ease;
@@ -247,11 +208,14 @@ html.dark-mode .post-body {
     min-width: 0;
     height: 40px;
     padding: 0 12px;
+
     border: 1px solid var(--border);
     border-radius: 9px;
     outline: none;
+
     background: var(--input-background);
     color: var(--text);
+
     font: inherit;
     font-size: 13px;
 }
@@ -268,14 +232,19 @@ html.dark-mode .post-body {
 .comment-form button {
     height: 40px;
     padding: 0 16px;
+
     border: none;
     border-radius: 9px;
+
     background: var(--brand-plum);
     color: var(--brand-white);
+
     font: inherit;
     font-size: 13px;
     font-weight: 600;
+
     cursor: pointer;
+
     transition:
         background-color 0.2s ease,
         transform 0.15s ease;
@@ -291,8 +260,87 @@ html.dark-mode .post-body {
 
 
 /* ========================================
+   ACTIVE LIKE / SAVE
+   ======================================== */
+
+.like-button.active {
+    background: var(--accent-soft);
+    color: var(--brand-plum);
+    font-weight: 700;
+}
+
+.like-button.active .like-heart {
+    color: var(--brand-plum);
+}
+
+.like-heart {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.save-button.active {
+    background: var(--accent-soft);
+    color: var(--brand-plum);
+    box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.like-button.active:hover,
+.save-button.active:hover {
+    background: var(--brand-lavender-light);
+    color: var(--brand-plum);
+}
+
+
+/* ========================================
    DARK MODE
    ======================================== */
+
+html.dark-mode .feed-page h1 {
+    color: #f1e8dc;
+}
+
+html.dark-mode .feed-page p {
+    color: #aaa2aa;
+}
+
+html.dark-mode .feed-tabs {
+    border-bottom-color: #302d35;
+}
+
+html.dark-mode .feed-tab {
+    color: #aaa2aa;
+}
+
+html.dark-mode .feed-tab.active {
+    color: #f1e8dc;
+    border-bottom-color: #c5a6ca;
+}
+
+html.dark-mode .post-card {
+    background: #1f1d24;
+    border-color: #343039;
+}
+
+html.dark-mode .post-avatar {
+    background: #493f46;
+}
+
+html.dark-mode .post-author strong {
+    color: #f1e8dc;
+}
+
+html.dark-mode .post-author p {
+    color: #aaa2aa;
+}
+
+html.dark-mode .post-image-placeholder {
+    background: #29262d;
+    color: #aaa2aa;
+}
+
+html.dark-mode .post-body {
+    color: #f1e8dc;
+}
 
 html.dark-mode .post-actions {
     border-color: #343039;
@@ -348,40 +396,6 @@ html.dark-mode .comment-form button:hover {
     color: var(--brand-black);
 }
 
-/* ========================================
-   ACTIVE LIKE / SAVE
-   ======================================== */
-
-.like-button.active {
-    background: var(--accent-soft);
-    color: var(--brand-plum);
-    font-weight: 700;
-}
-
-.like-button.active .like-heart {
-    color: var(--brand-plum);
-}
-
-.like-heart {
-    font-size: 18px;
-    line-height: 1;
-}
-
-.save-button.active {
-    background: var(--accent-soft);
-    color: var(--brand-plum);
-    box-shadow: inset 0 0 0 1px var(--accent);
-}
-
-.like-button.active:hover,
-.save-button.active:hover {
-    background: var(--brand-lavender-light);
-    color: var(--brand-plum);
-}
-
-
-/* DARK MODE */
-
 html.dark-mode .like-button.active,
 html.dark-mode .save-button.active {
     background: #493b4d;
@@ -402,17 +416,27 @@ html.dark-mode .save-button.active:hover {
     color: #ead9ed;
 }
 
+
 /* ========================================
    MOBILE
    ======================================== */
 
 @media (max-width: 500px) {
-    .post-actions {
-        gap: 4px;
-    }
 
     .feed-page {
         max-width: 100%;
+    }
+
+    .feed-page h1 {
+        font-size: 30px;
+    }
+
+    .post-image-placeholder {
+        height: 240px;
+    }
+
+    .post-actions {
+        gap: 4px;
     }
 
     .post-action-button {

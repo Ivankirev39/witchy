@@ -1,8 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --font-display: "Sora", sans-serif;
+    --font-body: "Sora", sans-serif;
+
+    /* all your colours continue below */
+
 /* ========================================
    WITCHY COLOURS
    ======================================== */
 
-:root {
+
     --brand-white: #FFFFFF;
     --brand-lavender-light: #E8DFEA;
     --brand-lavender: #C6A4CF;
@@ -98,7 +106,7 @@ body {
     margin: 0;
     min-height: 100vh;
 
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font-body);
 
     background: var(--background);
     color: var(--text);
@@ -178,7 +186,7 @@ input {
     align-items: center;
     gap: 7px;
 
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font-display);
     font-size: 20px;
     font-weight: 500;
 
@@ -199,7 +207,7 @@ input {
 
     color: var(--primary);
 
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font-display);
     font-size: 30px;
 }
 
@@ -209,7 +217,7 @@ input {
 
     margin: 0 0 18px;
 
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font-display);
     font-size: clamp(42px, 4.1vw, 62px);
     font-weight: 400;
 
@@ -277,7 +285,7 @@ input {
 .auth-header h2 {
     margin: 0 0 8px;
 
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font-display);
     font-size: 36px;
     font-weight: 400;
 
@@ -650,7 +658,7 @@ body.dark-mode .auth-button:hover {
 
     color: var(--text);
 
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font-display);
     font-size: 20px;
     font-weight: 500;
 
@@ -853,7 +861,7 @@ body.dark-mode .button-primary:hover {
 
     color: var(--text);
 
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font-display);
     font-size: clamp(44px, 4.4vw, 64px);
     font-weight: 400;
 
@@ -965,7 +973,7 @@ body.dark-mode .button-primary:hover {
 
     margin: 18px 0 0;
 
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font-display);
     font-size: 26px;
     font-weight: 400;
 }
@@ -1126,7 +1134,7 @@ body.dark-mode .button-primary:hover {
 
     color: var(--text);
 
-    font-family: Georgia, "Times New Roman", serif;
+    font-family: var(--font-display);
     font-size: clamp(30px, 3vw, 42px);
     font-weight: 400;
 
@@ -1465,7 +1473,7 @@ body.dark-mode .community-card {
 .user-logo a {
     text-decoration: none;
     color: var(--text);
-    font-family: Georgia, serif;
+    font-family: var(--font-display);
     font-size: 26px;
 }
 
@@ -1680,7 +1688,7 @@ html.dark-mode .create-post-button:hover {
 
 .rules-header h1{
     font-size:36px;
-    font-family: Georgia, serif;
+    font-family: var(--font-display);
 }
 
 .rules-header h2 {
@@ -1710,7 +1718,7 @@ html.dark-mode .rules-header h2 {
 
 .rule-title {
     margin: 0 0 10px;
-     font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font-body);
     font-size: 22px;
     font-weight: 700;
     color: var(--text);

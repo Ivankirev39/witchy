@@ -20,8 +20,10 @@
     margin: 0;
 
     color: var(--text);
-    font-family: Georgia, serif;
+
+    font-family: var(--font-display);
     font-size: 32px;
+    font-weight: 500;
     line-height: 1.2;
 }
 
@@ -30,16 +32,10 @@
 
     color: var(--text-secondary);
 
+    font-family: var(--font-body);
     font-size: 15px;
 }
 
-html.dark-mode .create-header h1 {
-    color: #f1e8dc;
-}
-
-html.dark-mode .create-subtitle {
-    color: #aaa2aa;
-}   
 
 /* ========================================
    FORM
@@ -76,7 +72,9 @@ html.dark-mode .create-subtitle {
 
     color: var(--text);
 
+    font-family: var(--font-body);
     font-size: 19px;
+    font-weight: 600;
     line-height: 1.3;
 }
 
@@ -85,22 +83,11 @@ html.dark-mode .create-subtitle {
 
     color: var(--text-secondary);
 
+    font-family: var(--font-body);
     font-size: 14px;
     line-height: 1.5;
 }
 
-html.dark-mode .create-card {
-    background: #1f1d24;
-    border-color: #343039;
-}
-
-html.dark-mode .card-header h2 {
-    color: #f1e8dc;
-}
-
-html.dark-mode .card-header p {
-    color: #aaa2aa;
-}
 
 /* ========================================
    IMAGE UPLOAD
@@ -177,28 +164,17 @@ html.dark-mode .card-header p {
 .image-upload-text strong {
     color: var(--text);
 
+    font-family: var(--font-body);
     font-size: 15px;
+    font-weight: 600;
 }
 
 .image-upload-text span {
     color: var(--text-secondary);
 
+    font-family: var(--font-body);
     font-size: 13px;
 }
-
-html.dark-mode .image-upload {
-    background: #1f1d24;
-    border-color: #343039;
-}
-
-html.dark-mode .image-upload:hover {
-    border-color: var(--border);
-}
-
-html.dark-mode .image-upload-text strong {
-    color: #f1e8dc;
-}
-
 
 
 /* ========================================
@@ -222,8 +198,9 @@ html.dark-mode .image-upload-text strong {
 
     color: var(--text);
 
+    font-family: var(--font-body);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .optional {
@@ -233,9 +210,6 @@ html.dark-mode .image-upload-text strong {
     font-weight: 400;
 }
 
-html.dark-mode .form-group label {
-    color: #f1e8dc;
-}
 
 /* ========================================
    INPUTS
@@ -255,6 +229,7 @@ html.dark-mode .form-group label {
     border-radius: 8px;
 
     font: inherit;
+    font-family: var(--font-body);
     font-size: 14px;
 
     transition:
@@ -295,31 +270,10 @@ html.dark-mode .form-group label {
 .form-group small {
     color: var(--text-secondary);
 
+    font-family: var(--font-body);
     font-size: 12px;
 }
 
-
-html.dark-mode .form-group input[type="text"] {
-    background: #1f1d24;
-    color: #f1e8dc;
-    border-color: #343039;
-}
-
-html.dark-mode .form-group textarea {
-    background: #1f1d24;
-    color: #f1e8dc;
-    border-color: #343039;
-}
-
-html.dark-mode .form-group select {
-    background: #1f1d24;
-    color: #f1e8dc;
-    border-color: #343039;
-}
-
-html.dark-mode .form-group small {
-    color: #aaa2aa;
-}
 
 /* ========================================
    ACTIONS
@@ -351,8 +305,9 @@ html.dark-mode .form-group small {
 
     border-radius: 8px;
 
+    font-family: var(--font-body);
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 600;
 
     text-decoration: none;
 
@@ -370,7 +325,7 @@ html.dark-mode .form-group small {
 }
 
 
-/* Primary */
+/* PRIMARY BUTTON */
 
 .button-primary {
     background: var(--primary);
@@ -384,18 +339,8 @@ html.dark-mode .form-group small {
     border-color: var(--primary-hover);
 }
 
-html.dark-mode .button-primary {
-    background: #c084cc;
-    color: var(--brand-white);
-}
 
-html.dark-mode .button-primary:hover {
-    background: var(--brand-lavender);
-
-}
-
-
-/* Secondary */
+/* SECONDARY BUTTON */
 
 .button-secondary {
     background: transparent;
@@ -410,8 +355,69 @@ html.dark-mode .button-primary:hover {
 }
 
 
-body.dark-mode .button-primary {
+/* ========================================
+   DARK MODE
+   ======================================== */
+
+html.dark-mode .create-header h1 {
+    color: #f1e8dc;
+}
+
+html.dark-mode .create-subtitle {
+    color: #aaa2aa;
+}
+
+html.dark-mode .create-card {
+    background: #1f1d24;
+    border-color: #343039;
+}
+
+html.dark-mode .card-header h2 {
+    color: #f1e8dc;
+}
+
+html.dark-mode .card-header p {
+    color: #aaa2aa;
+}
+
+html.dark-mode .image-upload {
+    background: #1f1d24;
+    border-color: #343039;
+}
+
+html.dark-mode .image-upload:hover {
+    border-color: var(--border);
+}
+
+html.dark-mode .image-upload-text strong {
+    color: #f1e8dc;
+}
+
+html.dark-mode .form-group label {
+    color: #f1e8dc;
+}
+
+html.dark-mode .form-group input[type="text"],
+html.dark-mode .form-group textarea,
+html.dark-mode .form-group select {
+    background: #1f1d24;
+    color: #f1e8dc;
+    border-color: #343039;
+}
+
+html.dark-mode .form-group small {
+    color: #aaa2aa;
+}
+
+html.dark-mode .button-primary {
+    background: #c084cc;
     color: var(--brand-black);
+    border-color: #c084cc;
+}
+
+html.dark-mode .button-primary:hover {
+    background: var(--brand-lavender);
+    border-color: var(--brand-lavender);
 }
 
 html.dark-mode .button-secondary {
@@ -424,10 +430,11 @@ html.dark-mode .button-secondary:hover {
     border-color: #806b84;
 }
 
+
 /* ========================================
    RESPONSIVE
    ======================================== */
-   
+
 @media (max-width: 650px) {
 
     .create-page {
@@ -457,4 +464,3 @@ html.dark-mode .button-secondary:hover {
         width: 100%;
     }
 }
-
