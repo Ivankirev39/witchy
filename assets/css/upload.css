@@ -423,3 +423,38 @@ html.dark-mode .button-secondary:hover {
     background: #29262f;
     border-color: #806b84;
 }
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+   
+@media (max-width: 650px) {
+
+    .create-page {
+        width: min(100% - 24px, 900px);
+        padding: 30px 0 50px;
+    }
+
+    .create-header h1 {
+        font-size: 27px;
+    }
+
+    .create-card {
+        padding: 20px;
+    }
+
+    .image-upload {
+        min-height: 160px;
+        padding: 20px;
+    }
+
+    .create-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .button {
+        width: 100%;
+    }
+}
+
