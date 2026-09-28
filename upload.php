@@ -1,10 +1,165 @@
 <?php
+
 require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/config/db.php";
 
 $pageTitle = "Create a post | Witchy";
+
+
+/* ========================================
+   PROCESS FORM
+   ======================================== */
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    $title = trim($_POST["title"] ?? "");
+    $description = trim($_POST["description"] ?? "");
+    $topic = trim($_POST["topic"] ?? "");
+    $sources = trim($_POST["sources"] ?? "");
+
+
+    /* ========================================
+       VALIDATION
+       ======================================== */
+
+    if ($title === "") {
+        die("Please enter a title.");
+    }
+
+    if ($topic === "") {
+        die("Please select a topic.");
+    }
+
+    if (
+        !isset($_FILES["image"]) ||
+        $_FILES["image"]["error"] === UPLOAD_ERR_NO_FILE
+    ) {
+        die("Please upload an image.");
+    }
+
+
+    /* ========================================
+       IMAGE VALIDATION
+       ======================================== */
+
+    $image = $_FILES["image"];
+
+    if ($image["error"] !== UPLOAD_ERR_OK) {
+        die("There was a problem uploading the image.");
+    }
+
+
+    // Maximum file size: 10 MB
+    $maxFileSize = 10 * 1024 * 1024;
+
+    if ($image["size"] > $maxFileSize) {
+        die("The image is too large. Maximum size is 10 MB.");
+    }
+
+
+    // Check actual MIME type
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mimeType = $finfo->file($image["tmp_name"]);
+
+
+    $allowedTypes = [
+        "image/jpeg" => "jpg",
+        "image/png"  => "png",
+        "image/gif"  => "gif",
+        "image/webp" => "webp"
+    ];
+
+
+    if (!array_key_exists($mimeType, $allowedTypes)) {
+        die("Invalid image type. Please upload JPG, PNG, GIF, or WebP.");
+    }
+
+
+    /* ========================================
+       CREATE UNIQUE FILE NAME
+       ======================================== */
+
+    $extension = $allowedTypes[$mimeType];
+
+    $fileName = bin2hex(random_bytes(16)) . "." . $extension;
+
+    $uploadDirectory = __DIR__ . "/uploads/posts/";
+
+    $uploadPath = $uploadDirectory . $fileName;
+
+
+    if (!is_dir($uploadDirectory)) {
+        mkdir($uploadDirectory, 0755, true);
+    }
+
+
+    /* ========================================
+       MOVE IMAGE
+       ======================================== */
+
+    if (!move_uploaded_file($image["tmp_name"], $uploadPath)) {
+        die("Failed to save the uploaded image.");
+    }
+
+
+    /* ========================================
+       SAVE POST TO DATABASE
+       ======================================== */
+
+    $sql = "
+        INSERT INTO post
+        (
+            user_id,
+            image,
+            title,
+            description,
+            topic,
+            sources
+        )
+        VALUES
+        (
+            :user_id,
+            :image,
+            :title,
+            :description,
+            :topic,
+            :sources
+        )
+    ";
+
+$stmt = $conn->prepare("
+    INSERT INTO post
+        (user_id, image, title, description, topic, sources)
+    VALUES (?, ?, ?, ?, ?, ?)
+");
+
+$userId = (int) $_SESSION["user_id"];
+
+$stmt->bind_param(
+    "isssss",
+    $userId,
+    $fileName,
+    $title,
+    $description,
+    $topic,
+    $sources
+);
+
+$stmt->execute();
+$postId = $conn->insert_id;
+
+    /* ========================================
+       REDIRECT
+       ======================================== */
+
+
+    header("Location: feed.php");
+    exit;
+}
+
+
 require_once __DIR__ . "/includes/user_header.php";
 ?>
-
 
 <section class="create-page">
 
@@ -71,6 +226,10 @@ require_once __DIR__ . "/includes/user_header.php";
                 >
 
             </label>
+
+         <div id="imagePreview" hidden>
+            <img id="imagePreviewImage" alt="Selected image preview">
+         </div>
 
         </section>
 
@@ -253,6 +412,32 @@ require_once __DIR__ . "/includes/user_header.php";
     </form>
 
 </section>
+
+<script>
+const imageInput = document.getElementById("image");
+const preview = document.getElementById("imagePreview");
+const previewImage = document.getElementById("imagePreviewImage");
+let previewUrl;
+
+imageInput.addEventListener("change", () => {
+    if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
+    }
+
+    const file = imageInput.files[0];
+
+    if (!file) {
+        preview.hidden = true;
+        previewImage.removeAttribute("src");
+        return;
+    }
+
+    previewUrl = URL.createObjectURL(file);
+    previewImage.src = previewUrl;
+    preview.hidden = false;
+});
+</script>
 
 
 <?php

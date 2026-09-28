@@ -430,6 +430,13 @@ html.dark-mode .button-secondary:hover {
     border-color: #806b84;
 }
 
+#imagePreview img {
+    display: block;
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    margin-top: 1rem;
+}
 
 /* ========================================
    RESPONSIVE

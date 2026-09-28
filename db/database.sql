@@ -20,6 +20,8 @@ CREATE TABLE post (
     image VARCHAR(255),
     title VARCHAR(150) NOT NULL,
     description TEXT,
+    topic VARCHAR(100),
+    sources TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_hot BOOLEAN DEFAULT FALSE,
     is_sticky BOOLEAN DEFAULT FALSE,
