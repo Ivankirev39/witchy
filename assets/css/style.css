@@ -625,113 +625,31 @@ body.dark-mode .auth-button:hover {
     overflow: hidden;
 }
 
+/* NAVIGATION */
 
-/* ========================================
-   LANDING HEADER
-   ======================================== */
-
-.site-header {
-    width: 100%;
-    min-height: 82px;
-
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-
-    gap: 30px;
-
-    padding: 0 6%;
-
-    border-bottom: 1px solid var(--border);
-
-    background: var(--surface-soft);
-}
-
-
-.site-logo {
-    width: fit-content;
-
-    display: inline-flex;
-    align-items: center;
-
-    gap: 8px;
-
-    color: var(--text);
-
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 500;
-
-    text-decoration: none;
-}
-
-
-.site-logo-symbol {
-    color: var(--primary);
-}
-
-
-.site-nav {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    gap: 30px;
-}
-
-
-.site-nav a,
 .footer-nav a {
     color: var(--text-secondary);
-
     font-size: 13px;
     font-weight: 500;
-
     text-decoration: none;
-
     transition: color 0.2s ease;
 }
 
-
-.site-nav a:hover,
 .footer-nav a:hover {
     color: var(--primary);
 }
 
-
-.site-nav a:focus-visible,
 .footer-nav a:focus-visible,
-.site-logo:focus-visible,
 .text-link:focus-visible,
 .topic-card:focus-visible {
     outline: 3px solid var(--focus);
     outline-offset: 4px;
-
     border-radius: 4px;
 }
-
-
-.site-header-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-
-    gap: 10px;
-}
-
-
-.site-theme-toggle {
-    position: static;
-
-    flex-shrink: 0;
-
-    box-shadow: none;
-}
-
-
 /* ========================================
-   LANDING BUTTONS
+   LANDING HEADER
    ======================================== */
+
 
 .button {
     min-height: 42px;
@@ -1405,7 +1323,7 @@ body.dark-mode .community-card {
 
     display: grid;
 
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
 
     gap: 30px;
@@ -1679,6 +1597,9 @@ html.dark-mode .create-post-button:hover {
     background: var(--brand-lavender);
 }
 
+
+/* LOGO LIGHT / DARK MODE */
+
 .site-logo {
     width: fit-content;
     display: inline-flex;
@@ -1687,23 +1608,25 @@ html.dark-mode .create-post-button:hover {
 }
 
 .site-logo img {
-    display: block;
     width: auto;
     height: 40px;
 }
 
-.logo-dark {
-    display: none;
-}
-
-html.dark-mode .logo-light {
-    display: none;
-}
-
-html.dark-mode .logo-dark {
+.site-logo .logo-light {
     display: block;
 }
 
+.site-logo .logo-dark {
+    display: none;
+}
+
+html.dark-mode .site-logo .logo-light {
+    display: none;
+}
+
+html.dark-mode .site-logo .logo-dark {
+    display: block;
+}
 
 /* FOOTER */
 

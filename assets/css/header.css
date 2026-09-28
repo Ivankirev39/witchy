@@ -1,0 +1,167 @@
+/* ========================================
+   WITCHY PUBLIC HEADER
+   ======================================== */
+
+.site-header {
+    width: 100%;
+    min-height: 82px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 30px;
+    padding: 0 6%;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-soft);
+}
+/* LIGHT MODE */
+.site-logo .logo-light {
+    display: block;
+}
+
+.site-logo .logo-dark {
+    display: none;
+}
+
+
+/* DARK MODE */
+body.dark-mode .site-logo .logo-light {
+    display: none;
+}
+
+body.dark-mode .site-logo .logo-dark {
+    display: block;
+}
+
+
+/* ========================================
+   LOGO
+   ======================================== */
+
+.site-logo {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: fit-content;
+    text-decoration: none;
+}
+
+.site-logo img {
+    display: block;
+    width: auto;
+    height: 52px;
+}
+
+.site-logo .logo-light {
+    display: block;
+}
+
+.site-logo .logo-dark {
+    display: none;
+}
+
+html.dark-mode .site-logo .logo-light {
+    display: none;
+}
+
+html.dark-mode .site-logo .logo-dark {
+    display: block;
+}
+
+
+/* ========================================
+   NAVIGATION
+   ======================================== */
+
+.site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+.site-nav a {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.site-nav a:hover {
+    color: var(--primary);
+}
+
+.site-nav a:focus-visible,
+.site-logo:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+
+/* ========================================
+   HEADER ACTIONS
+   ======================================== */
+
+.site-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.site-theme-toggle {
+    position: static;
+    flex-shrink: 0;
+    box-shadow: none;
+}
+
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1050px) {
+
+    .site-header {
+        grid-template-columns: auto 1fr;
+    }
+
+    .site-nav {
+        display: none;
+    }
+
+    .site-header-actions {
+        justify-self: end;
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .site-header {
+        min-height: 72px;
+        padding: 0 20px;
+    }
+
+    .site-logo img {
+        height: 44px;
+    }
+
+    .site-header-actions .button-secondary {
+        display: none;
+    }
+
+    .site-header-actions .button {
+        padding: 0 14px;
+    }
+}
+
+
+@media (max-width: 500px) {
+
+    .site-header-actions .button-primary {
+        display: none;
+    }
+}
