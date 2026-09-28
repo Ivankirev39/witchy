@@ -4,6 +4,9 @@ require_once __DIR__ . "/config/db.php";
 
 $pageTitle = "Home | Witchy";
 
+$sql = "SELECT * FROM post ORDER BY created_at DESC";
+$result = $conn->query($sql);
+
 // Get all posts from the database
 // Newest posts will appear first
 $sql = "SELECT * FROM post ORDER BY created_at DESC";
