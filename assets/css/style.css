@@ -1355,6 +1355,41 @@ body.dark-mode .community-card {
     font-size: 12px;
 }
 
+/* FOOTER LOGO */
+
+.footer-logo {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    text-decoration: none;
+}
+
+.footer-logo img {
+    display: block;
+    width: auto;
+    height: 70px;
+}
+
+/* LIGHT MODE */
+
+.footer-logo .logo-light {
+    display: block;
+}
+
+.footer-logo .logo-dark {
+    display: none;
+}
+
+/* DARK MODE */
+
+body.dark-mode .footer-logo .logo-light {
+    display: none;
+}
+
+body.dark-mode .footer-logo .logo-dark {
+    display: block;
+}
+
 /* USER DASHBOARD */
 
 /* =========================

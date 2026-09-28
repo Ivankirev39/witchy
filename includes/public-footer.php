@@ -1,13 +1,17 @@
 <footer class="site-footer">
-    <a href="/witchy/index.php" class="site-logo" aria-label="Witchy home">
+    <a
+        href="/witchy/index.php"
+        class="footer-logo"
+        aria-label="Witchy home"
+        >
         <img
-            src="/witchy/images/Horizontal black.svg"
+            src="/witchy/images/vertical_black.svg"
             alt="Witchy"
             class="logo-light"
         >
 
         <img
-            src="/witchy/images/Horizontal White.svg"
+            src="/witchy/images/vertical_white.svg"
             alt=""
             class="logo-dark"
             aria-hidden="true"
