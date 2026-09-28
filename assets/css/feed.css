@@ -82,12 +82,12 @@
     font-size: 13px;
 }
 
-.post-image-placeholder {
-    height: 340px;
-    display: grid;
-    place-items: center;
+.post-image {
+    display: block;
+    width: 100%;
+    height: 600px;
+    object-fit: cover;
     background: var(--accent-soft);
-    color: var(--text-secondary);
 }
 
 .post-body {
@@ -333,11 +333,6 @@ html.dark-mode .post-author p {
     color: #aaa2aa;
 }
 
-html.dark-mode .post-image-placeholder {
-    background: #29262d;
-    color: #aaa2aa;
-}
-
 html.dark-mode .post-body {
     color: #f1e8dc;
 }
@@ -431,9 +426,7 @@ html.dark-mode .save-button.active:hover {
         font-size: 30px;
     }
 
-    .post-image-placeholder {
-        height: 240px;
-    }
+
 
     .post-actions {
         gap: 4px;

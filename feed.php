@@ -66,9 +66,14 @@ require_once __DIR__ . "/includes/user_header.php";
                         </p>
                     </div>
                 </div>
-                <div class="post-image-placeholder">
-                    Post image
-                </div>
+                <?php if (!empty($post["image"])): ?>
+                 <img
+                   class="post-image"
+                   src="uploads/posts/<?= rawurlencode(basename($post["image"])) ?>"
+                   alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
+                   loading="lazy"
+                  >
+                 <?php endif; ?>
                 <div class="post-body">
                     <strong>
                         <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
