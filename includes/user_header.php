@@ -67,7 +67,13 @@ $currentPage = basename($_SERVER["PHP_SELF"]);
             >
                 Profile
             </a>
+
         </nav>
+
+        <a href="upload.php" class="create-post-button <?= $currentPage === "upload.php" ? "active" : "" ?>">
+            <span class="create-post-icon">+</span>
+            Create post
+        </a>
 
         <div class="user-sidebar-bottom">
 
