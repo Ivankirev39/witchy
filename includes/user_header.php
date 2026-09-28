@@ -28,13 +28,27 @@ $currentPage = basename($_SERVER["PHP_SELF"]);
 <body>
 
 <div class="user-layout">
-
     <aside class="user-sidebar">
-
         <div class="user-logo">
-            <a href="feed.php">☾ Witchy</a>
-        </div>
+            <a
+                href="/witchy/feed.php"
+                class="user-logo"
+                aria-label="Witchy home"
+               >
+                <img
+                    src="/witchy/images/horizontal_black.svg"
+                    alt="Witchy"
+                    class="user-logo-light"
+                >
 
+                <img
+                    src="/witchy/images/horizontal_white.svg"
+                    alt=""
+                    class="user-logo-dark"
+                    aria-hidden="true"
+                >
+            </a>
+        </div>
         <nav class="user-nav">
             <a
                 href="feed.php"

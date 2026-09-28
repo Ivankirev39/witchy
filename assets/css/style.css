@@ -1392,12 +1392,6 @@ body.dark-mode .footer-logo .logo-dark {
 
 /* USER DASHBOARD */
 
-/* =========================
-   USER DASHBOARD
-   ========================= */
-
-/* USER DASHBOARD */
-
 .user-layout {
     display: flex;
     min-height: 100vh;
@@ -1419,16 +1413,46 @@ body.dark-mode .footer-logo .logo-dark {
     flex-shrink: 0;
 }
 
+/* ========================================
+   USER LOGO
+   ======================================== */
+
 .user-logo {
-    margin-bottom: 32px;
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    text-decoration: none;
 }
 
-.user-logo a {
-    text-decoration: none;
-    color: var(--text);
-    font-family: var(--font-display);
-    font-size: 26px;
+.user-logo img {
+    width: auto;
+    height: 40px;
 }
+
+/* LIGHT MODE */
+
+.user-logo .user-logo-light {
+    display: block;
+}
+
+.user-logo .user-logo-dark {
+    display: none;
+}
+
+/* DARK MODE */
+
+html.dark-mode .user-logo .user-logo-light {
+    display: none;
+}
+
+html.dark-mode .user-logo .user-logo-dark {
+    display: block;
+}
+
+
+/* ========================================
+   USER NAVIGATION
+   ======================================== */
 
 .user-nav {
     display: flex;
@@ -1463,6 +1487,8 @@ body.dark-mode .footer-logo .logo-dark {
 .user-sidebar-bottom p {
     margin: 0;
 }
+
+/*logout*/
 
 .logout-form {
     margin-top: 12px;
@@ -1665,8 +1691,106 @@ html.dark-mode .site-logo .logo-dark {
 
 /* FOOTER */
 
+/* ========================================
+   USER FOOTER
+   ======================================== */
+
 .user-footer {
+    margin-top: 50px;
+    padding: 22px 30px;
+
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 30px;
+
+    border-top: 1px solid var(--border);
+}
+
+
+/* LOGO */
+
+.user-footer-logo {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.user-footer-logo img {
+    width: auto;
+    height: 60px;
+}
+
+.user-footer-logo .user-footer-logo-light {
+    display: block;
+}
+
+.user-footer-logo .user-footer-logo-dark {
     display: none;
+}
+
+html.dark-mode .user-footer-logo .user-footer-logo-light {
+    display: none;
+}
+
+html.dark-mode .user-footer-logo .user-footer-logo-dark {
+    display: block;
+}
+
+
+/* NAVIGATION */
+
+.user-footer-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+}
+
+.user-footer-nav a {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.user-footer-nav a:hover {
+    color: var(--primary);
+}
+
+
+/* COPYRIGHT */
+
+.user-footer-copy {
+    justify-self: end;
+    margin: 0;
+
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 800px) {
+
+    .user-footer {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 18px;
+        text-align: center;
+    }
+
+    .user-footer-logo,
+    .user-footer-copy {
+        justify-self: center;
+    }
+
+    .user-footer-logo img {
+        height: 55px;
+    }
 }
 
 
