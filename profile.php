@@ -12,7 +12,7 @@ $user_id = $_SESSION["user_id"];
 // ========================================
 
 $stmt = $conn->prepare("
-    SELECT user_id, username, email, birthdate, rank, bio
+    SELECT username, email, birthdate, rank, bio, profile_image
     FROM users
     WHERE user_id = ?
 ");
@@ -100,7 +100,34 @@ require_once __DIR__ . "/includes/user_header.php";
     <section class="profile-header">
 
         <div class="profile-avatar">
-            <?= strtoupper(substr($user["username"], 0, 1)) ?>
+
+            <?php if (!empty($user["profile_image"])): ?>
+
+                <img
+                    src="<?= htmlspecialchars(
+                        $user["profile_image"],
+                        ENT_QUOTES,
+                        "UTF-8"
+                    ) ?>"
+                    alt="<?= htmlspecialchars(
+                        $user["username"],
+                        ENT_QUOTES,
+                        "UTF-8"
+                    ) ?>'s profile picture"
+                >
+
+            <?php else: ?>
+
+                <span>
+                    <?= htmlspecialchars(
+                        strtoupper(substr($user["username"], 0, 1)),
+                        ENT_QUOTES,
+                        "UTF-8"
+                    ) ?>
+                </span>
+
+            <?php endif; ?>
+
         </div>
 
         <div class="profile-identity">
