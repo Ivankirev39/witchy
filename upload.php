@@ -353,6 +353,10 @@ require_once __DIR__ . "/includes/user_header.php";
                     <option value="occult-studies">
                         Occult Studies
                     </option>
+
+                     <option value="others">
+                        Others
+                    </option>
                 </select>
 
             </div>
