@@ -211,6 +211,31 @@ require_once __DIR__ . "/includes/user_header.php";
         </article>
     </div>
 </section>
+<!-- IMAGE LIGHTBOX -->
+<div
+    id="image-modal"
+    class="image-modal"
+    aria-hidden="true"
+>
+    <button
+        type="button"
+        class="image-modal-close"
+        aria-label="Close image"
+    >
+        &times;
+    </button>
+
+    <img
+        id="modal-image"
+        class="image-modal-content"
+        src=""
+        alt=""
+    >
+</div>  
+
+<script src="assets/js/main.js"></script>
+
+
 <?php
 $mediaStmt->close();
 $commentStmt->close();
