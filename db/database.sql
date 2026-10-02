@@ -10,7 +10,8 @@ CREATE TABLE users (
     birthdate DATE,
     rank VARCHAR(50),
     bio TEXT,
-    profile_image VARCHAR(255)
+    profile_image VARCHAR(255),
+    cover_image VARCHAR(255)
 );
 
 

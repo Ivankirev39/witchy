@@ -20,6 +20,10 @@ if (isset($_SESSION["user_id"])) {
     <title><?= htmlspecialchars($pageTitle ?? "Witchy", ENT_QUOTES, "UTF-8") ?></title>
     <link rel="stylesheet" href="/witchy/assets/css/style.css">
     <link rel="stylesheet" href="/witchy/assets/css/user_header.css">
+    <link rel="stylesheet" href="/witchy/assets/css/feed.css">
+    <link rel="stylesheet" href="/witchy/assets/css/profile.css">
+    <link rel="stylesheet" href="/witchy/assets/css/rules.css">
+    <link rel="stylesheet" href="/witchy/assets/css/upload.css">
     <?php if (!empty($pageCss)): ?>
         <link rel="stylesheet" href="/witchy/assets/css/<?= htmlspecialchars($pageCss, ENT_QUOTES, "UTF-8") ?>">
     <?php endif; ?>

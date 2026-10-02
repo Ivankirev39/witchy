@@ -5,7 +5,7 @@ $pageTitle = "Profile | Witchy";
 $user_id = (int) $_SESSION["user_id"];
 // GET LOGGED-IN USER
 $stmt = $conn->prepare("
-    SELECT username, email, birthdate, rank, bio, profile_image
+    SELECT username, email, birthdate, rank, bio, profile_image, cover_image
     FROM users
     WHERE user_id = ?
 ");
@@ -56,8 +56,21 @@ require_once __DIR__ . "/includes/user_header.php";
 ?>
 <section class="profile-page">
     <div class="profile-cover">
+
+    <?php if (!empty($user["cover_image"])): ?>
+
+        <img
+            src="<?= htmlspecialchars($user["cover_image"], ENT_QUOTES, "UTF-8") ?>"
+            alt=""
+        >
+
+    <?php else: ?>
+
         <span>WITCHY</span>
-    </div>
+
+    <?php endif; ?>
+
+</div>
     <section class="profile-header">
         <div class="profile-avatar">
             <?php if (!empty($user["profile_image"])): ?>

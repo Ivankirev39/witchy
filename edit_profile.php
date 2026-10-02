@@ -33,7 +33,8 @@ $stmt = $conn->prepare("
         email,
         birthdate,
         bio,
-        profile_image
+        profile_image,
+        cover_image
     FROM users
     WHERE user_id = ?
 ");
@@ -220,6 +221,85 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
+// ========================================
+// COVER IMAGE UPLOAD
+// ========================================
+
+$cover_image = $user["cover_image"] ?? null;
+
+if (
+    $error === "" &&
+    isset($_FILES["cover_image"]) &&
+    $_FILES["cover_image"]["error"] !== UPLOAD_ERR_NO_FILE
+) {
+
+    $file = $_FILES["cover_image"];
+
+    if ($file["error"] !== UPLOAD_ERR_OK) {
+
+        $error = "Something went wrong while uploading the cover image.";
+
+    } elseif ($file["size"] > 10 * 1024 * 1024) {
+
+        $error = "Cover image cannot be larger than 10 MB.";
+
+    } else {
+
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file["tmp_name"]);
+
+        $allowedTypes = [
+            "image/jpeg" => "jpg",
+            "image/png"  => "png",
+            "image/webp" => "webp"
+        ];
+
+        if (!isset($allowedTypes[$mimeType])) {
+
+            $error = "Only JPG, PNG and WebP images are allowed.";
+
+        } else {
+
+            $extension = $allowedTypes[$mimeType];
+
+            $filename =
+                "cover_" .
+                $user_id .
+                "_" .
+                bin2hex(random_bytes(8)) .
+                "." .
+                $extension;
+
+            $uploadDirectory = __DIR__ . "/uploads/profiles/";
+
+            $uploadPath = $uploadDirectory . $filename;
+
+            if (!is_dir($uploadDirectory)) {
+
+                if (!mkdir($uploadDirectory, 0755, true)) {
+                    $error = "Could not create the profile image folder.";
+                }
+            }
+
+            if ($error === "") {
+
+                if (!move_uploaded_file(
+                    $file["tmp_name"],
+                    $uploadPath
+                )) {
+
+                    $error = "Could not save the cover image.";
+
+                } else {
+
+                    $cover_image =
+                        "uploads/profiles/" . $filename;
+                }
+            }
+        }
+    }
+}
+
 
         // ========================================
         // VALIDATE PROFILE INFORMATION
@@ -309,16 +389,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         username = ?,
                         birthdate = ?,
                         bio = ?,
-                        profile_image = ?
+                        profile_image = ?,
+                        cover_image = ?
                     WHERE user_id = ?
                 ");
 
                 $updateStmt->bind_param(
-                    "ssssi",
+                    "sssssi",
                     $username,
                     $birthdate,
                     $bio,
                     $profile_image,
+                    $cover_image,
                     $user_id
                 );
 
@@ -524,6 +606,25 @@ require_once __DIR__ . "/includes/user_header.php";
             </div>
 
         </div>
+
+        <div class="edit-profile-cover-field">
+
+    <label for="cover_image">
+        Profile cover
+    </label>
+
+    <input
+        type="file"
+        id="cover_image"
+        name="cover_image"
+        accept="image/jpeg,image/png,image/webp"
+    >
+
+    <small>
+        JPG, PNG or WebP. Maximum 10 MB.
+    </small>
+
+</div>
 
 
         <!-- ========================================
