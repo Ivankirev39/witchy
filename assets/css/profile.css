@@ -84,7 +84,78 @@
     background: var(--surface);
 }
 
+.profile-post-card {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
 
+.profile-post-media {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.profile-post-card:hover .profile-post-media {
+    transform: scale(1.03);
+}
+
+.profile-post-media {
+    transition: transform 0.25s ease;
+}
+
+/* Number of media items */
+.profile-media-count {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.65);
+    color: white;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+/* Video indicator */
+.profile-video-icon {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.65);
+    color: white;
+
+    font-size: 13px;
+}
+
+/* Keep title above media */
+.profile-post-overlay {
+    z-index: 2;
+}
 /* ========================================
    AVATAR
    ======================================== */

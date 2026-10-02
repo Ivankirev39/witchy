@@ -428,7 +428,23 @@ html.dark-mode .save-button.active:hover {
     text-decoration: underline;
 }
 
+.save-icon {
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: fill 0.2s ease, transform 0.2s ease;
+}
 
+.save-button:hover .save-icon {
+    transform: scale(1.08);
+}
+
+.save-button.active .save-icon {
+    fill: currentColor;
+}
 /* ========================================
    MOBILE
    ======================================== */
