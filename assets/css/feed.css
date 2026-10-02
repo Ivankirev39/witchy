@@ -473,3 +473,72 @@ html.dark-mode .save-button.active:hover {
     background: #59465e;
     color: #ead9ed;
 }
+
+
+/* TABLET*/
+
+   @media (max-width: 800px) {
+    .feed-page {
+        max-width: 100%;
+    }
+    .post-media-count-1,
+    .post-media-count-1 .post-media-item {
+        height: 520px;
+    }
+    .post-media-count-2,
+    .post-media-count-3,
+    .post-media-count-4,
+    .post-media-count-5 {
+        height: 450px;
+    }
+}
+
+/* MOBILE*/
+@media (max-width: 500px) {
+    .feed-page {
+        max-width: 100%;
+    }
+    .feed-page h1 {
+        font-size: 30px;
+    }
+    .post-card {
+        border-radius: 12px;
+        margin-bottom: 20px;
+    }
+    .post-author {
+        padding: 14px;
+    }
+    .post-media-count-1,
+    .post-media-count-1 .post-media-item {
+        height: 440px;
+    }
+    .post-media-count-2 {
+        height: 340px;
+    }
+    .post-media-count-3,
+    .post-media-count-4,
+    .post-media-count-5 {
+        height: 360px;
+    }
+    .post-body {
+        padding: 14px 14px 16px;
+    }
+    .post-actions {
+        gap: 4px;
+        padding: 10px 14px;
+    }
+    .post-action-button {
+        padding: 6px 8px;
+    }
+    .comment-form {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 12px 14px 14px;
+    }
+    .comment-form input[type="text"],
+    .comment-form button {
+        width: 100%;
+    }
+}
+
+
