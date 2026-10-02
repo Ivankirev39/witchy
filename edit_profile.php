@@ -606,23 +606,54 @@ require_once __DIR__ . "/includes/user_header.php";
             </div>
 
         </div>
+        
+<div class="edit-profile-cover-field">
 
-        <div class="edit-profile-cover-field">
+    <!-- Current cover preview -->
+    <div class="edit-profile-cover-preview" id="cover_preview">
 
-    <label for="cover_image">
-        Profile cover
-    </label>
+        <?php if (!empty($user["cover_image"])): ?>
 
-    <input
-        type="file"
-        id="cover_image"
-        name="cover_image"
-        accept="image/jpeg,image/png,image/webp"
-    >
+            <img
+                id="cover_preview_image"
+                src="<?= htmlspecialchars(
+                    $user["cover_image"],
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>"
+                alt="Current profile cover"
+            >
 
-    <small>
-        JPG, PNG or WebP. Maximum 10 MB.
-    </small>
+        <?php else: ?>
+
+            <span id="cover_preview_placeholder">
+                WITCHY
+            </span>
+
+        <?php endif; ?>
+
+    </div>
+
+
+    <!-- Cover upload controls -->
+    <div class="edit-profile-cover-controls">
+
+        <label for="cover_image">
+            Profile cover
+        </label>
+
+        <input
+            type="file"
+            id="cover_image"
+            name="cover_image"
+            accept="image/jpeg,image/png,image/webp"
+        >
+
+        <small>
+            JPG, PNG or WebP. Maximum 10 MB.
+        </small>
+
+    </div>
 
 </div>
 

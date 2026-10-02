@@ -137,26 +137,64 @@
    ======================================== */
 .edit-profile-cover-field {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    gap: 24px;
     padding-bottom: 26px;
     margin-bottom: 26px;
     border-bottom: 1px solid var(--border);
 }
 
-.edit-profile-cover-field label {
+.edit-profile-cover-preview {
+    width: 260px;
+    height: 110px;
+    min-width: 260px;
+    flex: 0 0 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 4px solid var(--background);
+    border-radius: 12px;
+    background: var(--accent-soft);
+    box-shadow: 0 0 0 1px var(--border);
+}
+
+.edit-profile-cover-preview img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.edit-profile-cover-preview span {
+    color: var(--brand-plum);
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 5px;
+    opacity: 0.18;
+}
+
+.edit-profile-cover-controls {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edit-profile-cover-controls label {
     color: var(--text);
     font-size: 14px;
     font-weight: 600;
 }
 
-.edit-profile-cover-field input[type="file"] {
+.edit-profile-cover-controls input[type="file"] {
     max-width: 100%;
     color: var(--text-secondary);
     font-size: 13px;
 }
 
-.edit-profile-cover-field small {
+.edit-profile-cover-controls small {
     color: var(--text-secondary);
     font-size: 12px;
 }
