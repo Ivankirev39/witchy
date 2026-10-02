@@ -11,7 +11,7 @@ require_once __DIR__ . "/includes/csrf.php";
 
 
 $pageTitle = "Edit Profile | Witchy";
-$pageCss = "profile.css";
+$pageCss = "edit_profile.css";
 
 // Get the logged-in user's ID from the session.
 // This ensures users can only edit their own profile.

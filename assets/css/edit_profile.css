@@ -1,0 +1,411 @@
+/* ========================================
+   EDIT PROFILE PAGE
+   ======================================== */
+.edit-profile-page {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+}
+
+/* ========================================
+   PAGE HEADING
+   ======================================== */
+.edit-profile-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.edit-profile-heading h1 {
+    margin: 0;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 600;
+}
+
+.edit-profile-heading p {
+    margin: 7px 0 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.edit-profile-back {
+    flex-shrink: 0;
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.edit-profile-back:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+
+/* ========================================
+   FORM
+   ======================================== */
+.edit-profile-form {
+    width: 100%;
+    padding: 28px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 8px 24px var(--shadow);
+}
+
+/* ========================================
+   PROFILE PICTURE
+   ======================================== */
+.edit-profile-picture-field {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding-bottom: 26px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid var(--border);
+}
+
+.edit-profile-picture-preview {
+    width: 110px;
+    height: 110px;
+    min-width: 110px;
+    flex: 0 0 110px;
+    overflow: hidden;
+    border: 4px solid var(--background);
+    border-radius: 50%;
+    background: var(--brand-plum);
+    box-shadow: 0 0 0 1px var(--border);
+}
+
+.edit-profile-picture-preview img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+}
+
+.edit-profile-picture-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 600;
+}
+
+.edit-profile-picture-controls {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edit-profile-picture-controls label {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.edit-profile-picture-controls input[type="file"] {
+    max-width: 100%;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.edit-profile-picture-controls small {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* ========================================
+   COVER IMAGE
+   ======================================== */
+.edit-profile-cover-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 26px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid var(--border);
+}
+
+.edit-profile-cover-field label {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.edit-profile-cover-field input[type="file"] {
+    max-width: 100%;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.edit-profile-cover-field small {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* ========================================
+   STANDARD FIELDS
+   ======================================== */
+.edit-profile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 20px;
+}
+
+.edit-profile-field label {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.edit-profile-field input,
+.edit-profile-field textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    background: var(--input-background);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edit-profile-field input {
+    height: 44px;
+}
+
+.edit-profile-field textarea {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.edit-profile-field input:focus,
+.edit-profile-field textarea:focus {
+    border-color: var(--focus);
+    background: var(--surface);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.edit-profile-field input:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.edit-profile-field small {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* ========================================
+   MESSAGE
+   ======================================== */
+.edit-profile-message {
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    border-radius: 9px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.edit-profile-message.error {
+    border: 1px solid var(--danger);
+    background: var(--danger-background);
+    color: var(--danger);
+}
+
+/* ========================================
+   ACTIONS
+   ======================================== */
+.edit-profile-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 8px;
+}
+
+.edit-profile-cancel {
+    padding: 11px 17px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.edit-profile-cancel:hover {
+    background: var(--accent-soft);
+}
+
+.edit-profile-save {
+    padding: 12px 20px;
+    border: 0;
+    border-radius: 9px;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.edit-profile-save:hover {
+    background: var(--brand-black);
+    transform: translateY(-1px);
+}
+
+.edit-profile-save:active {
+    transform: translateY(0);
+}
+
+/* ========================================
+   DARK MODE
+   ======================================== */
+html.dark-mode .edit-profile-form {
+    background: #1d1b22;
+    border-color: #302d35;
+}
+
+html.dark-mode .edit-profile-back {
+    background: #1d1b22;
+    border-color: #302d35;
+    color: #f1e8dc;
+}
+
+html.dark-mode .edit-profile-back:hover,
+html.dark-mode .edit-profile-cancel:hover {
+    background: #292630;
+}
+
+html.dark-mode .edit-profile-field input,
+html.dark-mode .edit-profile-field textarea {
+    background: #242229;
+    border-color: #302d35;
+    color: #f1e8dc;
+}
+
+html.dark-mode .edit-profile-field input:focus,
+html.dark-mode .edit-profile-field textarea:focus {
+    background: #29262f;
+    border-color: #806b84;
+}
+
+html.dark-mode .edit-profile-save {
+    background: #c084cc;
+    color: #100e12;
+}
+
+html.dark-mode .edit-profile-save:hover {
+    background: var(--brand-lavender);
+}
+
+html.dark-mode .edit-profile-heading h1,
+html.dark-mode .edit-profile-field label,
+html.dark-mode .edit-profile-picture-controls label,
+html.dark-mode .edit-profile-cover-field label {
+    color: #f1e8dc;
+}
+
+html.dark-mode .edit-profile-heading p,
+html.dark-mode .edit-profile-field small,
+html.dark-mode .edit-profile-picture-controls small,
+html.dark-mode .edit-profile-cover-field small {
+    color: #c8bac7;
+}
+
+html.dark-mode .edit-profile-cancel {
+    border-color: #302d35;
+    color: #f1e8dc;
+}
+/* ========================================
+   MOBILE
+   ======================================== */
+@media (max-width: 700px) {
+    .edit-profile-page {
+        width: 100%;
+        max-width: 100%;
+        padding-bottom: 30px;
+    }
+
+    .edit-profile-heading {
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .edit-profile-heading h1 {
+        font-size: 30px;
+    }
+
+    .edit-profile-form {
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    .edit-profile-picture-field {
+        align-items: flex-start;
+    }
+
+    .edit-profile-picture-preview {
+        width: 90px;
+        height: 90px;
+        min-width: 90px;
+        flex-basis: 90px;
+    }
+}
+
+@media (max-width: 500px) {
+    .edit-profile-heading {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .edit-profile-picture-field {
+        flex-direction: column;
+    }
+
+    .edit-profile-picture-preview {
+        width: 100px;
+        height: 100px;
+        min-width: 100px;
+        flex-basis: 100px;
+    }
+
+    .edit-profile-picture-controls {
+        width: 100%;
+    }
+
+    .edit-profile-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .edit-profile-cancel,
+    .edit-profile-save {
+        width: 100%;
+        text-align: center;
+    }
+}
