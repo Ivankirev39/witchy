@@ -57,9 +57,9 @@ require_once __DIR__ . "/includes/user_header.php";
         <?php else: ?>
 
             <?php foreach ($posts as $post): ?>
-                <article class="explore-card">
+                <article class="explore-cards">
 
-                <div class="explore-card-image">
+                <div class="explore-cards-image">
                     <a href="post.php?id=<?php echo (int) $post['post_id']; ?>">
                         <?php if (!empty($post['image'])): ?>
                         <img src="uploads/posts/<?php echo rawurlencode(basename($post['image'])); ?>"
@@ -67,7 +67,7 @@ require_once __DIR__ . "/includes/user_header.php";
                         loading="lazy">
                     
                         <?php else: ?>
-                            <div class="explore-card-placeholder">
+                            <div class="explore-cards-placeholder">
                             <span>✦</span>
                                 No image
                             </div>
@@ -75,19 +75,19 @@ require_once __DIR__ . "/includes/user_header.php";
                     </a>
                 </div>
 
-                    <div class="explore-card-body">
+                    <div class="explore-cards-body">
 
-                        <p class="explore-card-author">
+                        <p class="explore-cards-author">
                             @<?php echo htmlspecialchars($post['username']); ?>
                         </p>
-                        <h2 class="explore-card-title">
+                        <h2 class="explore-cards-title">
                             <a href="post.php?id=<?php echo (int) $post['post_id']; ?>">
                                 <?php echo htmlspecialchars($post['title']); ?>
                             </a>
                         </h2>
 
                         <?php if (!empty($post['description'])): ?>
-                            <p class="explore-card-description">
+                            <p class="explore-cards-description">
                                 <?php
                                 echo htmlspecialchars(
                                     mb_strimwidth(
@@ -102,7 +102,7 @@ require_once __DIR__ . "/includes/user_header.php";
                         <?php endif; ?>
 
                         <?php if (!empty($post['topic'])): ?>
-                            <p class="explore-card-topic">
+                            <p class="explore-cards-topic">
                                 <?php echo htmlspecialchars($post['topic']); ?>
                             </p>
                         <?php endif; ?>
