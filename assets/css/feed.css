@@ -324,3 +324,152 @@
     color: var(--text-secondary);
     font-size: 11px;
 }
+
+
+/* COMMENT FORM*/
+
+   .comment-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px 16px;
+}
+.comment-form input[type="text"] {
+    height: 40px;
+    min-width: 0;
+    flex: 1;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    background: var(--input-background);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+}
+.comment-form input[type="text"]::placeholder {
+    color: var(--placeholder);
+}
+.comment-form input[type="text"]:focus {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.comment-form button {
+    height: 40px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 9px;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        transform 0.15s ease;
+}
+.comment-form button:hover {
+    background: var(--brand-black);
+}
+.comment-form button:active {
+    transform: translateY(1px);
+}
+
+/* DARK MODE*/
+html.dark-mode .feed-page h1 {
+    color: #f1e8dc;
+}
+html.dark-mode .feed-page p {
+    color: #aaa2aa;
+}
+html.dark-mode .feed-tabs {
+    border-bottom-color: #302d35;
+}
+html.dark-mode .feed-tab {
+    color: #aaa2aa;
+}
+html.dark-mode .feed-tab.active {
+    color: #f1e8dc;
+    border-bottom-color: #c5a6ca;
+}
+html.dark-mode .post-card {
+    background: #1f1d24;
+    border-color: #343039;
+}
+html.dark-mode .post-avatar {
+    background: #493f46;
+}
+html.dark-mode .post-author strong {
+    color: #f1e8dc;
+}
+html.dark-mode .post-author p {
+    color: #aaa2aa;
+}
+html.dark-mode .post-media {
+    background: #161416;
+}
+html.dark-mode .post-body {
+    color: #f1e8dc;
+}
+html.dark-mode .post-topic {
+    color: #aaa2aa;
+}
+html.dark-mode .post-actions {
+    border-color: #343039;
+}
+html.dark-mode .post-action-button {
+    color: #aaa2aa;
+}
+html.dark-mode .post-action-button:hover {
+    background: #292630;
+    color: #c5a6ca;
+}
+html.dark-mode .post-comments {
+    border-color: #343039;
+}
+html.dark-mode .comment {
+    border-color: #343039;
+}
+html.dark-mode .comment strong,
+html.dark-mode .comment p {
+    color: #f1e8dc;
+}
+html.dark-mode .comment small {
+    color: #aaa2aa;
+}
+html.dark-mode .comment-form input[type="text"] {
+    background: #242229;
+    border-color: #343039;
+    color: #f1e8dc;
+}
+html.dark-mode .comment-form input[type="text"]::placeholder {
+    color: #9d969f;
+}
+html.dark-mode .comment-form input[type="text"]:focus {
+    border-color: #806b84;
+}
+html.dark-mode .comment-form button {
+    background: #c084cc;
+    color: var(--brand-white);
+}
+html.dark-mode .comment-form button:hover {
+    background: var(--brand-lavender);
+    color: var(--brand-black);
+}
+html.dark-mode .like-button.active,
+html.dark-mode .save-button.active {
+    background: #493b4d;
+    color: #d9b7df;
+}
+html.dark-mode .like-button.active .like-heart {
+    color: #d9b7df;
+}
+html.dark-mode .save-button.active {
+    box-shadow: inset 0 0 0 1px #806b84;
+}
+html.dark-mode .like-button.active:hover,
+html.dark-mode .save-button.active:hover {
+    background: #59465e;
+    color: #ead9ed;
+}
