@@ -30,14 +30,31 @@
 
 .explore-card {
     overflow: hidden;
-    border-radius: 12px;
-    background: var(----brand-plum);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+}
+
+.explore-card a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.explore-card-title a:hover {
+    text-decoration: underline;
 }
 
 .explore-card-image {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1 / 0.8;
     overflow: hidden;
+    background: var(--brand-lavender);
+}
+
+.explore-card-image a {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .explore-card-image img {
@@ -45,30 +62,56 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.2s ease;
+}
+
+.explore-card-image a:hover img {
+    transform: scale(1.02);
 }
 
 .explore-card-body {
-    padding: 16px;
+    padding: 12px;
 }
 
 .explore-card-author {
+    color: var(--brand-black)!important;
     margin: 0 0 8px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .explore-card-title {
+    color: var(--brand-black)!important;
     margin: 0 0 8px;
     font-size: 1.1rem;
 }
 
 .explore-card-description {
+    color: var(--brand-black)!important;
+    font-size: 0.9rem;
     margin: 0 0 12px;
     line-height: 1.5;
 }
 
 .explore-card-topic {
+    color: var(--brand-black)!important;
     margin: 0;
     font-size: 0.9rem;
+}
+
+.explore-card-placeholder {
+    width: 100%;
+    aspect-ratio: 1 / 0.8;
+    background: var(--brand-plum);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.explore-card-placeholder span {
+    color: var(--accent);
+    padding-bottom:5px;
+    font-size: 26px;
 }
 
 .explore-empty {
