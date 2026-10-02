@@ -1,0 +1,675 @@
+/* ========================================
+   USER LAYOUT
+   ======================================== */
+.user-layout {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--background);
+    color: var(--text);
+}
+.user-main {
+    flex: 1;
+    min-width: 0;
+    padding: 0 48px 40px;
+}
+/* ========================================
+   SIDEBAR
+   ======================================== */
+.user-sidebar {
+    width: 220px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 28px 20px;
+    border-right: 1px solid var(--border);
+    background: var(--surface-soft);
+    z-index: 100;
+}
+/* ========================================
+   USER LOGO
+   ======================================== */
+.user-logo {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin-bottom: 32px;
+    text-decoration: none;
+}
+.user-logo a {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+.user-logo img {
+    display: block;
+    width: auto;
+    height: 40px;
+}
+.user-logo .user-logo-light {
+    display: block;
+}
+.user-logo .user-logo-dark {
+    display: none;
+}
+html.dark-mode .user-logo .user-logo-light {
+    display: none;
+}
+html.dark-mode .user-logo .user-logo-dark {
+    display: block;
+}
+/* ========================================
+   USER NAVIGATION
+   ======================================== */
+.user-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.user-nav a {
+    display: block;
+    padding: 11px 14px;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+.user-nav a:hover {
+    background: var(--accent-soft);
+    color: var(--text);
+}
+.user-nav a.active {
+    background: var(--accent-soft);
+    color: var(--text);
+    font-weight: 600;
+}
+/* ========================================
+   CREATE POST BUTTON
+   ======================================== */
+.create-post-button {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 0;
+    border-radius: 15px;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.create-post-button:hover {
+    background: var(--brand-black);
+    transform: translateY(-1px);
+}
+.create-post-button:active {
+    transform: translateY(0);
+}
+.create-post-button:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+.create-post-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    line-height: 1;
+}
+html.dark-mode .create-post-button {
+    background: #c084cc;
+    color: #100e12;
+}
+html.dark-mode .create-post-button:hover {
+    background: var(--brand-lavender);
+}
+/* ========================================
+   SIDEBAR BOTTOM
+   ======================================== */
+.user-sidebar-bottom {
+    margin-top: auto;
+    padding-top: 30px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+.user-sidebar-bottom p {
+    margin: 0;
+}
+.logout-form {
+    margin-top: 12px;
+}
+.logout-button {
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    cursor: pointer;
+}
+.logout-button:hover {
+    color: var(--text);
+    text-decoration: underline;
+}
+/* ========================================
+   TOP BAR
+   ======================================== */
+.user-topbar {
+    height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+}
+.user-search {
+    flex: 1;
+    max-width: 600px;
+    margin: 0;
+}
+.user-search input {
+    width: 100%;
+    padding: 11px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--input-background);
+    color: var(--text);
+    font: inherit;
+    outline: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.user-search input::placeholder {
+    color: var(--placeholder);
+}
+.user-search input:focus {
+    background: var(--surface);
+    border-color: var(--focus);
+}
+/* ========================================
+   TOP BAR ACTIONS
+   ======================================== */
+.user-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.user-topbar .theme-toggle {
+    position: static;
+    top: auto;
+    right: auto;
+    z-index: auto;
+}
+.user-topbar .theme-toggle,
+.topbar-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: none;
+}
+.user-topbar .theme-toggle:hover,
+.topbar-icon:hover {
+    background: var(--accent-soft);
+    transform: none;
+}
+/* ========================================
+   TOP BAR PROFILE AVATAR
+   ======================================== */
+.topbar-profile {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    max-width: 38px;
+    max-height: 38px;
+    flex: 0 0 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+}
+.topbar-profile > img.topbar-profile-image {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    max-width: 38px;
+    max-height: 38px;
+    display: block;
+    flex: 0 0 38px;
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+}
+.topbar-profile > span {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* ========================================
+   MOBILE ELEMENTS - HIDDEN ON DESKTOP
+   ======================================== */
+.mobile-header {
+    display: none;
+}
+.mobile-menu-overlay {
+    display: none;
+}
+.mobile-menu-top {
+    display: none;
+}
+.mobile-menu-search {
+    display: none;
+}
+/* ========================================
+   DARK MODE
+   ======================================== */
+html.dark-mode body,
+html.dark-mode .user-layout {
+    background: #18171d;
+    color: #f1e8dc;
+}
+html.dark-mode .user-sidebar {
+    background: #1d1b22;
+    border-right-color: #302d35;
+}
+html.dark-mode .user-nav a {
+    color: #d9d0da;
+}
+html.dark-mode .user-nav a:hover {
+    background: #292630;
+    color: #f1e8dc;
+}
+html.dark-mode .user-nav a.active {
+    background: #3a3040;
+    color: #f1e8dc;
+}
+html.dark-mode .user-sidebar-bottom {
+    color: #d9d0da;
+}
+html.dark-mode .logout-button {
+    color: #c8bac7;
+}
+html.dark-mode .logout-button:hover {
+    color: #f1e8dc;
+}
+html.dark-mode .user-topbar {
+    border-bottom-color: #302d35;
+}
+html.dark-mode .user-search input {
+    background: #242229;
+    border-color: #302d35;
+    color: #f1e8dc;
+}
+html.dark-mode .user-search input::placeholder {
+    color: #9d969f;
+}
+html.dark-mode .user-search input:focus {
+    background: #29262f;
+    border-color: #806b84;
+}
+html.dark-mode .user-topbar .theme-toggle,
+html.dark-mode .topbar-icon {
+    color: #f1e8dc;
+}
+html.dark-mode .user-topbar .theme-toggle:hover,
+html.dark-mode .topbar-icon:hover {
+    background: #292630;
+}
+html.dark-mode .topbar-profile {
+    background: #493b4d;
+    color: #f1e8dc;
+}
+/* ========================================
+   TABLET
+   ======================================== */
+@media (max-width: 900px) {
+    .user-sidebar {
+        width: 180px;
+        padding: 24px 16px;
+    }
+    .user-main {
+        padding: 0 24px 30px;
+    }
+}
+/* ========================================
+   MOBILE HEADER + BURGER MENU
+   ======================================== */
+@media (max-width: 700px) {
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    body.mobile-menu-open {
+        overflow: hidden;
+    }
+    .user-layout {
+        display: block;
+        width: 100%;
+        min-width: 0;
+    }
+    .mobile-header {
+        position: sticky;
+        top: 0;
+        z-index: 900;
+        width: 100%;
+        height: 68px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        border-bottom: 1px solid var(--border);
+        background: var(--surface);
+    }
+    .mobile-logo {
+        display: inline-flex;
+        align-items: center;
+        height: 100%;
+        text-decoration: none;
+    }
+    .mobile-logo img {
+        display: block;
+        width: auto;
+        height: 34px;
+    }
+    .mobile-logo .user-logo-light {
+        display: block;
+    }
+    .mobile-logo .user-logo-dark {
+        display: none;
+    }
+    html.dark-mode .mobile-logo .user-logo-light {
+        display: none;
+    }
+    html.dark-mode .mobile-logo .user-logo-dark {
+        display: block;
+    }
+    .mobile-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .mobile-profile {
+        width: 38px;
+        height: 38px;
+        flex: 0 0 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        color: var(--text);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .mobile-profile img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+    .mobile-menu-button {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 0;
+        border: 0;
+        border-radius: 10px;
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+    }
+    .mobile-menu-button:hover {
+        background: var(--accent-soft);
+    }
+    .mobile-menu-button span {
+        width: 22px;
+        height: 2px;
+        display: block;
+        border-radius: 10px;
+        background: currentColor;
+    }
+    .mobile-menu-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 950;
+        display: block;
+        visibility: hidden;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+    .mobile-menu-overlay.active {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .user-sidebar {
+        position: fixed;
+        top: 0;
+        right: 0;
+        left: auto;
+        z-index: 1000;
+        width: min(86vw, 340px);
+        height: 100dvh;
+        min-height: 100dvh;
+        padding: 20px;
+        overflow-y: auto;
+        border-right: 0;
+        border-left: 1px solid var(--border);
+        background: var(--surface);
+        transform: translateX(105%);
+        transition: transform 0.25s ease;
+    }
+    .user-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    .mobile-menu-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 700;
+    }
+    .mobile-menu-close {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--text);
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+    }
+    .mobile-menu-close:hover {
+        background: var(--accent-soft);
+    }
+    .user-sidebar > .user-logo {
+        display: none;
+    }
+    .user-nav {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        overflow: visible;
+    }
+    .user-nav a {
+        width: 100%;
+        padding: 13px 14px;
+        white-space: normal;
+    }
+    .create-post-button {
+        width: 100%;
+        margin-top: 16px;
+    }
+    .mobile-menu-search {
+        display: block;
+        width: 100%;
+        margin-top: 18px;
+    }
+    .mobile-menu-search form {
+        width: 100%;
+        margin: 0;
+    }
+    .mobile-menu-search input {
+        width: 100%;
+        padding: 11px 13px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        outline: none;
+        background: var(--input-background);
+        color: var(--text);
+        font: inherit;
+    }
+    .mobile-menu-search input::placeholder {
+        color: var(--placeholder);
+    }
+    .mobile-menu-search input:focus {
+        border-color: var(--focus);
+    }
+    .user-sidebar-bottom {
+        display: block;
+        margin-top: auto;
+        padding-top: 24px;
+    }
+    .user-main {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        padding: 0 16px 30px;
+        overflow: visible;
+    }
+    .user-topbar {
+        height: auto;
+        margin: 0 0 20px;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .user-search {
+        width: 100%;
+        max-width: none;
+    }
+    .user-topbar-actions {
+        display: none;
+    }
+    .feed-page,
+    .post-detail-page,
+    .profile-page,
+    .upload-page,
+    .saved-page,
+    .rules-page {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+    .feed-list,
+    .feed-post {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+    img,
+    video {
+        max-width: 100%;
+    }
+    html.dark-mode .mobile-header {
+        background: #1d1b22;
+        border-bottom-color: #302d35;
+    }
+    html.dark-mode .user-sidebar {
+        background: #1d1b22;
+        border-left-color: #302d35;
+    }
+    html.dark-mode .mobile-profile {
+        background: #493b4d;
+        color: #f1e8dc;
+    }
+    html.dark-mode .mobile-menu-button,
+    html.dark-mode .mobile-menu-close {
+        color: #f1e8dc;
+    }
+    html.dark-mode .mobile-menu-search input {
+        background: #242229;
+        border-color: #302d35;
+        color: #f1e8dc;
+    }
+    html.dark-mode .mobile-menu-search input::placeholder {
+        color: #9d969f;
+    }
+}
+/* ========================================
+   SMALL MOBILE
+   ======================================== */
+@media (max-width: 500px) {
+    .mobile-header {
+        height: 64px;
+        padding: 0 14px;
+    }
+    .mobile-logo img {
+        height: 31px;
+    }
+    .mobile-profile {
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+    }
+    .mobile-menu-button {
+        width: 38px;
+        height: 38px;
+    }
+    .user-sidebar {
+        width: min(90vw, 330px);
+        padding: 18px;
+    }
+    .user-main {
+        padding: 0 12px 24px;
+    }
+    .user-topbar {
+        padding: 12px 0;
+        margin-bottom: 16px;
+    }
+}

@@ -1,334 +1,111 @@
 <?php
-
-// Load session, CSRF protection and database connection.
 require_once __DIR__ . "/session.php";
 require_once __DIR__ . "/csrf.php";
 require_once __DIR__ . "/../config/db.php";
-
-// Get the name of the current page for active navigation styling.
 $currentPage = basename($_SERVER["PHP_SELF"]);
-
-// Get the logged-in user's information for the header.
 $headerUser = null;
-
 if (isset($_SESSION["user_id"])) {
-
-    $headerUserStmt = $conn->prepare("
-        SELECT username, profile_image
-        FROM users
-        WHERE user_id = ?
-    ");
-
-    $headerUserStmt->bind_param(
-        "i",
-        $_SESSION["user_id"]
-    );
-
+    $headerUserStmt = $conn->prepare("SELECT username, profile_image FROM users WHERE user_id = ?");
+    $headerUserStmt->bind_param("i", $_SESSION["user_id"]);
     $headerUserStmt->execute();
-
-    $headerUser = $headerUserStmt
-        ->get_result()
-        ->fetch_assoc();
+    $headerUser = $headerUserStmt->get_result()->fetch_assoc();
+    $headerUserStmt->close();
 }
-
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-    <!-- Page metadata and title. -->
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        <?= htmlspecialchars(
-            $pageTitle ?? "Witchy",
-            ENT_QUOTES,
-            "UTF-8"
-        ) ?>
-    </title>
-
-
-    <!-- Load shared Witchy stylesheets. -->
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/css/upload.css">
-    <link rel="stylesheet" href="assets/css/feed.css">
-    <link rel="stylesheet" href="assets/css/rules.css">
-
-    <!-- Load an additional page-specific stylesheet when needed. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($pageTitle ?? "Witchy", ENT_QUOTES, "UTF-8") ?></title>
+    <link rel="stylesheet" href="/witchy/assets/css/style.css">
+    <link rel="stylesheet" href="/witchy/assets/css/user_header.css">
     <?php if (!empty($pageCss)): ?>
-        <link
-            rel="stylesheet"
-            href="assets/css/<?= htmlspecialchars(
-                $pageCss,
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
-        >
+        <link rel="stylesheet" href="/witchy/assets/css/<?= htmlspecialchars($pageCss, ENT_QUOTES, "UTF-8") ?>">
     <?php endif; ?>
-
-
-    <!-- Apply the saved theme before the page is displayed. -->
     <script>
-
         const savedTheme = localStorage.getItem("theme");
-
         if (savedTheme === "dark") {
             document.documentElement.classList.add("dark-mode");
         }
-
     </script>
-
+    <script src="/witchy/assets/js/user_header.js" defer></script>
 </head>
-
-
 <body>
-
 <div class="user-layout">
-
-
-    <!-- Sidebar with logo, navigation and account actions. -->
-    <aside class="user-sidebar">
-
-
-        <!-- Witchy logo. -->
-        <div class="user-logo">
-
-            <a
-                href="/witchy/feed.php"
-                class="user-logo"
-                aria-label="Witchy home"
-            >
-
-                <img
-                    src="/witchy/images/horizontal_black.svg"
-                    alt="Witchy"
-                    class="user-logo-light"
-                >
-
-                <img
-                    src="/witchy/images/horizontal_white.svg"
-                    alt=""
-                    class="user-logo-dark"
-                    aria-hidden="true"
-                >
-
+    <header class="mobile-header">
+        <a href="/witchy/feed.php" class="mobile-logo" aria-label="Witchy home">
+            <img src="/witchy/images/horizontal_black.svg" alt="Witchy" class="user-logo-light">
+            <img src="/witchy/images/horizontal_white.svg" alt="Witchy" class="user-logo-dark">
+        </a>
+        <div class="mobile-header-actions">
+            <a href="/witchy/profile.php" class="mobile-profile" aria-label="Profile">
+                <?php if (!empty($headerUser["profile_image"])): ?>
+                    <img src="/witchy/<?= htmlspecialchars($headerUser["profile_image"], ENT_QUOTES, "UTF-8") ?>" alt="">
+                <?php else: ?>
+                    <span><?= htmlspecialchars(strtoupper(substr($headerUser["username"] ?? $_SESSION["username"] ?? "U", 0, 1)), ENT_QUOTES, "UTF-8") ?></span>
+                <?php endif; ?>
             </a>
-
+            <button type="button" class="mobile-menu-button" id="mobile-menu-button" aria-label="Open navigation" aria-expanded="false" aria-controls="user-sidebar">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
-
-
-        <!-- Main navigation for logged-in users. -->
+    </header>
+    <div class="mobile-menu-overlay" id="mobile-menu-overlay"></div>
+    <aside class="user-sidebar" id="user-sidebar">
+        <div class="mobile-menu-top">
+            <span>Menu</span>
+            <button type="button" class="mobile-menu-close" id="mobile-menu-close" aria-label="Close navigation">×</button>
+        </div>
+        <div class="user-logo">
+            <a href="/witchy/feed.php" aria-label="Witchy home">
+                <img src="/witchy/images/horizontal_black.svg" alt="Witchy" class="user-logo-light">
+                <img src="/witchy/images/horizontal_white.svg" alt="Witchy" class="user-logo-dark">
+            </a>
+        </div>
         <nav class="user-nav">
-
-            <a
-                href="feed.php"
-                class="<?= $currentPage === "feed.php" ? "active" : "" ?>"
-            >
-                Home
-            </a>
-
-            <a
-                href="explore.php"
-                class="<?= $currentPage === "explore.php" ? "active" : "" ?>"
-            >
-                Explore
-            </a>
-
-            <a
-                href="rules.php"
-                class="<?= $currentPage === "rules.php" ? "active" : "" ?>"
-            >
-                Rules
-            </a>
-
-            <a
-                href="saved.php"
-                class="<?= $currentPage === "saved.php" ? "active" : "" ?>"
-            >
-                Saved
-            </a>
-
-            <a
-                href="profile.php"
-                class="<?= $currentPage === "profile.php" ? "active" : "" ?>"
-            >
-                Profile
-            </a>
-
+            <a href="/witchy/feed.php" class="<?= $currentPage === "feed.php" ? "active" : "" ?>">Home</a>
+            <a href="/witchy/explore.php" class="<?= $currentPage === "explore.php" ? "active" : "" ?>">Explore</a>
+            <a href="/witchy/rules.php" class="<?= $currentPage === "rules.php" ? "active" : "" ?>">Rules</a>
+            <a href="/witchy/saved.php" class="<?= $currentPage === "saved.php" ? "active" : "" ?>">Saved</a>
+            <a href="/witchy/profile.php" class="<?= $currentPage === "profile.php" ? "active" : "" ?>">Profile</a>
         </nav>
-
-
-        <!-- Shortcut for creating a new post. -->
-        <a
-            href="upload.php"
-            class="create-post-button <?= $currentPage === "upload.php" ? "active" : "" ?>"
-        >
+        <a href="/witchy/upload.php" class="create-post-button <?= $currentPage === "upload.php" ? "active" : "" ?>">
             <span class="create-post-icon">+</span>
             Create post
         </a>
-
-
-        <!-- Logged-in user information and logout. -->
-        <div class="user-sidebar-bottom">
-
-            <?php if (isset($_SESSION["username"])): ?>
-
-                <p>
-                    Logged in as
-
-                    <strong>
-                        <?= htmlspecialchars(
-                            $_SESSION["username"],
-                            ENT_QUOTES,
-                            "UTF-8"
-                        ) ?>
-                    </strong>
-                </p>
-
-            <?php endif; ?>
-
-
-            <!-- Logout uses POST and CSRF protection. -->
-            <form
-                method="POST"
-                action="logout.php"
-                class="logout-form"
-            >
-
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="<?= htmlspecialchars(
-                        csrf_token(),
-                        ENT_QUOTES,
-                        "UTF-8"
-                    ) ?>"
-                >
-
-                <button
-                    type="submit"
-                    class="logout-button"
-                >
-                    Log out
-                </button>
-
+        <div class="mobile-menu-search">
+            <form action="/witchy/explore.php" method="GET">
+                <input type="search" name="search" placeholder="Search Witchy..." aria-label="Search Witchy">
             </form>
-
         </div>
-
-    </aside>
-
-
-    <!-- Main logged-in page content. -->
-    <main class="user-main">
-
-
-        <!-- Topbar with search, theme controls and user actions. -->
-        <header class="user-topbar">
-
-
-            <!-- Search sends the query to the Explore page. -->
-            <form
-                class="user-search"
-                action="explore.php"
-                method="GET"
-            >
-
-                <input
-                    type="search"
-                    name="search"
-                    placeholder="Search posts, users or topics..."
-                    aria-label="Search Witchy"
-                >
-
+        <div class="user-sidebar-bottom">
+            <?php if (isset($_SESSION["username"])): ?>
+                <p>Logged in as <strong><?= htmlspecialchars($_SESSION["username"], ENT_QUOTES, "UTF-8") ?></strong></p>
+            <?php endif; ?>
+            <form method="POST" action="/witchy/logout.php" class="logout-form">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                <button type="submit" class="logout-button">Log out</button>
             </form>
-
-
-            <!-- Topbar action buttons. -->
+        </div>
+    </aside>
+    <main class="user-main">
+        <header class="user-topbar">
+            <form class="user-search" action="/witchy/explore.php" method="GET">
+                <input type="search" name="search" placeholder="Search posts, users or topics..." aria-label="Search Witchy">
+            </form>
             <div class="user-topbar-actions">
-
-
-                <!-- Dark/light theme toggle. -->
-                <button
-                    type="button"
-                    class="theme-toggle"
-                    id="theme-toggle"
-                    aria-label="Toggle dark mode"
-                    title="Toggle dark mode"
-                >
-                    ☾
-                </button>
-
-
-                <!-- Notifications button. -->
-                <button
-                    type="button"
-                    class="topbar-icon"
-                    aria-label="Notifications"
-                    title="Notifications"
-                >
-                    ♡
-                </button>
-
-
-                <!-- Messages button. -->
-                <button
-                    type="button"
-                    class="topbar-icon"
-                    aria-label="Messages"
-                    title="Messages"
-                >
-                    ✉
-                </button>
-
-
-                <!-- Show the profile picture or username initial as fallback. -->
-                <a
-                    href="profile.php"
-                    class="topbar-profile"
-                    aria-label="Profile"
-                    title="Profile"
-                >
-
+                <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
+                <button type="button" class="topbar-icon" aria-label="Notifications" title="Notifications">♡</button>
+                <button type="button" class="topbar-icon" aria-label="Messages" title="Messages">✉</button>
+                <a href="/witchy/profile.php" class="topbar-profile" aria-label="Profile" title="Profile">
                     <?php if (!empty($headerUser["profile_image"])): ?>
-
-                        <img
-                            src="/witchy/<?= htmlspecialchars(
-                                $headerUser["profile_image"],
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>"
-                            alt=""
-                            class="topbar-profile-image"
-                        >
-
+                        <img src="/witchy/<?= htmlspecialchars($headerUser["profile_image"], ENT_QUOTES, "UTF-8") ?>" alt="" class="topbar-profile-image">
                     <?php else: ?>
-
-                        <span>
-                            <?= htmlspecialchars(
-                                strtoupper(
-                                    substr(
-                                        $headerUser["username"] ??
-                                        $_SESSION["username"] ??
-                                        "U",
-                                        0,
-                                        1
-                                    )
-                                ),
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>
-                        </span>
-
+                        <span><?= htmlspecialchars(strtoupper(substr($headerUser["username"] ?? $_SESSION["username"] ?? "U", 0, 1)), ENT_QUOTES, "UTF-8") ?></span>
                     <?php endif; ?>
-
                 </a>
-
             </div>
         </header>
