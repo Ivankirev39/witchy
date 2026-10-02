@@ -91,10 +91,9 @@ require_once __DIR__ . "/includes/user_header.php";
 ?>
 <section class="post-detail-page">
     <a href="feed.php" class="post-detail-back">← Back</a>
-    <div class="post-detail-layout">
-        <!-- POST MEDIA -->
-        <div class="post-detail-media">
-            <?php if ($mediaCount > 0): ?>
+    <div class="post-detail-layout <?= $mediaCount === 0 ? "text-only" : "" ?>">
+        <?php if ($mediaCount > 0): ?>
+            <div class="post-detail-media">
                 <div class="post-detail-media-gallery post-detail-media-count-<?= $mediaCount ?>">
                     <?php foreach ($postMedia as $media): ?>
                         <?php
@@ -103,19 +102,9 @@ require_once __DIR__ . "/includes/user_header.php";
                         ?>
                         <div class="post-detail-media-item">
                             <?php if ($media["media_type"] === "image"): ?>
-                                <img
-                                    class="post-detail-image"
-                                    src="<?= $mediaPath ?>"
-                                    alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
-                                    loading="lazy"
-                                >
+                                <img class="post-detail-image" src="<?= $mediaPath ?>" alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>" loading="lazy">
                             <?php elseif ($media["media_type"] === "video"): ?>
-                                <video
-                                    class="post-detail-video"
-                                    controls
-                                    playsinline
-                                    preload="metadata"
-                                >
+                                <video class="post-detail-video" controls playsinline preload="metadata">
                                     <source src="<?= $mediaPath ?>">
                                     Your browser does not support video playback.
                                 </video>
@@ -123,114 +112,72 @@ require_once __DIR__ . "/includes/user_header.php";
                         </div>
                     <?php endforeach; ?>
                 </div>
-            <?php else: ?>
-                <div class="post-detail-no-image">No media</div>
-            <?php endif; ?>
-        </div>
-        <!-- RIGHT SIDE -->
+            </div>
+        <?php endif; ?>
         <article class="post-detail-content">
-            <!-- AUTHOR -->
             <header class="post-detail-author-row">
                 <div class="post-detail-author">
                     <?php if (!empty($post["profile_image"])): ?>
-                        <img
-                            class="post-detail-avatar"
-                            src="<?= htmlspecialchars($post["profile_image"], ENT_QUOTES, "UTF-8") ?>"
-                            alt=""
-                        >
+                        <img class="post-detail-avatar" src="<?= htmlspecialchars($post["profile_image"], ENT_QUOTES, "UTF-8") ?>" alt="">
                     <?php else: ?>
-                        <div class="post-detail-avatar post-detail-avatar-fallback">
-                            <?= htmlspecialchars(strtoupper(substr($post["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?>
-                        </div>
+                        <div class="post-detail-avatar post-detail-avatar-fallback"><?= htmlspecialchars(strtoupper(substr($post["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?></div>
                     <?php endif; ?>
                     <div>
-                        <strong>
-                            <?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
-                        </strong>
-                        <span class="post-detail-date">
-                            <?= htmlspecialchars(date("j M Y", strtotime($post["created_at"])), ENT_QUOTES, "UTF-8") ?>
-                        </span>
+                        <strong><?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?></strong>
+                        <span class="post-detail-date"><?= htmlspecialchars(date("j M Y", strtotime($post["created_at"])), ENT_QUOTES, "UTF-8") ?></span>
                     </div>
                 </div>
                 <?php if ((int) $post["user_id"] !== $user_id): ?>
                     <form action="follow_user.php" method="POST">
                         <input type="hidden" name="user_id" value="<?= (int) $post["user_id"] ?>">
                         <input type="hidden" name="return_post" value="<?= $post_id ?>">
-                        <button
-                            type="submit"
-                            class="post-detail-follow <?= $post["user_follows"] ? "active" : "" ?>"
-                        >
-                            <?= $post["user_follows"] ? "Following" : "Follow" ?>
-                        </button>
+                        <button type="submit" class="post-detail-follow <?= $post["user_follows"] ? "active" : "" ?>"><?= $post["user_follows"] ? "Following" : "Follow" ?></button>
                     </form>
                 <?php endif; ?>
             </header>
-            <!-- POST INFORMATION -->
             <div class="post-detail-info">
-                <h1>
-                    <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
-                </h1>
-                <?php if (!empty($post["description"])): ?>
-                    <p class="post-detail-description">
-                        <?= nl2br(htmlspecialchars($post["description"], ENT_QUOTES, "UTF-8")) ?>
-                    </p>
+                <?php if ($mediaCount === 0 && !empty($post["topic"])): ?>
+                    <div class="post-detail-topics text-only-topic">
+                        <span>#<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?></span>
+                    </div>
                 <?php endif; ?>
-                <?php if (!empty($post["topic"])): ?>
+                <h1><?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?></h1>
+                <?php if (!empty($post["description"])): ?>
+                    <p class="post-detail-description"><?= nl2br(htmlspecialchars($post["description"], ENT_QUOTES, "UTF-8")) ?></p>
+                <?php endif; ?>
+                <?php if ($mediaCount > 0 && !empty($post["topic"])): ?>
                     <div class="post-detail-topics">
-                        <span>
-                            #<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
-                        </span>
+                        <span>#<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?></span>
                     </div>
                 <?php endif; ?>
                 <?php if (!empty($post["sources"])): ?>
                     <div class="post-detail-sources">
                         <strong>Sources</strong>
-                        <p>
-                            <?= nl2br(htmlspecialchars($post["sources"], ENT_QUOTES, "UTF-8")) ?>
-                        </p>
+                        <p><?= nl2br(htmlspecialchars($post["sources"], ENT_QUOTES, "UTF-8")) ?></p>
                     </div>
                 <?php endif; ?>
             </div>
-            <!-- POST ACTIONS -->
             <div class="post-detail-actions">
-                <!-- LIKE -->
                 <form action="like_post.php" method="POST">
                     <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                    <button
-                        type="submit"
-                        class="post-detail-action <?= $post["user_liked"] ? "active" : "" ?>"
-                    >
+                    <button type="submit" class="post-detail-action <?= $post["user_liked"] ? "active" : "" ?>">
                         <?= $post["user_liked"] ? "♥" : "♡" ?>
                         <span><?= (int) $post["like_count"] ?></span>
                     </button>
                 </form>
-                <!-- COMMENTS -->
                 <div class="post-detail-action">
                     ◯
                     <span><?= (int) $post["comment_count"] ?></span>
                 </div>
-                <!-- SAVE -->
                 <form action="save_post.php" method="POST">
                     <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                    <button
-                        type="submit"
-                        class="post-detail-action save-button <?= $post["user_saved"] ? "active" : "" ?>"
-                        aria-label="<?= $post["user_saved"] ? "Remove from saved" : "Save post" ?>"
-                        title="<?= $post["user_saved"] ? "Saved" : "Save" ?>"
-                    >
-                        <svg
-                            class="save-icon"
-                            viewBox="0 0 24 24"
-                            width="20"
-                            height="20"
-                            aria-hidden="true"
-                        >
+                    <button type="submit" class="post-detail-action save-button <?= $post["user_saved"] ? "active" : "" ?>" aria-label="<?= $post["user_saved"] ? "Remove from saved" : "Save post" ?>" title="<?= $post["user_saved"] ? "Saved" : "Save" ?>">
+                        <svg class="save-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                             <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z"/>
                         </svg>
                     </button>
                 </form>
             </div>
-            <!-- COMMENTS -->
             <section class="post-detail-comments">
                 <h2>Comments</h2>
                 <div class="post-detail-comment-list">
@@ -238,51 +185,26 @@ require_once __DIR__ . "/includes/user_header.php";
                         <?php while ($comment = $comments->fetch_assoc()): ?>
                             <article class="post-detail-comment">
                                 <?php if (!empty($comment["profile_image"])): ?>
-                                    <img
-                                        class="comment-avatar"
-                                        src="<?= htmlspecialchars($comment["profile_image"], ENT_QUOTES, "UTF-8") ?>"
-                                        alt=""
-                                    >
+                                    <img class="comment-avatar" src="<?= htmlspecialchars($comment["profile_image"], ENT_QUOTES, "UTF-8") ?>" alt="">
                                 <?php else: ?>
-                                    <div class="comment-avatar comment-avatar-fallback">
-                                        <?= htmlspecialchars(strtoupper(substr($comment["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?>
-                                    </div>
+                                    <div class="comment-avatar comment-avatar-fallback"><?= htmlspecialchars(strtoupper(substr($comment["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?></div>
                                 <?php endif; ?>
                                 <div class="comment-content">
                                     <div class="comment-meta">
-                                        <strong>
-                                            <?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>
-                                        </strong>
-                                        <span>
-                                            <?= htmlspecialchars(date("j M", strtotime($comment["created_at"])), ENT_QUOTES, "UTF-8") ?>
-                                        </span>
+                                        <strong><?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?></strong>
+                                        <span><?= htmlspecialchars(date("j M", strtotime($comment["created_at"])), ENT_QUOTES, "UTF-8") ?></span>
                                     </div>
-                                    <p>
-                                        <?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?>
-                                    </p>
+                                    <p><?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?></p>
                                 </div>
                             </article>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <p class="post-detail-no-comments">
-                            No comments yet. Be the first to comment.
-                        </p>
+                        <p class="post-detail-no-comments">No comments yet. Be the first to comment.</p>
                     <?php endif; ?>
                 </div>
-                <!-- ADD COMMENT -->
-                <form
-                    action="comment_post.php"
-                    method="POST"
-                    class="post-detail-comment-form"
-                >
+                <form action="comment_post.php" method="POST" class="post-detail-comment-form">
                     <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                    <input
-                        type="text"
-                        name="comment"
-                        placeholder="Add a comment..."
-                        maxlength="1000"
-                        required
-                    >
+                    <input type="text" name="comment" placeholder="Add a comment..." maxlength="1000" required>
                     <button type="submit" aria-label="Post comment">➤</button>
                 </form>
             </section>
