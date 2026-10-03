@@ -116,11 +116,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "Something went wrong while uploading the profile picture.";
 
 
-            // Limit profile pictures to 5 MB.
-            } elseif ($file["size"] > 5 * 1024 * 1024) {
+            // Limit profile pictures to 10 MB.
+            } elseif ($file["size"] > 10 * 1024 * 1024) {
 
                 $error =
-                    "Profile picture cannot be larger than 5 MB.";
+                    "Profile picture cannot be larger than 10 MB.";
 
 
             } else {
@@ -221,9 +221,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
-// ========================================
+
 // COVER IMAGE UPLOAD
-// ========================================
+
 
 $cover_image = $user["cover_image"] ?? null;
 
@@ -301,10 +301,9 @@ if (
 }
 
 
-        // ========================================
+        
         // VALIDATE PROFILE INFORMATION
-        // ========================================
-
+        
         // Do not continue if the image upload already caused an error.
         if ($error !== "") {
 
@@ -330,9 +329,9 @@ if (
         } else {
 
 
-            // ========================================
+           
             // CHECK USERNAME AVAILABILITY
-            // ========================================
+     
 
             // Check whether another user already has this username.
             // The current user's ID is excluded so they can keep
@@ -366,9 +365,9 @@ if (
             } else {
 
 
-                // ========================================
+               
                 // PREPARE OPTIONAL VALUES
-                // ========================================
+               
 
                 // Store an empty birthday as NULL instead
                 // of an empty string.
@@ -377,10 +376,8 @@ if (
                 }
 
 
-                // ========================================
+               
                 // UPDATE USER IN DATABASE
-                // ========================================
-
                 // Update only the row belonging to the logged-in user.
                 // The user ID comes from the session and not from the form.
                 $updateStmt = $conn->prepare("
@@ -432,10 +429,8 @@ if (
     }
 
 
-    // ========================================
+    
     // KEEP FORM VALUES AFTER AN ERROR
-    // ========================================
-
     // If validation fails, keep the submitted text values so the
     // user does not have to type everything again.
     if ($error !== "") {
@@ -463,9 +458,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
 <section class="edit-profile-page">
 
-    <!-- ========================================
-         PAGE HEADER
-         ======================================== -->
+    <!-- PAGE HEADER -->
 
     <header class="edit-profile-heading">
 
@@ -487,11 +480,9 @@ require_once __DIR__ . "/includes/user_header.php";
     </header>
 
 
-    <!-- ========================================
-         ERROR MESSAGE
+    <!-- ERROR MESSAGE
          Only appears if validation or security
-         checks fail.
-         ======================================== -->
+         checks fail. -->
 
     <?php if ($error !== ""): ?>
 
@@ -508,11 +499,9 @@ require_once __DIR__ . "/includes/user_header.php";
     <?php endif; ?>
 
 
-    <!-- ========================================
-         EDIT PROFILE FORM
+    <!-- EDIT PROFILE FORM
          multipart/form-data is required because
-         this form can upload an image.
-         ======================================== -->
+         this form can upload an image. -->
 
     <form
         action="edit_profile.php"
@@ -539,9 +528,7 @@ require_once __DIR__ . "/includes/user_header.php";
         >
 
 
-        <!-- ========================================
-             PROFILE PICTURE
-             ======================================== -->
+        <!-- PROFILE PICTURE -->
 
         <div class="edit-profile-picture-field">
 
@@ -600,7 +587,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 >
 
                 <small>
-                    JPG, PNG or WebP. Maximum 5 MB.
+                    JPG, PNG or WebP. Maximum 10 MB.
                 </small>
 
             </div>
@@ -658,11 +645,9 @@ require_once __DIR__ . "/includes/user_header.php";
 </div>
 
 
-        <!-- ========================================
-             USERNAME
+        <!-- USERNAME
              Must be unique and is limited to
-             50 characters.
-             ======================================== -->
+             50 characters. -->
 
         <div class="edit-profile-field">
 
@@ -686,11 +671,9 @@ require_once __DIR__ . "/includes/user_header.php";
         </div>
 
 
-        <!-- ========================================
-             EMAIL
+        <!--  EMAIL
              Displayed for reference but cannot
-             be changed from this page.
-             ======================================== -->
+             be changed from this page.-->
 
         <div class="edit-profile-field">
 
@@ -716,10 +699,8 @@ require_once __DIR__ . "/includes/user_header.php";
         </div>
 
 
-        <!-- ========================================
-             BIRTHDAY
-             Optional profile information.
-             ======================================== -->
+        <!--  BIRTHDAY
+             Optional profile information.-->
 
         <div class="edit-profile-field">
 
@@ -741,10 +722,8 @@ require_once __DIR__ . "/includes/user_header.php";
         </div>
 
 
-        <!-- ========================================
-             BIO
-             Optional and limited to 500 characters.
-             ======================================== -->
+        <!-- BIO
+             Optional and limited to 500 characters -->
 
         <div class="edit-profile-field">
 
@@ -771,11 +750,9 @@ require_once __DIR__ . "/includes/user_header.php";
         </div>
 
 
-        <!-- ========================================
-             FORM ACTIONS
+        <!-- FORM ACTIONS
              Cancel returns to the profile.
-             Save validates and updates the account.
-             ======================================== -->
+             Save validates and updates the account. -->
 
         <div class="edit-profile-actions">
 
