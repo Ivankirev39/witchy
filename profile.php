@@ -73,12 +73,17 @@ require_once __DIR__ . "/includes/user_header.php";
 </div>
     <section class="profile-header">
         <div class="profile-avatar">
-            <?php if (!empty($user["profile_image"])): ?>
-                <img src="<?= htmlspecialchars($user["profile_image"], ENT_QUOTES, "UTF-8") ?>" alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
-            <?php else: ?>
-                <span><?= htmlspecialchars(strtoupper(substr($user["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?></span>
-            <?php endif; ?>
-        </div>
+    <?php if (!empty($user["profile_image"])): ?>
+        <img
+            src="<?= htmlspecialchars($user["profile_image"], ENT_QUOTES, "UTF-8") ?>"
+            alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
+            class="profile-avatar-image"
+            id="profile-avatar-image"
+        >
+    <?php else: ?>
+        <span><?= htmlspecialchars(strtoupper(substr($user["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?></span>
+    <?php endif; ?>
+</div>
         <div class="profile-identity">
             <div class="profile-name-row">
                 <div>
@@ -200,6 +205,30 @@ require_once __DIR__ . "/includes/user_header.php";
         <?php endif; ?>
     </section>
 </section>
+<!-- Profile Picture Modal -->
+<div
+    id="profile-image-modal"
+    class="profile-image-modal"
+    aria-hidden="true"
+>
+    <button
+        type="button"
+        class="profile-image-modal-close"
+        aria-label="Close profile picture"
+    >
+        &times;
+    </button>
+
+    <img
+        id="profile-modal-image"
+        class="profile-modal-image"
+        src=""
+        alt=""
+    >
+</div>
+
+<script src="assets/js/profile.js"></script>
+
 <?php
 $mediaStmt->close();
 $postStmt->close();
