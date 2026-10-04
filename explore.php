@@ -27,7 +27,7 @@ $sql = "
 
 if ($search !== "") {
     $searchTerm = "%" . $conn->real_escape_string($search) . "%";
-
+    
     $sql .= "
         WHERE
             p.title LIKE '$searchTerm'
@@ -55,21 +55,43 @@ require_once __DIR__ . "/includes/user_header.php";
 <section class="explore-page">
 
     <header class="explore-header">
-        <h1>Explore</h1>
+        <?php if ($search !== ""): ?>
+        <h1>Search results</h1>
         <p>
-            Discover posts from the Witchy community.
+            Showing results for
+            <strong>"<?php echo htmlspecialchars($search, ENT_QUOTES, "UTF-8"); ?>"</strong>
         </p>
+
+        <?php else: ?>
+            <h1>Explore</h1>
+            <p>
+                Discover posts from the Witchy community.
+            </p>
+        <?php endif; ?>
     </header>
+
 
     <section class="explore-content">
 
-    <div class="explore-grid">
+        <div class="explore-grid">
+            <?php if (empty($posts)): ?>
+    
+            <div class="explore-empty">
 
-        <?php if (empty($posts)): ?>
+            <?php if ($search !== ""): ?>
+                <h2>No results found</h2>
+                <p>
+                    We couldn't find any posts matching
+                    "<strong><?php echo htmlspecialchars($search, ENT_QUOTES, "UTF-8"); ?></strong>".
+                </p>
 
-            <p class="explore-empty">
-                No posts to explore yet.
-            </p>
+            <?php else: ?>
+                <h2>No posts to explore yet</h2>
+                <p>
+                    Check back later for new posts from the Witchy community.
+                </p>
+            <?php endif; ?>
+        </div>
 
         <?php else: ?>
 
@@ -128,6 +150,7 @@ require_once __DIR__ . "/includes/user_header.php";
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
+    </section>
 </section>
 
 <?php
