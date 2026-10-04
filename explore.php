@@ -8,6 +8,8 @@ $pageCss = "explore.css";
 
 $posts = [];
 
+$search = trim($_GET["search"] ?? "");
+
 $sql = "
     SELECT
         p.post_id,
@@ -21,6 +23,21 @@ $sql = "
     FROM post p
     INNER JOIN users u
         ON u.user_id = p.user_id
+";
+
+if ($search !== "") {
+    $searchTerm = "%" . $conn->real_escape_string($search) . "%";
+
+    $sql .= "
+        WHERE
+            p.title LIKE '$searchTerm'
+            OR p.description LIKE '$searchTerm'
+            OR p.topic LIKE '$searchTerm'
+            OR u.username LIKE '$searchTerm'
+    ";
+}
+
+$sql .= "
     ORDER BY p.created_at DESC
 ";
 
