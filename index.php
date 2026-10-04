@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . "/includes/session.php";
 
-if (isset($_SESSION["user_id"])) {
+if (isset($_SESSION["user_id"]) && ($_GET["preview"] ?? "") !== "1") {
     header("Location: feed.php");
     exit;
 }
