@@ -1,8 +1,12 @@
 <?php
 require_once __DIR__ . "/includes/session.php";
 
+if (isset($_SESSION["user_id"])) {
+    header("Location: feed.php");
+    exit;
+}
+
 $pageTitle = "Witchy";
-$isLoggedIn = isset($_SESSION["user_id"]);
 
 require_once __DIR__ . "/includes/public-header.php";
 ?>
