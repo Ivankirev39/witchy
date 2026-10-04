@@ -96,8 +96,7 @@ require_once __DIR__ . "/includes/user_header.php";
                         <img
                             class="post-avatar"
                             src="<?= htmlspecialchars($post["author_profile_image"], ENT_QUOTES, "UTF-8") ?>"
-                            alt=""
-                        >
+                            alt="">
                     <?php else: ?>
                         <div class="post-avatar">
                             <?= htmlspecialchars(
@@ -131,36 +130,32 @@ require_once __DIR__ . "/includes/user_header.php";
                                 <?php if ($media["media_type"] === "image"): ?>
                                     <a
                                         href="post.php?id=<?= $postId ?>"
-                                        class="post-media-link"
-                                    >
+                                        class="post-media-link">
                                         <img
                                             class="post-media-image"
                                             src="<?= $mediaPath ?>"
                                             alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
-                                            loading="lazy"
-                                        >
+                                            loading="lazy">
                                     </a>
 
                                 <?php elseif ($media["media_type"] === "video"): ?>
                                     <video
                                         class="post-media-video"
                                         controls
-                                        preload="metadata"
-                                    >
+                                        preload="metadata">
                                         <source src="<?= $mediaPath ?>">
                                         Your browser does not support video playback.
-                                    
-                                    <video
-                                        class="post-media-video"
-                                        controls
-                                        muted
-                                        playsinline
-                                        preload="metadata"
-                                    >
-                                        <source src="<?= $mediaPath ?>">
-                                        Your browser does not support video playback.
-                                    </video>
-                                <?php endif; ?>
+
+                                        <video
+                                            class="post-media-video"
+                                            controls
+                                            muted
+                                            playsinline
+                                            preload="metadata">
+                                            <source src="<?= $mediaPath ?>">
+                                            Your browser does not support video playback.
+                                        </video>
+                                    <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
                     </div>
@@ -171,8 +166,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     <strong>
                         <a
                             href="post.php?id=<?= $postId ?>"
-                            class="post-title-link"
-                        >
+                            class="post-title-link">
                             <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
                         </a>
                     </strong>
@@ -198,13 +192,11 @@ require_once __DIR__ . "/includes/user_header.php";
                         <input
                             type="hidden"
                             name="post_id"
-                            value="<?= $postId ?>"
-                        >
+                            value="<?= $postId ?>">
                         <button
                             type="submit"
                             class="post-action-button like-button <?= $post["user_liked"] ? "active" : "" ?>"
-                            aria-label="<?= $post["user_liked"] ? "Unlike post" : "Like post" ?>"
-                        >
+                            aria-label="<?= $post["user_liked"] ? "Unlike post" : "Like post" ?>">
                             <span class="like-heart">
                                 <?= $post["user_liked"] ? "♥" : "♡" ?>
                             </span>
@@ -215,8 +207,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     <!-- COMMENTS -->
                     <a
                         href="?comments=<?= $postId ?>#post-<?= $postId ?>"
-                        class="post-action-button"
-                    >
+                        class="post-action-button">
                         💬 <?= (int) $post["comment_count"] ?>
                     </a>
 
@@ -225,24 +216,20 @@ require_once __DIR__ . "/includes/user_header.php";
                         <input
                             type="hidden"
                             name="post_id"
-                            value="<?= $postId ?>"
-                        >
+                            value="<?= $postId ?>">
                         <button
                             type="submit"
                             class="post-action-button save-button <?= $post["user_saved"] ? "active" : "" ?>"
                             aria-label="<?= $post["user_saved"] ? "Remove from saved" : "Save post" ?>"
-                            title="<?= $post["user_saved"] ? "Saved" : "Save" ?>"
-                        >
+                            title="<?= $post["user_saved"] ? "Saved" : "Save" ?>">
                             <svg
                                 class="save-icon"
                                 viewBox="0 0 24 24"
                                 width="20"
                                 height="20"
-                                aria-hidden="true"
-                            >
+                                aria-hidden="true">
                                 <path
-                                    d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z"
-                                />
+                                    d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z" />
                             </svg>
                         </button>
                     </form>
@@ -257,9 +244,11 @@ require_once __DIR__ . "/includes/user_header.php";
                         <?php
                         $commentStmt = $conn->prepare("
                             SELECT
-                                comment.comment,
-                                comment.created_at,
-                                users.username
+                                 comment.comment_id,
+                                 comment.user_id,
+                                 comment.comment,
+                                 comment.created_at,
+                                 users.username
                             FROM comment
                             JOIN users ON comment.user_id = users.user_id
                             WHERE comment.post_id = ?
@@ -277,12 +266,26 @@ require_once __DIR__ . "/includes/user_header.php";
                                     <strong>
                                         <?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>
                                     </strong>
+
                                     <p>
                                         <?= htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8") ?>
                                     </p>
+
                                     <small>
                                         <?= htmlspecialchars($comment["created_at"], ENT_QUOTES, "UTF-8") ?>
                                     </small>
+
+                                    <?php if ((int) $comment["user_id"] === $user_id): ?>
+                                        <form action="comment_delete.php" method="POST">
+                                            <input type="hidden" name="comment_id" value="<?= (int) $comment["comment_id"] ?>">
+                                            <input type="hidden" name="post_id" value="<?= $postId ?>">
+                                            <input type="hidden" name="return_to" value="feed">
+
+                                            <button type="submit" class="delete-comment-button">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 </div>
                             <?php endwhile; ?>
                         <?php else: ?>
@@ -297,20 +300,17 @@ require_once __DIR__ . "/includes/user_header.php";
                 <form
                     action="comment_post.php"
                     method="POST"
-                    class="comment-form"
-                >
+                    class="comment-form">
                     <input
                         type="hidden"
                         name="post_id"
-                        value="<?= $postId ?>"
-                    >
+                        value="<?= $postId ?>">
                     <input
                         type="text"
                         name="comment"
                         placeholder="Write a comment..."
                         maxlength="500"
-                        required
-                    >
+                        required>
                     <button type="submit">Post</button>
                 </form>
 

@@ -493,6 +493,34 @@ button.post-detail-action:hover {
     background: var(--brand-black);
     transform: translateY(-1px);
 }
+.delete-comment-form {
+    display: inline;
+    margin-left: auto;
+}
+
+.delete-comment-button {
+    background: var(--brand-plum);
+    border: none;
+    color: var(--brand-white);
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease
+}
+
+.delete-comment-button:hover {
+    background: var(--brand-black);
+    color: var(--brand-white);
+      transform: translateY(-1px);
+
+}
+
+.delete-comment-button:active {
+    transform: scale(0.96);
+}
+
 /* ========================================
    TEXT-ONLY POST
    ======================================== */
@@ -630,6 +658,13 @@ html.dark-mode .post-detail-comment-form button {
 html.dark-mode .post-detail-comment-form button:hover {
     background: #c5a6ca;
     color: #1f1d24;
+}
+html.dark-mode .delete-comment-button {
+    background: #c084cc;
+    color: var(--brand-black);
+}
+html.dark-mode .delete-comment-button:hover {
+    background: #c5a6ca;
 }
 /* ========================================
    TABLET

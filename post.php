@@ -173,7 +173,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     <input type="hidden" name="post_id" value="<?= $post_id ?>">
                     <button type="submit" class="post-detail-action save-button <?= $post["user_saved"] ? "active" : "" ?>" aria-label="<?= $post["user_saved"] ? "Remove from saved" : "Save post" ?>" title="<?= $post["user_saved"] ? "Saved" : "Save" ?>">
                         <svg class="save-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                            <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z"/>
+                            <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z" />
                         </svg>
                     </button>
                 </form>
@@ -187,13 +187,29 @@ require_once __DIR__ . "/includes/user_header.php";
                                 <?php if (!empty($comment["profile_image"])): ?>
                                     <img class="comment-avatar" src="<?= htmlspecialchars($comment["profile_image"], ENT_QUOTES, "UTF-8") ?>" alt="">
                                 <?php else: ?>
-                                    <div class="comment-avatar comment-avatar-fallback"><?= htmlspecialchars(strtoupper(substr($comment["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?></div>
+                                    <div class="comment-avatar comment-avatar-fallback">
+                                        <?= htmlspecialchars(strtoupper(substr($comment["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?>
+                                    </div>
                                 <?php endif; ?>
-                                <div class="comment-content">
+
+                                   <div class="comment-content">
                                     <div class="comment-meta">
                                         <strong><?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?></strong>
                                         <span><?= htmlspecialchars(date("j M", strtotime($comment["created_at"])), ENT_QUOTES, "UTF-8") ?></span>
+
+                                        <?php if ((int) $comment["user_id"] === $user_id): ?>
+                                            <form action="comment_delete.php" method="POST" class="delete-comment-form">
+                                                <input type="hidden" name="comment_id" value="<?= (int) $comment["comment_id"] ?>">
+                                                <input type="hidden" name="post_id" value="<?= $post_id ?>">
+                                                <input type="hidden" name="return_to" value="post">
+
+                                                <button type="submit" class="delete-comment-button">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
                                     </div>
+
                                     <p><?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?></p>
                                 </div>
                             </article>
@@ -215,13 +231,11 @@ require_once __DIR__ . "/includes/user_header.php";
 <div
     id="image-modal"
     class="image-modal"
-    aria-hidden="true"
->
+    aria-hidden="true">
     <button
         type="button"
         class="image-modal-close"
-        aria-label="Close image"
-    >
+        aria-label="Close image">
         &times;
     </button>
 
@@ -229,9 +243,8 @@ require_once __DIR__ . "/includes/user_header.php";
         id="modal-image"
         class="image-modal-content"
         src=""
-        alt=""
-    >
-</div>  
+        alt="">
+</div>
 
 <script src="assets/js/main.js"></script>
 
