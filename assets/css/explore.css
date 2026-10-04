@@ -137,7 +137,24 @@
     font-size: 0.9rem;
 }
 
+.explore-clear-search {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 9px 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
 
+.explore-clear-search:hover {
+    background: var(--accent-soft);
+    border-color: var(--focus);
+}
 
 @media (max-width: 900px) {
     .explore-grid {

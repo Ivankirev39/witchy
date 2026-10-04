@@ -56,11 +56,14 @@ require_once __DIR__ . "/includes/user_header.php";
 
     <header class="explore-header">
         <?php if ($search !== ""): ?>
-        <h1>Search results</h1>
-        <p>
-            Showing results for
-            <strong>"<?php echo htmlspecialchars($search, ENT_QUOTES, "UTF-8"); ?>"</strong>
-        </p>
+            <h1>Search results</h1>
+            <p>
+                Showing results for
+                <strong>"<?php echo htmlspecialchars($search, ENT_QUOTES, "UTF-8"); ?>"</strong>
+            </p>
+            <a href="explore.php" class="explore-clear-search">
+                Clear search
+            </a>
 
         <?php else: ?>
             <h1>Explore</h1>
