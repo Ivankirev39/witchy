@@ -36,6 +36,10 @@
     background: var(--surface);
 }
 
+.explore-cards-body {
+    padding: 12px;
+}
+
 .explore-cards:hover {
     transform: scale(1.02);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
@@ -76,7 +80,10 @@
 }
 
 .explore-cards-body {
+    min-height: 150px;
     padding: 12px;
+    display: flex;
+    flex-direction: column;
 }
 
 .explore-cards-author {
@@ -93,9 +100,9 @@
 
 .explore-cards-description {
     color: var(--brand-black);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     margin: 0 0 12px;
-    line-height: 1.5;
+    line-height: 1.45;
 }
 
 .explore-cards-topic {
@@ -247,6 +254,36 @@ html.dark-mode .explore-sort select {
     color: #e8dfea;
 }
 
+
+.explore-cards-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 8px;
+}
+
+.explore-cards-topic {
+    color: var(--brand-black);
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.explore-cards-date {
+    color: var(--text);
+    opacity: 0.55;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+html.dark-mode .explore-cards-date {
+    color: #e8dfea;
+    opacity: 0.65;
+}
+
+
 @media (max-width: 600px) {
     .explore-sort {
         margin-bottom: 24px;
@@ -255,6 +292,14 @@ html.dark-mode .explore-sort select {
     .explore-sort select {
         font-size: 11px;
         padding: 6px 9px;
+    }
+
+    .explore-cards-meta {
+        gap: 8px;
+    }
+
+    .explore-cards-date {
+        font-size: 0.7rem;
     }
 }
 
@@ -275,18 +320,6 @@ html.dark-mode .explore-sort select {
         gap: 16px;
     }
 }
-
-.explore-topics {
-    gap: 6px;
-    margin-bottom: 24px;
-}
-
-.explore-topics a {
-    padding: 6px 9px;
-    font-size: 11px;
-}
-
-
 
 
 /* Dark Mode */

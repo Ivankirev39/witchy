@@ -156,10 +156,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
             <?php if ($search !== ""): ?>
                 <h2>No results found</h2>
-                <p>
-                    We couldn't find any posts matching
-                    "<strong><?php echo htmlspecialchars($search, ENT_QUOTES, "UTF-8"); ?></strong>".
-                </p>
+                <p>We couldn't find any posts matching"<strong><?php echo htmlspecialchars($search, ENT_QUOTES, "UTF-8"); ?></strong>".</p>
 
             <?php else: ?>
                 <h2>No posts to explore yet</h2>
@@ -216,11 +213,26 @@ require_once __DIR__ . "/includes/user_header.php";
                             </p>
                         <?php endif; ?>
 
-                        <?php if (!empty($post['topic'])): ?>
-                            <p class="explore-cards-topic">
-                                <?php echo htmlspecialchars($post['topic']); ?>
-                            </p>
-                        <?php endif; ?>
+                        <?php if (!empty($post['topic']) || !empty($post['created_at'])): ?>
+    <div class="explore-cards-meta">
+
+        <?php if (!empty($post['topic'])): ?>
+            <p class="explore-cards-topic">
+                <?php echo htmlspecialchars($post['topic']); ?>
+            </p>
+        <?php endif; ?>
+
+        <?php if (!empty($post['created_at'])): ?>
+            <time
+                class="explore-cards-date"
+                datetime="<?php echo htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8'); ?>"
+            >
+                <?php echo date("M j, Y", strtotime($post['created_at'])); ?>
+            </time>
+        <?php endif; ?>
+
+    </div>
+<?php endif; ?>
                     </div>
                 </article>
             <?php endforeach; ?>
