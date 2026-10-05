@@ -7,8 +7,8 @@ $pageTitle = "Explore | Witchy";
 $pageCss = "explore.css";
 
 $posts = [];
-
 $search = trim($_GET["search"] ?? "");
+$topic = trim($_GET["topic"] ?? "");
 
 $sql = "
     SELECT
@@ -25,16 +25,29 @@ $sql = "
         ON u.user_id = p.user_id
 ";
 
+$conditions = [];
+
 if ($search !== "") {
     $searchTerm = "%" . $conn->real_escape_string($search) . "%";
-    
-    $sql .= "
-        WHERE
+
+    $conditions[] = "
+        (
             p.title LIKE '$searchTerm'
             OR p.description LIKE '$searchTerm'
             OR p.topic LIKE '$searchTerm'
             OR u.username LIKE '$searchTerm'
+        )
     ";
+}
+
+if ($topic !== "") {
+    $safeTopic = $conn->real_escape_string($topic);
+
+    $conditions[] = "p.topic = '$safeTopic'";
+}
+
+if (!empty($conditions)) {
+    $sql .= " WHERE " . implode(" AND ", $conditions);
 }
 
 $sql .= "
