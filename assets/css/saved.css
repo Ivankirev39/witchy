@@ -208,6 +208,57 @@ html.dark-mode .saved-empty-button:hover {
     border-color: #c084cc;
 }
     
+/* Unsave Button */ 
+
+.saved-card {
+    position: relative;
+}
+    
+.saved-card-unsave-form {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    margin: 0;
+}
+    
+.saved-card-unsave {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+    
+.saved-card-unsave svg {
+    display: block;
+    fill: currentColor;
+}
+    
+.saved-card-unsave:hover {
+    background: var(--accent-soft);
+    border-color: var(--focus);
+}
+    
+html.dark-mode .saved-card-unsave {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+}
+    
+html.dark-mode .saved-card-unsave:hover {
+    background: #3a3040;
+    border-color: #806b84;
+}
+
+    
 
 /* Dark Mode */
 

@@ -245,10 +245,10 @@
     align-items: center;
     gap: 8px;
     margin: 0 0 28px;
+    color: #242229;
 }
 
-.explore-sort label {
-    color: var(--text);
+.explore-sort label{
     font-size: 13px;
     font-weight: 600;
 }
@@ -475,4 +475,14 @@ html.dark-mode .explore-cards-topic a {
 html.dark-mode .explore-cards-topic a:hover {
     background: #3a3040;
     border-color: #806b84;
+}
+
+html.dark-mode .explore-sort label {
+    color: #e8dfea;
+}
+
+html.dark-mode .export-sort select {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
 }

@@ -86,6 +86,33 @@ require_once __DIR__ . "/includes/user_header.php";
                             onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'; }"
                         >
 
+                        <form action="save_post.php" method="POST" class="saved-card-unsave-form">
+                            <input
+                                type="hidden"
+                                name="post_id"
+                                value="<?= (int) $post["post_id"] ?>"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="redirect"
+                                value="saved.php"
+                            >
+
+                            <button
+                                type="submit"
+                                class="saved-card-unsave"
+                                aria-label="Remove from saved"
+                                title="Remove from saved"
+                                onclick="event.stopPropagation();"
+                            >
+                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                    <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z" />
+                                </svg>
+                            </button>
+                        </form>
+
+
                         <div class="saved-card-image">
                             <?php if (!empty($post["image"])): ?>
                                 <img

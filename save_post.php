@@ -55,5 +55,12 @@ if ($result->num_rows > 0) {
 }
 
 
+$redirect = $_POST["redirect"] ?? "feed.php";
+
+if ($redirect === "saved.php") {
+header("Location: saved.php");
+} else {
 header("Location: feed.php");
+}
+
 exit;
