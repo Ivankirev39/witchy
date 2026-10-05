@@ -45,8 +45,19 @@ require_once __DIR__ . "/includes/user_header.php";
 
     <header class="saved-header">
         <h1>Saved</h1>
-        <p>Your saved posts.</p>
+        <p>
+            <?php
+            $savedCount = count($savedPosts);
+
+            if ($savedCount === 1) {
+                echo "1 saved post.";
+            } else {
+                echo $savedCount . " saved posts.";
+            }
+            ?>
+        </p>
     </header>
+
 
     <section class="saved-content">
 
@@ -56,67 +67,82 @@ require_once __DIR__ . "/includes/user_header.php";
                 <p>
                     Posts you save will appear here.
                 </p>
+                <a href="explore.php" class="saved-empty-button">
+                    Explore posts
+                </a>
             </div>
+
 
         <?php else: ?>
 
             <div class="saved-grid">
                 <?php foreach ($savedPosts as $post): ?>
 
-                    <article class="saved-card">
-                        <a href="post.php?id=<?= (int) $post["post_id"] ?>">
-                            <div class="saved-card-image">
-                                <?php if (!empty($post["image"])): ?>
-                                    <img
-                                        src="uploads/posts/<?= rawurlencode(basename($post["image"])) ?>"
-                                        alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
-                                        loading="lazy"
-                                    >
-                                <?php else: ?>
+                    <article
+                            class="saved-card"
+                            role="link"
+                            tabindex="0"
+                            onclick="window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'"
+                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'; }"
+                        >
 
-                                    <div class="saved-card-placeholder">
-                                        <span>✦</span>
-                                        No image
-                                    </div>
+                        <div class="saved-card-image">
+                            <?php if (!empty($post["image"])): ?>
+                                <img
+                                    src="uploads/posts/<?= rawurlencode(basename($post["image"])) ?>"
+                                    alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
+                                    loading="lazy"
+                                >
+                            <?php else: ?>
 
-                                <?php endif; ?>
-                            </div>
+                                <div class="saved-card-placeholder">
+                                    <span>✦</span>
+                                    No image
+                                </div>
 
-                            <div class="saved-card-body">
-                                <p class="saved-card-author">
-                                    @<?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="saved-card-body">
+                            <p class="saved-card-author">
+                                @<?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
+                            </p>
+                            <h2 class="saved-card-title">
+                                <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
+                            </h2>
+
+                            <?php if (!empty($post["description"])): ?>
+
+                                <p class="saved-card-description">
+                                    <?= htmlspecialchars(
+                                        mb_strimwidth(
+                                            $post["description"],
+                                            0,
+                                            140,
+                                            "..."
+                                        ),
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>
                                 </p>
-                                <h2 class="saved-card-title">
-                                    <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
-                                </h2>
 
-                                <?php if (!empty($post["description"])): ?>
+                            <?php endif; ?>
 
-                                    <p class="saved-card-description">
-                                        <?= htmlspecialchars(
-                                            mb_strimwidth(
-                                                $post["description"],
-                                                0,
-                                                140,
-                                                "..."
-                                            ),
-                                            ENT_QUOTES,
-                                            "UTF-8"
-                                        ) ?>
-                                    </p>
-
-                                <?php endif; ?>
-
-                                <?php if (!empty($post["topic"])): ?>
-
-                                    <p class="saved-card-topic">
+                            <?php if (!empty($post["topic"])): ?>
+                                <p class="saved-card-topic">
+                                    <a
+                                        href="explore.php?topic=<?= urlencode($post["topic"]) ?>"
+                                        onclick="event.stopPropagation();"
+                                    >
                                         <?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
-                                    </p>
+                                    </a>
+                                </p>
 
-                                <?php endif; ?>
-                            </div>
-                        </a>
+                            <?php endif; ?>
+
+                        </div>
                     </article>
+
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

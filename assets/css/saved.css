@@ -137,6 +137,77 @@
     font-size: 0.9rem;
 }
 
+/* Saved Card Topic Button */
+
+.saved-card-topic {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+    
+.saved-card-topic a {
+    display: inline-block;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+    
+.saved-card-topic a:hover {
+    background: var(--accent-soft);
+    border-color: var(--focus);
+}
+    
+html.dark-mode .saved-card-topic a {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+ }
+    
+html.dark-mode .saved-card-topic a:hover {
+    background: #3a3040;
+    border-color: #806b84;
+}
+   
+/* Empty State Button */
+
+.saved-empty-button {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 9px 16px;
+    border: 1px solid var(--brand-plum);
+    border-radius: 8px;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+    
+.saved-empty-button:hover {
+    background: var(--brand-plum);
+    border-color: var(--brand-plum);
+}
+    
+html.dark-mode .saved-empty-button {
+    background: #c084cc;
+    border-color: #c084cc;
+    color: #18171d;
+}
+    
+html.dark-mode .saved-empty-button:hover {
+    background: #c084cc;
+    border-color: #c084cc;
+}
+    
 
 /* Dark Mode */
 
