@@ -258,6 +258,43 @@ html.dark-mode .saved-card-unsave:hover {
     border-color: #806b84;
 }
 
+/* Saved Sort Dropdown */
+
+.saved-sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    color: var(--text);
+}
+    
+.saved-sort label {
+    font-size: 13px;
+    font-weight: 600;
+}
+    
+.saved-sort select {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+}
+    
+.saved-sort select:focus {
+    outline: 2px solid var(--focus);
+    outline-offset: 1px;
+}
+    
+html.dark-mode .saved-sort select {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+}
+    
+    
     
 
 /* Dark Mode */
@@ -283,6 +320,10 @@ html.dark-mode .saved-empty p {
     color: #E8DFEA !important;
 }
 
+html.dark-mode .saved-sort {
+    color: #E8DFEA !important;
+}
+
 
 /* Responsive */
 
@@ -304,5 +345,14 @@ html.dark-mode .saved-empty p {
 
     .saved-card-body {
         min-height: 140px;
+    }
+
+    .saved-sort {
+        margin-bottom: 20px;
+    }
+        
+      
+    .saved-sort select {
+        flex: 1;
     }
 }

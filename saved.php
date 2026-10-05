@@ -8,6 +8,7 @@ $pageCss = "saved.css";
 $user_id = (int) $_SESSION["user_id"];
 
 $savedPosts = [];
+$sort = $_GET["sort"] ?? "newest_saved";
 
 $sql = "
     SELECT
@@ -24,9 +25,20 @@ $sql = "
         ON p.post_id = s.post_id
     INNER JOIN users u
         ON u.user_id = p.user_id
-    WHERE s.user_id = ?
-    ORDER BY s.created_at DESC
-";
+   WHERE s.user_id = ?
+    ";
+
+    if ($sort === "oldest_saved") {
+    $sql .= " ORDER BY s.created_at ASC";
+    } elseif ($sort === "newest_post") {
+    $sql .= " ORDER BY p.created_at DESC";
+    } elseif ($sort === "oldest_post") {
+    $sql .= " ORDER BY p.created_at ASC";
+    } elseif ($sort === "title_asc") {
+    $sql .= " ORDER BY p.title ASC";
+    } else {
+    $sql .= " ORDER BY s.created_at DESC";
+    }
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
@@ -58,6 +70,33 @@ require_once __DIR__ . "/includes/user_header.php";
         </p>
     </header>
 
+    <div class="saved-sort">
+        <label for="saved-sort">Sort by:</label>
+        <select
+            id="saved-sort"
+            onchange="window.location.href=this.value">
+
+            <option value="saved.php?sort=newest_saved" <?= $sort === "newest_saved" ? "selected" : "" ?>
+            >Recently saved
+            </option>
+
+            <option value="saved.php?sort=oldest_saved" <?= $sort === "oldest_saved" ? "selected" : "" ?>
+            >Oldest saved
+            </option>
+
+            <option value="saved.php?sort=newest_post" <?= $sort === "newest_post" ? "selected" : "" ?>
+            >Newest post
+            </option>
+
+            <option value="saved.php?sort=oldest_post" <?= $sort === "oldest_post" ? "selected" : "" ?>
+            >Oldest post
+            </option>
+
+            <option value="saved.php?sort=title_asc" <?= $sort === "title_asc" ? "selected" : "" ?>
+            >Title A–Z
+            </option>
+        </select>
+    </div>
 
     <section class="saved-content">
 
