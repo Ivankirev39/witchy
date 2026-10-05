@@ -182,6 +182,7 @@
     border-color: var(--focus);
 }
 
+/* Explore Topics */
 
 .explore-topics {
     display: flex;
@@ -237,6 +238,7 @@
     color: var(--brand-white);
 }
 
+/* Sort Dropdown */
 
 .explore-sort {
     display: flex;
@@ -301,6 +303,73 @@ html.dark-mode .explore-cards-date {
     opacity: 0.65;
 }
 
+/* Pagination */
+.explore-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 32px;
+}
+
+.explore-pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.explore-pagination a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 9px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.explore-pagination a:hover {
+    background: var(--accent-soft);
+    border-color: var(--focus);
+}
+
+.explore-pagination-pages a.active {
+    background: var(--brand-plum);
+    border-color: var(--brand-plum);
+    color: var(--brand-white);
+}
+
+.explore-pagination-button {
+    padding: 0 12px !important;
+}
+
+html.dark-mode .explore-pagination a {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+}
+
+html.dark-mode .explore-pagination a:hover {
+    background: #3a3040;
+    border-color: #806b84;
+}
+
+html.dark-mode .explore-pagination-pages a.active {
+    background: #c084cc;
+    border-color: #c084cc;
+    color: #18171d;
+}
+
+
 
 @media (max-width: 600px) {
     .explore-sort {
@@ -318,6 +387,22 @@ html.dark-mode .explore-cards-date {
 
     .explore-cards-date {
         font-size: 0.7rem;
+    }
+
+    .explore-pagination {
+        gap: 6px;
+        margin-top: 24px;
+    }
+
+    .explore-pagination a {
+        min-width: 30px;
+        height: 30px;
+        padding: 0 7px;
+        font-size: 11px;
+    }
+
+    .explore-pagination-button {
+        padding: 0 9px !important;
     }
 }
 

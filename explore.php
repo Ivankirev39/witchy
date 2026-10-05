@@ -11,6 +11,10 @@ $search = trim($_GET["search"] ?? "");
 $topic = trim($_GET["topic"] ?? "");
 $sort = $_GET["sort"] ?? "newest";
 
+$postsPerPage = 9;
+$page = max(1, (int) ($_GET["page"] ?? 1));
+$offset = ($page - 1) * $postsPerPage;
+
 $sql = "
     SELECT
         p.post_id,
@@ -51,6 +55,41 @@ if (!empty($conditions)) {
     $sql .= " WHERE " . implode(" AND ", $conditions);
 }
 
+
+/*Counts all matching posts */
+
+$countSql = "
+    SELECT COUNT(*) AS total
+    FROM post p
+    INNER JOIN users u
+        ON u.user_id = p.user_id
+";
+
+if (!empty($conditions)) {
+    $countSql .= " WHERE " . implode(" AND ", $conditions);
+}
+
+$countResult = $conn->query($countSql);
+
+$totalPosts = 0;
+
+if ($countResult) {
+    $countRow = $countResult->fetch_assoc();
+    $totalPosts = (int) $countRow["total"];
+}
+
+$totalPages = max(1, (int) ceil($totalPosts / $postsPerPage));
+
+
+if ($page > $totalPages) {
+    $page = $totalPages;
+}
+
+$offset = ($page - 1) * $postsPerPage;
+
+
+/* Sorting */
+
 if ($sort === "oldest") {
     $orderBy = "p.created_at ASC";
 } elseif ($sort === "title_asc") {
@@ -63,6 +102,7 @@ if ($sort === "oldest") {
 
 $sql .= "
     ORDER BY $orderBy
+    LIMIT $postsPerPage OFFSET $offset
 ";
 
 $result = $conn->query($sql);
@@ -72,7 +112,6 @@ if ($result) {
         $posts[] = $row;
     }
 }
-
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 
@@ -261,8 +300,76 @@ require_once __DIR__ . "/includes/user_header.php";
             <?php endif; ?>
         </div>
     </section>
-</section>
 
+    <?php if ($totalPages > 1): ?>
+
+        <?php
+        $paginationParams = [];
+
+        if ($search !== "") {
+            $paginationParams["search"] = $search;
+        }
+
+        if ($topic !== "") {
+            $paginationParams["topic"] = $topic;
+        }
+
+        if ($sort !== "newest") {
+            $paginationParams["sort"] = $sort;
+        }
+        ?>
+
+        <nav class="explore-pagination" aria-label="Explore pages">
+
+            <?php if ($page > 1): ?>
+
+                <?php
+                $previousParams = $paginationParams;
+                $previousParams["page"] = $page - 1;
+
+                $previousUrl = "explore.php?" . http_build_query($previousParams);
+                ?>
+
+                <a href="<?php echo htmlspecialchars($previousUrl, ENT_QUOTES, "UTF-8"); ?>" class="explore-pagination-button">← Previous</a>
+
+            <?php endif; ?>
+
+
+            <div class="explore-pagination-pages">
+                <?php for ($pageNumber = 1; $pageNumber <= $totalPages; $pageNumber++): ?>
+
+                    <?php
+                    $pageParams = $paginationParams;
+                    $pageParams["page"] = $pageNumber;
+
+                    $pageUrl = "explore.php?" . http_build_query($pageParams);
+                    ?>
+
+                    <a
+                        href="<?php echo htmlspecialchars($pageUrl, ENT_QUOTES, "UTF-8"); ?>"
+                        class="<?php echo $pageNumber === $page ? "active" : ""; ?>"
+                    >
+                        <?php echo $pageNumber; ?>
+                    </a>
+                <?php endfor; ?>
+            </div>
+
+
+            <?php if ($page < $totalPages): ?>
+
+                <?php
+                $nextParams = $paginationParams;
+                $nextParams["page"] = $page + 1;
+
+                $nextUrl = "explore.php?" . http_build_query($nextParams);
+                ?>
+
+                <a href="<?php echo htmlspecialchars($nextUrl, ENT_QUOTES, "UTF-8"); ?>" class="explore-pagination-button">Next →</a>
+
+            <?php endif; ?>
+        </nav>
+    <?php endif; ?>
+</section>
 
 <?php
 require_once __DIR__ . "/includes/user_footer.php";
