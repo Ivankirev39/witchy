@@ -293,6 +293,40 @@
     color: var(--brand-plum);
 }
 
+.post-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.post-actions form {
+    margin: 0;
+}
+
+.delete-post-button {
+    color: #d65b5b;
+}
+
+.delete-post-button:hover {
+    background: rgba(214, 91, 91, 0.08);
+    color: #bf3d3d;
+}
+
+.delete-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
 /*COMMENTS*/
 
 .post-comments {

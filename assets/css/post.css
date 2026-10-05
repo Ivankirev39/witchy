@@ -324,7 +324,7 @@
     line-height: 1.5;
 }
 /* ========================================
-   LIKE / COMMENT / SAVE
+   LIKE / COMMENT / SAVE / DELETE
    ======================================== */
 .post-detail-actions {
     display: flex;
@@ -443,6 +443,31 @@ button.post-detail-action:hover {
     margin: 10px 0 20px;
     color: var(--text-secondary);
     font-size: 13px;
+}
+.delete-post-button {
+    color: #d65b5b;
+    transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.delete-post-button:hover {
+    color: #bf3d3d;
+    transform: translateY(-1px);
+}
+
+.delete-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 0.2s ease;
+}
+
+.delete-post-button:hover .delete-icon {
+    transform: scale(1.08);
 }
 /* ========================================
    ADD COMMENT
