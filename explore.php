@@ -222,7 +222,12 @@ require_once __DIR__ . "/includes/user_header.php";
             <?php else: ?>
 
                 <?php foreach ($posts as $post): ?>
-                    <article class="explore-cards">
+                    <article
+                        class="explore-cards"
+                        role="link"
+                        tabindex="0"
+                        onclick="window.location.href='post.php?id=<?php echo (int) $post['post_id']; ?>'"
+                        onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?php echo (int) $post['post_id']; ?>'; }">                        
                         <div class="explore-cards-image">
                             <a href="post.php?id=<?php echo (int) $post['post_id']; ?>">
                                 <?php if (!empty($post['image'])): ?>
