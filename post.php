@@ -4,6 +4,25 @@ require_once __DIR__ . "/config/db.php";
 $pageTitle = "Post | Witchy";
 $pageCss = "post.css";
 $user_id = (int) $_SESSION["user_id"];
+
+$backUrl = "feed.php";
+
+if (!empty($_SERVER["HTTP_REFERER"])) {
+    $referer = parse_url($_SERVER["HTTP_REFERER"]);
+
+    if (
+        isset($referer["host"], $referer["path"]) &&
+        $referer["host"] === $_SERVER["HTTP_HOST"] &&
+        basename($referer["path"]) !== "post.php"
+    ) {
+        $backUrl = $referer["path"];
+
+        if (!empty($referer["query"])) {
+            $backUrl .= "?" . $referer["query"];
+        }
+    }
+}
+
 // GET POST ID
 $post_id = (int) ($_GET["id"] ?? 0);
 if ($post_id <= 0) {
@@ -90,8 +109,7 @@ $comments = $commentStmt->get_result();
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 <section class="post-detail-page">
-    <a href="feed.php" class="post-detail-back">← Back</a>
-    <div class="post-detail-layout <?= $mediaCount === 0 ? "text-only" : "" ?>">
+    <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, "UTF-8") ?>" class="post-detail-back">← Back</a>    <div class="post-detail-layout <?= $mediaCount === 0 ? "text-only" : "" ?>">
         <?php if ($mediaCount > 0): ?>
             <div class="post-detail-media">
                 <div class="post-detail-media-gallery post-detail-media-count-<?= $mediaCount ?>">
