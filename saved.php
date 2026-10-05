@@ -9,36 +9,47 @@ $user_id = (int) $_SESSION["user_id"];
 
 $savedPosts = [];
 $sort = $_GET["sort"] ?? "newest_saved";
+$topic = trim($_GET["topic"] ?? "");
 
 $sql = "
     SELECT
-        p.post_id,
-        p.user_id,
-        p.title,
-        p.description,
-        p.image,
-        p.topic,
-        p.created_at,
-        u.username
+    p.post_id,
+    p.user_id,
+    p.title,
+    p.description,
+    p.image,
+    p.topic,
+    p.created_at,
+    u.username
     FROM save s
     INNER JOIN post p
-        ON p.post_id = s.post_id
+    ON p.post_id = s.post_id
     INNER JOIN users u
-        ON u.user_id = p.user_id
-   WHERE s.user_id = ?
+    ON u.user_id = p.user_id
+    WHERE s.user_id = ?
     ";
 
-    if ($sort === "oldest_saved") {
+if ($topic !== "") {
+    $safeTopic = $conn->real_escape_string($topic);
+    $sql .= " AND p.topic = '$safeTopic'";
+}
+
+if ($sort === "oldest_saved") {
     $sql .= " ORDER BY s.created_at ASC";
-    } elseif ($sort === "newest_post") {
+} 
+elseif ($sort === "newest_post") {
     $sql .= " ORDER BY p.created_at DESC";
-    } elseif ($sort === "oldest_post") {
+} 
+elseif ($sort === "oldest_post") {
     $sql .= " ORDER BY p.created_at ASC";
-    } elseif ($sort === "title_asc") {
+} 
+elseif ($sort === "title_asc") {
     $sql .= " ORDER BY p.title ASC";
-    } else {
+} 
+else {
     $sql .= " ORDER BY s.created_at DESC";
-    }
+}
+
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
@@ -69,6 +80,41 @@ require_once __DIR__ . "/includes/user_header.php";
             ?>
         </p>
     </header>
+
+    <nav class="saved-topics" aria-label="Saved post topics">
+        <a href="saved.php?sort=<?= urlencode($sort) ?>"class="<?= $topic === "" ? "active" : "" ?>">
+            All
+        </a>
+        <a href="saved.php?topic=Spells&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Spells" ? "active" : "" ?>">
+            Spells
+        </a>
+        <a href="saved.php?topic=Altars&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Altars" ? "active" : "" ?>">
+            Altars
+        </a>
+        <a href="saved.php?topic=Tarot&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Tarot" ? "active" : "" ?>">
+            Tarot
+        </a>
+        <a href="saved.php?topic=Herbs&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Herbs" ? "active" : "" ?>">
+            Herbs
+        </a>
+        <a href="saved.php?topic=Crystals&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Crystals" ? "active" : "" ?>">
+            Crystals
+        </a>
+        <a href="saved.php?topic=Books&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Books" ? "active" : "" ?>">
+            Books
+        </a>
+        <a href="saved.php?topic=Artwork&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Artwork" ? "active" : "" ?>">
+            Artwork
+        </a>
+        <a href="saved.php?topic=Occult%20Studies&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Occult Studies" ? "active" : "" ?>">
+            Occult Studies
+        </a>
+        <a href="saved.php?topic=Others&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Others" ? "active" : "" ?>">
+            Others
+        </a>
+    </nav>
+
+
 
     <div class="saved-sort">
         <label for="saved-sort">Sort by:</label>

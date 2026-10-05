@@ -162,18 +162,7 @@
     background: var(--accent-soft);
     border-color: var(--focus);
 }
-    
-html.dark-mode .saved-card-topic a {
-    background: #242229;
-    border-color: #3a3540;
-    color: #e8dfea;
- }
-    
-html.dark-mode .saved-card-topic a:hover {
-    background: #3a3040;
-    border-color: #806b84;
-}
-   
+     
 /* Empty State Button */
 
 .saved-empty-button {
@@ -196,17 +185,7 @@ html.dark-mode .saved-card-topic a:hover {
     background: var(--brand-plum);
     border-color: var(--brand-plum);
 }
-    
-html.dark-mode .saved-empty-button {
-    background: #c084cc;
-    border-color: #c084cc;
-    color: #18171d;
-}
-    
-html.dark-mode .saved-empty-button:hover {
-    background: #c084cc;
-    border-color: #c084cc;
-}
+
     
 /* Unsave Button */ 
 
@@ -247,17 +226,6 @@ html.dark-mode .saved-empty-button:hover {
     border-color: var(--focus);
 }
     
-html.dark-mode .saved-card-unsave {
-    background: #242229;
-    border-color: #3a3540;
-    color: #e8dfea;
-}
-    
-html.dark-mode .saved-card-unsave:hover {
-    background: #3a3040;
-    border-color: #806b84;
-}
-
 /* Saved Sort Dropdown */
 
 .saved-sort {
@@ -269,12 +237,12 @@ html.dark-mode .saved-card-unsave:hover {
 }
     
 .saved-sort label {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
 }
     
 .saved-sort select {
-    padding: 7px 10px;
+    padding: 6px 8px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--surface);
@@ -287,11 +255,45 @@ html.dark-mode .saved-card-unsave:hover {
     outline: 2px solid var(--focus);
     outline-offset: 1px;
 }
+
     
-html.dark-mode .saved-sort select {
-    background: #242229;
-    border-color: #3a3540;
-    color: #e8dfea;
+/* Saved Topics Filter */
+.saved-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 20px;
+}
+    
+.saved-topics a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+    
+.saved-topics a:hover {
+    background: var(--accent-soft);
+    border-color: var(--focus);
+}
+    
+.saved-topics a.active {
+    background: var(--brand-plum);
+    border-color: var(--brand-plum);
+    color: var(--brand-white);
 }
     
     
@@ -324,6 +326,64 @@ html.dark-mode .saved-sort {
     color: #E8DFEA !important;
 }
 
+html.dark-mode .saved-sort select {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+}
+
+html.dark-mode .saved-topics a {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+}
+    
+html.dark-mode .saved-topics a:hover {
+    background: #3a3040;
+    border-color: #806b84;
+}
+    
+html.dark-mode .saved-topics a.active {
+    background: #c084cc;
+    border-color: #c084cc;
+    color: #18171d;
+}
+
+html.dark-mode .saved-empty-button {
+    background: #c084cc;
+    border-color: #c084cc;
+    color: #18171d;
+}
+    
+html.dark-mode .saved-empty-button:hover {
+    background: #c084cc;
+    border-color: #c084cc;
+}
+
+html.dark-mode .saved-card-unsave {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+}
+    
+html.dark-mode .saved-card-unsave:hover {
+    background: #3a3040;
+    border-color: #806b84;
+}
+
+html.dark-mode .saved-card-topic a {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+ }
+    
+html.dark-mode .saved-card-topic a:hover {
+    background: #3a3040;
+    border-color: #806b84;
+}
+  
+
+
 
 /* Responsive */
 
@@ -354,5 +414,15 @@ html.dark-mode .saved-sort {
       
     .saved-sort select {
         flex: 1;
+    }
+
+    .saved-topics {
+        gap: 6px;
+        margin-bottom: 16px;
+    }
+      
+    .saved-topics a {
+        padding: 6px 9px;
+        font-size: 11px;
     }
 }
