@@ -86,6 +86,19 @@ require_once __DIR__ . "/includes/user_header.php";
         <?php endif; ?>
     </header>
 
+    <nav class="explore-topics">
+        <a href="explore.php" class="<?php echo $topic === "" ? "active" : ""; ?>">All</a>
+        <a href="explore.php?topic=Spells" class="<?php echo $topic === "Spells" ? "active" : ""; ?>">Spells</a>
+        <a href="explore.php?topic=Altars" class="<?php echo $topic === "Altars" ? "active" : ""; ?>">Altars</a>
+        <a href="explore.php?topic=Tarot" class="<?php echo $topic === "Tarot" ? "active" : ""; ?>">Tarot</a>
+        <a href="explore.php?topic=Herbs" class="<?php echo $topic === "Herbs" ? "active" : ""; ?>">Herbs</a>
+        <a href="explore.php?topic=Crystals" class="<?php echo $topic === "Crystals" ? "active" : ""; ?>">Crystals</a>
+        <a href="explore.php?topic=Books" class="<?php echo $topic === "Books" ? "active" : ""; ?>">Books</a>
+        <a href="explore.php?topic=Artwork" class="<?php echo $topic === "Artwork" ? "active" : ""; ?>"> Artwork</a>
+        <a href="explore.php?topic=Occult%20Studies" class="<?php echo $topic === "Occult Studies" ? "active" : ""; ?>">Occult Studies</a>
+        <a href="explore.php?topic=Others" class="<?php echo $topic === "Others" ? "active" : ""; ?>">Others</a>
+    </nav>
+
 
     <section class="explore-content">
 

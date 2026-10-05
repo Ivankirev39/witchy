@@ -1,3 +1,4 @@
+/* TEST CSS FILE */
 .explore-page {
     width: 100%;
     max-width: 1200px;
@@ -156,6 +157,63 @@
     border-color: var(--focus);
 }
 
+
+.explore-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin: 0 0 28px;
+}
+
+.explore-topics a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 6px 11px;
+
+    border: 1px solid var(--border);
+    border-radius: 8px;
+
+    background: var(--surface);
+    color: var(--text);
+
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.explore-topics a:hover {
+    background: var(--accent-soft);
+    border-color: var(--focus);
+    color: var(--text);
+}
+
+
+.explore-topics a.active {
+    background: var(--brand-plum);
+    border-color: var(--brand-plum);
+    color: var(--brand-white);
+    box-shadow: 0 2px 8px rgba(91, 45, 102, 0.2);
+}
+
+.explore-topics a.active:hover {
+    background: var(--brand-plum);
+    border-color: var(--brand-plum);
+    color: var(--brand-white);
+}
+
+
+
 @media (max-width: 900px) {
     .explore-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -172,6 +230,17 @@
         gap: 16px;
     }
 }
+
+.explore-topics {
+    gap: 6px;
+    margin-bottom: 24px;
+}
+
+.explore-topics a {
+    padding: 6px 9px;
+    font-size: 11px;
+}
+
 
 
 
@@ -196,4 +265,22 @@ html.dark-mode .explore-cards-topic {
 html.dark-mode .explore-empty h2,
 html.dark-mode .explore-empty p {
     color: #E8DFEA !important;
+}
+
+html.dark-mode .explore-topics a {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+}
+
+html.dark-mode .explore-topics a:hover {
+    background: #3a3040;
+    border-color: #806b84;
+    color: #f1e8dc;
+}
+
+html.dark-mode .explore-topics a.active {
+    background: #c084cc;
+    border-color: #c084cc;
+    color: #18171d;
 }
