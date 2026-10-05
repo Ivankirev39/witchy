@@ -213,6 +213,51 @@
 }
 
 
+.explore-sort {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 28px;
+}
+
+.explore-sort label {
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.explore-sort select {
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.explore-sort select:focus {
+    outline: none;
+    border-color: var(--focus);
+}
+
+html.dark-mode .explore-sort select {
+    background: #242229;
+    border-color: #3a3540;
+    color: #e8dfea;
+}
+
+@media (max-width: 600px) {
+    .explore-sort {
+        margin-bottom: 24px;
+    }
+
+    .explore-sort select {
+        font-size: 11px;
+        padding: 6px 9px;
+    }
+}
+
 
 @media (max-width: 900px) {
     .explore-grid {

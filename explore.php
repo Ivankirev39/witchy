@@ -9,6 +9,7 @@ $pageCss = "explore.css";
 $posts = [];
 $search = trim($_GET["search"] ?? "");
 $topic = trim($_GET["topic"] ?? "");
+$sort = $_GET["sort"] ?? "newest";
 
 $sql = "
     SELECT
@@ -50,10 +51,19 @@ if (!empty($conditions)) {
     $sql .= " WHERE " . implode(" AND ", $conditions);
 }
 
-$sql .= "
-    ORDER BY p.created_at DESC
-";
+if ($sort === "oldest") {
+    $orderBy = "p.created_at ASC";
+} elseif ($sort === "title_asc") {
+    $orderBy = "p.title ASC";
+} elseif ($sort === "title_desc") {
+    $orderBy = "p.title DESC";
+} else {
+    $orderBy = "p.created_at DESC";
+}
 
+$sql .= "
+    ORDER BY $orderBy
+";
 $result = $conn->query($sql);
 
 if ($result) {
@@ -99,6 +109,43 @@ require_once __DIR__ . "/includes/user_header.php";
         <a href="explore.php?topic=Others" class="<?php echo $topic === "Others" ? "active" : ""; ?>">Others</a>
     </nav>
 
+    <div class="explore-sort">
+        <label for="explore-sort">Sort by:</label>
+        <select
+            id="explore-sort"
+            onchange="window.location.href=this.value">
+            <?php
+            $baseParams = [];
+
+            if ($search !== "") {
+                $baseParams["search"] = $search;
+            }
+
+            if ($topic !== "") {
+                $baseParams["topic"] = $topic;
+            }
+
+            $sortOptions = [
+                "newest" => "Newest",
+                "oldest" => "Oldest",
+                "title_asc" => "Title A–Z",
+                "title_desc" => "Title Z–A"
+            ];
+
+            foreach ($sortOptions as $value => $label):
+                $params = $baseParams;
+                $params["sort"] = $value;
+
+                $url = "explore.php?" . http_build_query($params);
+            ?>
+            <option
+                value="<?php echo htmlspecialchars($url, ENT_QUOTES, "UTF-8"); ?>"
+                <?php echo $sort === $value ? "selected" : ""; ?> >
+                <?php echo htmlspecialchars($label, ENT_QUOTES, "UTF-8"); ?>
+            </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
     <section class="explore-content">
 
