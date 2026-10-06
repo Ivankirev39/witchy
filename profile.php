@@ -1,20 +1,28 @@
 <?php
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
+
 $pageTitle = "Profile | Witchy";
+
 $user_id = (int) $_SESSION["user_id"];
-// GET LOGGED-IN USER
+$profile_id = (int) ($_GET["id"] ?? $user_id);
+
+$is_own_profile = $profile_id === $user_id;
+
+// GET PROFILE USER
 $stmt = $conn->prepare("
     SELECT username, email, birthdate, rank, bio, profile_image, cover_image
     FROM users
     WHERE user_id = ?
 ");
-$stmt->bind_param("i", $user_id);
+$stmt->bind_param("i", $profile_id);
 $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
+
 if (!$user) {
     die("User not found.");
 }
+
 // GET USER'S POSTS
 $postStmt = $conn->prepare("
     SELECT post_id, title, description, topic, created_at
@@ -22,10 +30,11 @@ $postStmt = $conn->prepare("
     WHERE user_id = ?
     ORDER BY created_at DESC
 ");
-$postStmt->bind_param("i", $user_id);
+$postStmt->bind_param("i", $profile_id);
 $postStmt->execute();
 $posts = $postStmt->get_result();
 $post_count = $posts->num_rows;
+
 // PREPARE MEDIA QUERY
 $mediaStmt = $conn->prepare("
     SELECT file, media_type
@@ -33,57 +42,58 @@ $mediaStmt = $conn->prepare("
     WHERE post_id = ?
     ORDER BY sort_order ASC, media_id ASC
 ");
+
 // FOLLOWER COUNT
 $followerStmt = $conn->prepare("
     SELECT COUNT(*) AS total
     FROM follow
     WHERE following_id = ?
 ");
-$followerStmt->bind_param("i", $user_id);
+$followerStmt->bind_param("i", $profile_id);
 $followerStmt->execute();
 $follower_count = $followerStmt->get_result()->fetch_assoc()["total"];
+
 // FOLLOWING COUNT
 $followingStmt = $conn->prepare("
     SELECT COUNT(*) AS total
     FROM follow
     WHERE follower_id = ?
 ");
-$followingStmt->bind_param("i", $user_id);
+$followingStmt->bind_param("i", $profile_id);
 $followingStmt->execute();
 $following_count = $followingStmt->get_result()->fetch_assoc()["total"];
+
 $pageCss = "profile.css";
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 <section class="profile-page">
     <div class="profile-cover">
 
-    <?php if (!empty($user["cover_image"])): ?>
+        <?php if (!empty($user["cover_image"])): ?>
 
-        <img
-            src="<?= htmlspecialchars($user["cover_image"], ENT_QUOTES, "UTF-8") ?>"
-            alt=""
-        >
+            <img
+                src="<?= htmlspecialchars($user["cover_image"], ENT_QUOTES, "UTF-8") ?>"
+                alt="">
 
-    <?php else: ?>
+        <?php else: ?>
 
-        <span>WITCHY</span>
+            <span>WITCHY</span>
 
-    <?php endif; ?>
+        <?php endif; ?>
 
-</div>
+    </div>
     <section class="profile-header">
         <div class="profile-avatar">
-    <?php if (!empty($user["profile_image"])): ?>
-        <img
-            src="<?= htmlspecialchars($user["profile_image"], ENT_QUOTES, "UTF-8") ?>"
-            alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
-            class="profile-avatar-image"
-            id="profile-avatar-image"
-        >
-    <?php else: ?>
-        <span><?= htmlspecialchars(strtoupper(substr($user["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?></span>
-    <?php endif; ?>
-</div>
+            <?php if (!empty($user["profile_image"])): ?>
+                <img
+                    src="<?= htmlspecialchars($user["profile_image"], ENT_QUOTES, "UTF-8") ?>"
+                    alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
+                    class="profile-avatar-image"
+                    id="profile-avatar-image">
+            <?php else: ?>
+                <span><?= htmlspecialchars(strtoupper(substr($user["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?></span>
+            <?php endif; ?>
+        </div>
         <div class="profile-identity">
             <div class="profile-name-row">
                 <div>
@@ -92,7 +102,9 @@ require_once __DIR__ . "/includes/user_header.php";
                         <span class="profile-rank"><?= htmlspecialchars($user["rank"], ENT_QUOTES, "UTF-8") ?></span>
                     <?php endif; ?>
                 </div>
-                <a href="edit_profile.php" class="profile-edit-button">Edit Profile</a>
+                <?php if ($is_own_profile): ?>
+                    <a href="edit_profile.php" class="profile-edit-button">Edit Profile</a>
+                <?php endif; ?>
             </div>
             <?php if (!empty($user["bio"])): ?>
                 <p class="profile-bio"><?= nl2br(htmlspecialchars($user["bio"], ENT_QUOTES, "UTF-8")) ?></p>
@@ -199,8 +211,12 @@ require_once __DIR__ . "/includes/user_header.php";
             <div class="profile-no-posts">
                 <span>✦</span>
                 <h3>No posts yet</h3>
-                <p>Your creations will appear here.</p>
-                <a href="upload.php">Create your first post</a>
+                <?php if ($is_own_profile): ?>
+                    <p>Your creations will appear here.</p>
+                    <a href="upload.php">Create your first post</a>
+                <?php else: ?>
+                    <p><?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?> hasn’t posted yet.</p>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </section>
@@ -209,13 +225,11 @@ require_once __DIR__ . "/includes/user_header.php";
 <div
     id="profile-image-modal"
     class="profile-image-modal"
-    aria-hidden="true"
->
+    aria-hidden="true">
     <button
         type="button"
         class="profile-image-modal-close"
-        aria-label="Close profile picture"
-    >
+        aria-label="Close profile picture">
         &times;
     </button>
 
@@ -223,8 +237,7 @@ require_once __DIR__ . "/includes/user_header.php";
         id="profile-modal-image"
         class="profile-modal-image"
         src=""
-        alt=""
-    >
+        alt="">
 </div>
 
 <script src="assets/js/profile.js"></script>
