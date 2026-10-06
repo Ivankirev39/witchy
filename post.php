@@ -109,7 +109,8 @@ $comments = $commentStmt->get_result();
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 <section class="post-detail-page">
-    <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, "UTF-8") ?>" class="post-detail-back">← Back</a>    <div class="post-detail-layout <?= $mediaCount === 0 ? "text-only" : "" ?>">
+    <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, "UTF-8") ?>" class="post-detail-back">← Back</a>
+    <div class="post-detail-layout <?= $mediaCount === 0 ? "text-only" : "" ?>">
         <?php if ($mediaCount > 0): ?>
             <div class="post-detail-media">
                 <div class="post-detail-media-gallery post-detail-media-count-<?= $mediaCount ?>">
@@ -135,13 +136,30 @@ require_once __DIR__ . "/includes/user_header.php";
         <article class="post-detail-content">
             <header class="post-detail-author-row">
                 <div class="post-detail-author">
-                    <?php if (!empty($post["profile_image"])): ?>
-                        <img class="post-detail-avatar" src="<?= htmlspecialchars($post["profile_image"], ENT_QUOTES, "UTF-8") ?>" alt="">
-                    <?php else: ?>
-                        <div class="post-detail-avatar post-detail-avatar-fallback"><?= htmlspecialchars(strtoupper(substr($post["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?></div>
-                    <?php endif; ?>
+                    <a
+                        href="profile.php?id=<?= (int) $post["user_id"] ?>"
+                        class="post-detail-avatar-link">
+
+                        <?php if (!empty($post["profile_image"])): ?>
+                            <img
+                                class="post-detail-avatar"
+                                src="<?= htmlspecialchars($post["profile_image"], ENT_QUOTES, "UTF-8") ?>"
+                                alt="">
+                        <?php else: ?>
+                            <div class="post-detail-avatar post-detail-avatar-fallback">
+                                <?= htmlspecialchars(strtoupper(substr($post["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?>
+                            </div>
+                        <?php endif; ?>
+
+                    </a>
                     <div>
-                        <strong><?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?></strong>
+                        <strong>
+                            <a
+                                href="profile.php?id=<?= (int) $post["user_id"] ?>"
+                                class="post-author-link">
+                                <?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
+                            </a>
+                        </strong>
                         <span class="post-detail-date"><?= htmlspecialchars(date("j M Y", strtotime($post["created_at"])), ENT_QUOTES, "UTF-8") ?></span>
                     </div>
                 </div>
