@@ -11,86 +11,62 @@ const observerOptions = {
 };
 
 const videoObserver = new IntersectionObserver((entries) => {
-
     entries.forEach((entry) => {
-
         const video = entry.target;
 
-        if (
-            entry.isIntersecting &&
-            entry.intersectionRatio >= 0.5
-        ) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
 
+            // Make absolutely sure it is muted before autoplay
             video.muted = true;
 
+            // Pause other videos
             feedVideos.forEach((otherVideo) => {
-
-                if (
-                    otherVideo !== video &&
-                    !otherVideo.paused
-                ) {
+                if (otherVideo !== video && !otherVideo.paused) {
                     otherVideo.pause();
                 }
-
             });
 
+            // Start this video
             const playPromise = video.play();
 
             if (playPromise !== undefined) {
-
                 playPromise.catch((error) => {
-                    console.log(
-                        "Video autoplay blocked:",
-                        error
-                    );
+                    console.log("Video autoplay blocked:", error);
                 });
-
             }
 
         } else {
-
             video.pause();
-
         }
-
     });
-
-});
+}, observerOptions);
 
 feedVideos.forEach((video) => {
-
     video.muted = true;
     videoObserver.observe(video);
-
 });
 
 
 // =========================
-// COMMENTS TOGGLE
+// OPEN / CLOSE COMMENTS
 // =========================
 
 document.querySelectorAll(".comments-toggle").forEach((button) => {
-
     button.addEventListener("click", () => {
-
         const post = button.closest(".post-card");
         const commentsArea = post.querySelector(".comments-area");
 
         commentsArea.hidden = !commentsArea.hidden;
-
     });
-
 });
 
 
 // =========================
-// LIKE
+// LIKE WITHOUT RELOAD
 // =========================
 
 document.querySelectorAll(".like-form").forEach((form) => {
-
     form.addEventListener("submit", async (event) => {
-
         event.preventDefault();
 
         const button = form.querySelector(".like-button");
@@ -100,7 +76,6 @@ document.querySelectorAll(".like-form").forEach((form) => {
         button.disabled = true;
 
         try {
-
             const response = await fetch(form.action, {
                 method: "POST",
                 body: new FormData(form),
@@ -110,59 +85,42 @@ document.querySelectorAll(".like-form").forEach((form) => {
             });
 
             if (!response.ok) {
-                throw new Error("Like request failed.");
+                throw new Error("Like request failed");
             }
 
             const data = await response.json();
 
             if (!data.success) {
-                return;
+                throw new Error("Like was not updated");
             }
 
-            button.classList.toggle(
-                "active",
-                data.liked
-            );
+            if (data.liked) {
+                button.classList.add("active");
+                heart.textContent = "♥";
+                button.setAttribute("aria-label", "Unlike post");
+            } else {
+                button.classList.remove("active");
+                heart.textContent = "♡";
+                button.setAttribute("aria-label", "Like post");
+            }
 
-            heart.textContent =
-                data.liked ? "♥" : "♡";
-
-            count.textContent =
-                data.like_count;
-
-            button.setAttribute(
-                "aria-label",
-                data.liked
-                    ? "Unlike post"
-                    : "Like post"
-            );
+            count.textContent = data.like_count;
 
         } catch (error) {
-
-            console.error(
-                "Like error:",
-                error
-            );
-
+            console.error("Like error:", error);
         } finally {
-
             button.disabled = false;
-
         }
-
     });
-
 });
 
 
 // =========================
-// SAVE
+// SAVE WITHOUT RELOAD
 // =========================
 
 document.querySelectorAll(".save-form").forEach((form) => {
-
     form.addEventListener("submit", async (event) => {
-
         event.preventDefault();
 
         const button = form.querySelector(".save-button");
@@ -170,7 +128,6 @@ document.querySelectorAll(".save-form").forEach((form) => {
         button.disabled = true;
 
         try {
-
             const response = await fetch(form.action, {
                 method: "POST",
                 body: new FormData(form),
@@ -180,86 +137,55 @@ document.querySelectorAll(".save-form").forEach((form) => {
             });
 
             if (!response.ok) {
-                throw new Error("Save request failed.");
+                throw new Error("Save request failed");
             }
 
             const data = await response.json();
 
             if (!data.success) {
-                return;
+                throw new Error("Save was not updated");
             }
 
-            button.classList.toggle(
-                "active",
-                data.saved
-            );
-
-            button.setAttribute(
-                "aria-label",
-                data.saved
-                    ? "Remove from saved"
-                    : "Save post"
-            );
-
-            button.setAttribute(
-                "title",
-                data.saved
-                    ? "Saved"
-                    : "Save"
-            );
+            if (data.saved) {
+                button.classList.add("active");
+                button.setAttribute("aria-label", "Remove from saved");
+                button.setAttribute("title", "Saved");
+            } else {
+                button.classList.remove("active");
+                button.setAttribute("aria-label", "Save post");
+                button.setAttribute("title", "Save");
+            }
 
         } catch (error) {
-
-            console.error(
-                "Save error:",
-                error
-            );
-
+            console.error("Save error:", error);
         } finally {
-
             button.disabled = false;
-
         }
-
     });
-
 });
 
 
 // =========================
-// ADD COMMENT
+// COMMENT WITHOUT RELOAD
 // =========================
 
 document.querySelectorAll(".comment-form").forEach((form) => {
-
     form.addEventListener("submit", async (event) => {
-
         event.preventDefault();
 
         const post = form.closest(".post-card");
+        const input = form.querySelector('input[name="comment"]');
+        const button = form.querySelector('button[type="submit"]');
+        const comments = post.querySelector(".post-comments");
+        const count = post.querySelector(".comment-count");
 
-        const input =
-            form.querySelector('input[name="comment"]');
-
-        const button =
-            form.querySelector('button[type="submit"]');
-
-        const comments =
-            post.querySelector(".post-comments");
-
-        const count =
-            post.querySelector(".comment-count");
-
-        const commentText = input.value.trim();
-
-        if (commentText === "") {
+        if (input.value.trim() === "") {
             return;
         }
 
         button.disabled = true;
 
         try {
-
             const response = await fetch(form.action, {
                 method: "POST",
                 body: new FormData(form),
@@ -269,72 +195,97 @@ document.querySelectorAll(".comment-form").forEach((form) => {
             });
 
             if (!response.ok) {
-                throw new Error("Comment request failed.");
+                throw new Error("Comment request failed");
             }
 
             const data = await response.json();
 
             if (!data.success) {
-                return;
+                throw new Error("Comment was not added");
             }
 
+            const newComment = document.createElement("div");
+            newComment.className = "comment";
 
-            // CREATE COMMENT
-            const comment = document.createElement("div");
-
-            comment.className = "comment";
-
-
-            // USERNAME
             const username = document.createElement("strong");
+            username.textContent = data.username;
 
-            username.textContent =
-                data.username;
-
-
-            // COMMENT TEXT
             const text = document.createElement("p");
+            text.textContent = data.comment;
 
-            text.textContent =
-                data.comment;
-
-
-            // DATE
             const date = document.createElement("small");
+            date.textContent = data.created_at;
 
-            date.textContent =
-                data.created_at;
+            newComment.appendChild(username);
+            newComment.appendChild(text);
+            newComment.appendChild(date);
 
+            comments.appendChild(newComment);
 
-            // ADD ELEMENTS
-            comment.appendChild(username);
-            comment.appendChild(text);
-            comment.appendChild(date);
-
-            comments.appendChild(comment);
-
-
-            // UPDATE COUNT
-            count.textContent =
-                data.comment_count;
-
-
-            // CLEAR INPUT
+            count.textContent = data.comment_count;
             input.value = "";
 
         } catch (error) {
-
-            console.error(
-                "Comment error:",
-                error
-            );
-
+            console.error("Comment error:", error);
         } finally {
-
             button.disabled = false;
+        }
+    });
+});
 
+// =========================
+// DELETE COMMENT WITHOUT RELOAD
+// =========================
+
+document.addEventListener("submit", async (event) => {
+    const form = event.target.closest(".delete-comment-form");
+
+    if (!form) {
+        return;
+    }
+
+    event.preventDefault();
+
+    const confirmed = confirm("Are you sure you want to delete this comment?");
+
+    if (!confirmed) {
+        return;
+    }
+
+    const post = form.closest(".post-card");
+    const comment = form.closest(".comment");
+    const count = post.querySelector(".comment-count");
+    const button = form.querySelector(".delete-comment-button");
+
+    button.disabled = true;
+
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Delete comment request failed");
         }
 
-    });
+        const data = await response.json();
 
+        if (!data.success) {
+            throw new Error("Comment could not be deleted");
+        }
+
+        // Remove the comment from the page
+        comment.remove();
+
+        // Update comment count
+        count.textContent = data.comment_count;
+
+    } catch (error) {
+        console.error("Delete comment error:", error);
+        button.disabled = false;
+    }
 });
