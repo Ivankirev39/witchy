@@ -409,6 +409,44 @@
 .comment-form button:active {
     transform: translateY(1px);
 }
+.comment-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.comment-content p {
+  margin: 0;
+  flex: 1;
+}
+
+.delete-comment-form {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.delete-comment-button {
+  background: var(--brand-plum);
+  border: none;
+  color: var(--brand-white);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.delete-comment-button:hover {
+  background: var(--brand-black);
+  color: var(--brand-white);
+  transform: translateY(-1px);
+}
+
+.delete-comment-button:active {
+  transform: scale(0.96);
+}
 
 /* DARK MODE*/
 html.dark-mode .feed-page h1 {
@@ -490,6 +528,13 @@ html.dark-mode .comment-form button {
 html.dark-mode .comment-form button:hover {
     background: var(--brand-lavender);
     color: var(--brand-black);
+}
+html.dark-mode .delete-comment-button {
+    background: #c084cc;
+    color: var(--brand-black);
+}
+html.dark-mode .delete-comment-button:hover {
+    background: #c5a6ca;
 }
 html.dark-mode .like-button.active,
 html.dark-mode .save-button.active {

@@ -221,28 +221,32 @@ require_once __DIR__ . "/includes/user_header.php";
                         <?php while ($comment = $comments->fetch_assoc()): ?>
                             <div class="comment">
                                 <strong><?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?></strong>
-                                <p><?= htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8") ?></p>
+                                <div class="comment-content">
+                                    <p><?= htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8") ?></p>
+                                    <?php if ((int) $comment["user_id"] === $user_id): ?>
+                                        <form
+                                            action="comment_delete.php"
+                                            method="POST"
+                                            class="delete-comment-form">
+                                            <input
+                                                type="hidden"
+                                                name="comment_id"
+                                                value="<?= (int) $comment["comment_id"] ?>">
+                                            <input
+                                                type="hidden"
+                                                name="post_id"
+                                                value="<?= $postId ?>">
+                                            <input
+                                                type="hidden"
+                                                name="return_to"
+                                                value="feed">
+                                            <button type="submit" class="delete-comment-button">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
                                 <small><?= htmlspecialchars($comment["created_at"], ENT_QUOTES, "UTF-8") ?></small>
-                                <?php if ((int) $comment["user_id"] === $user_id): ?>
-                                    <form
-                                        action="comment_delete.php"
-                                        method="POST"
-                                        class="delete-comment-form">
-                                        <input
-                                            type="hidden"
-                                            name="comment_id"
-                                            value="<?= (int) $comment["comment_id"] ?>">
-                                        <input
-                                            type="hidden"
-                                            name="post_id"
-                                            value="<?= $postId ?>">
-                                        <input
-                                            type="hidden"
-                                            name="return_to"
-                                            value="feed">
-                                        <button type="submit" class="delete-comment-button">Delete</button>
-                                    </form>
-                                <?php endif; ?>
                             </div>
                         <?php endwhile; ?>
                         <?php $commentStmt->close(); ?>
