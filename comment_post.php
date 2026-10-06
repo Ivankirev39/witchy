@@ -8,23 +8,38 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-$user_id = $_SESSION["user_id"];
-$post_id = (int) $_POST["post_id"];
+$user_id = (int) $_SESSION["user_id"];
+$post_id = (int) ($_POST["post_id"] ?? 0);
 $comment = trim($_POST["comment"] ?? "");
 
-
-/*
-    Don't insert an empty comment.
-*/
+$isAjax =
+    isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
+    strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) === "xmlhttprequest";
 
 if ($comment === "") {
-    header("Location: feed.php");
+
+    if ($isAjax) {
+
+        header("Content-Type: application/json");
+
+        echo json_encode([
+            "success" => false,
+            "message" => "Comment cannot be empty."
+        ]);
+
+        exit;
+    }
+
+    header("Location: feed.php#post-" . $post_id);
     exit;
 }
 
-
 $stmt = $conn->prepare("
-    INSERT INTO comment (user_id, post_id, comment)
+    INSERT INTO comment (
+        user_id,
+        post_id,
+        comment
+    )
     VALUES (?, ?, ?)
 ");
 
@@ -37,6 +52,49 @@ $stmt->bind_param(
 
 $stmt->execute();
 
+$commentId = $conn->insert_id;
 
-header("Location: feed.php");
+$countStmt = $conn->prepare("
+    SELECT COUNT(*) AS comment_count
+    FROM comment
+    WHERE post_id = ?
+");
+
+$countStmt->bind_param("i", $post_id);
+$countStmt->execute();
+
+$countRow = $countStmt->get_result()->fetch_assoc();
+
+$commentCount = (int) $countRow["comment_count"];
+
+$userStmt = $conn->prepare("
+    SELECT username
+    FROM users
+    WHERE user_id = ?
+");
+
+$userStmt->bind_param("i", $user_id);
+$userStmt->execute();
+
+$userRow = $userStmt->get_result()->fetch_assoc();
+
+$username = $userRow["username"];
+
+if ($isAjax) {
+
+    header("Content-Type: application/json");
+
+    echo json_encode([
+        "success" => true,
+        "comment_id" => $commentId,
+        "comment" => $comment,
+        "username" => $username,
+        "created_at" => date("Y-m-d H:i:s"),
+        "comment_count" => $commentCount
+    ]);
+
+    exit;
+}
+
+header("Location: feed.php#post-" . $post_id);
 exit;
