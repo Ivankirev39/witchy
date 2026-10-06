@@ -409,14 +409,14 @@
 .comment-form button:active {
     transform: translateY(1px);
 }
-.comment-content {
+.feed-comment-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
 
-.comment-content p {
+.feed-comment-content p {
   margin: 0;
   flex: 1;
 }
