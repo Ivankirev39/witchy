@@ -444,11 +444,28 @@ button.post-detail-action:hover {
     line-height: 1.55;
     overflow-wrap: anywhere;
 }
+.comment-avatar-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.comment-author-link {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+
+.comment-author-link:hover {
+    opacity: 0.75;
+}
 .post-detail-no-comments {
     margin: 10px 0 20px;
     color: var(--text-secondary);
     font-size: 13px;
 }
+/* DELETE */
 .delete-post-button {
     color: #d65b5b;
     transition: color 0.2s ease, transform 0.15s ease;

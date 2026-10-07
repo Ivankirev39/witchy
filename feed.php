@@ -231,7 +231,13 @@ require_once __DIR__ . "/includes/user_header.php";
                         ?>
                         <?php while ($comment = $comments->fetch_assoc()): ?>
                             <div class="comment">
-                                <strong><?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?></strong>
+                                <strong>
+                                    <a
+                                        href="profile.php?id=<?= (int) $comment["user_id"] ?>"
+                                        class="comment-author-link">
+                                        <?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>
+                                    </a>
+                                </strong>
                                 <div class="feed-comment-content">
                                     <p><?= htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8") ?></p>
                                     <?php if ((int) $comment["user_id"] === $user_id): ?>
