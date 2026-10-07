@@ -116,13 +116,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "Something went wrong while uploading the profile picture.";
 
 
-            // Limit profile pictures to 10 MB.
+                // Limit profile pictures to 10 MB.
             } elseif ($file["size"] > 10 * 1024 * 1024) {
 
                 $error =
                     "Profile picture cannot be larger than 10 MB.";
-
-
             } else {
 
                 // Check the actual MIME type of the temporary file.
@@ -146,8 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                     $error =
                         "Only JPG, PNG and WebP images are allowed.";
-
-
                 } else {
 
                     // Get the safe extension based on the verified MIME type.
@@ -206,8 +202,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                             $error =
                                 "Could not save the profile picture.";
-
-
                         } else {
 
                             // Save the relative path in the database
@@ -222,88 +216,84 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
 
-// COVER IMAGE UPLOAD
+        // COVER IMAGE UPLOAD
 
 
-$cover_image = $user["cover_image"] ?? null;
+        $cover_image = $user["cover_image"] ?? null;
 
-if (
-    $error === "" &&
-    isset($_FILES["cover_image"]) &&
-    $_FILES["cover_image"]["error"] !== UPLOAD_ERR_NO_FILE
-) {
+        if (
+            $error === "" &&
+            isset($_FILES["cover_image"]) &&
+            $_FILES["cover_image"]["error"] !== UPLOAD_ERR_NO_FILE
+        ) {
 
-    $file = $_FILES["cover_image"];
+            $file = $_FILES["cover_image"];
 
-    if ($file["error"] !== UPLOAD_ERR_OK) {
+            if ($file["error"] !== UPLOAD_ERR_OK) {
 
-        $error = "Something went wrong while uploading the cover image.";
+                $error = "Something went wrong while uploading the cover image.";
+            } elseif ($file["size"] > 10 * 1024 * 1024) {
 
-    } elseif ($file["size"] > 10 * 1024 * 1024) {
+                $error = "Cover image cannot be larger than 10 MB.";
+            } else {
 
-        $error = "Cover image cannot be larger than 10 MB.";
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $mimeType = $finfo->file($file["tmp_name"]);
 
-    } else {
+                $allowedTypes = [
+                    "image/jpeg" => "jpg",
+                    "image/png"  => "png",
+                    "image/webp" => "webp"
+                ];
 
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($file["tmp_name"]);
+                if (!isset($allowedTypes[$mimeType])) {
 
-        $allowedTypes = [
-            "image/jpeg" => "jpg",
-            "image/png"  => "png",
-            "image/webp" => "webp"
-        ];
-
-        if (!isset($allowedTypes[$mimeType])) {
-
-            $error = "Only JPG, PNG and WebP images are allowed.";
-
-        } else {
-
-            $extension = $allowedTypes[$mimeType];
-
-            $filename =
-                "cover_" .
-                $user_id .
-                "_" .
-                bin2hex(random_bytes(8)) .
-                "." .
-                $extension;
-
-            $uploadDirectory = __DIR__ . "/uploads/profiles/";
-
-            $uploadPath = $uploadDirectory . $filename;
-
-            if (!is_dir($uploadDirectory)) {
-
-                if (!mkdir($uploadDirectory, 0755, true)) {
-                    $error = "Could not create the profile image folder.";
-                }
-            }
-
-            if ($error === "") {
-
-                if (!move_uploaded_file(
-                    $file["tmp_name"],
-                    $uploadPath
-                )) {
-
-                    $error = "Could not save the cover image.";
-
+                    $error = "Only JPG, PNG and WebP images are allowed.";
                 } else {
 
-                    $cover_image =
-                        "uploads/profiles/" . $filename;
+                    $extension = $allowedTypes[$mimeType];
+
+                    $filename =
+                        "cover_" .
+                        $user_id .
+                        "_" .
+                        bin2hex(random_bytes(8)) .
+                        "." .
+                        $extension;
+
+                    $uploadDirectory = __DIR__ . "/uploads/profiles/";
+
+                    $uploadPath = $uploadDirectory . $filename;
+
+                    if (!is_dir($uploadDirectory)) {
+
+                        if (!mkdir($uploadDirectory, 0755, true)) {
+                            $error = "Could not create the profile image folder.";
+                        }
+                    }
+
+                    if ($error === "") {
+
+                        if (!move_uploaded_file(
+                            $file["tmp_name"],
+                            $uploadPath
+                        )) {
+
+                            $error = "Could not save the cover image.";
+                        } else {
+
+                            $cover_image =
+                                "uploads/profiles/" . $filename;
+                        }
+                    }
                 }
             }
         }
-    }
-}
 
 
-        
+
         // VALIDATE PROFILE INFORMATION
-        
+
         // Do not continue if the image upload already caused an error.
         if ($error !== "") {
 
@@ -312,26 +302,20 @@ if (
         } elseif ($username === "") {
 
             $error = "Username cannot be empty.";
-
-
         } elseif (strlen($username) > 50) {
 
             $error =
                 "Username cannot be longer than 50 characters.";
-
-
         } elseif (strlen($bio) > 500) {
 
             $error =
                 "Bio cannot be longer than 500 characters.";
-
-
         } else {
 
 
-           
+
             // CHECK USERNAME AVAILABILITY
-     
+
 
             // Check whether another user already has this username.
             // The current user's ID is excluded so they can keep
@@ -360,14 +344,12 @@ if (
 
                 $error =
                     "That username is already taken.";
-
-
             } else {
 
 
-               
+
                 // PREPARE OPTIONAL VALUES
-               
+
 
                 // Store an empty birthday as NULL instead
                 // of an empty string.
@@ -376,7 +358,7 @@ if (
                 }
 
 
-               
+
                 // UPDATE USER IN DATABASE
                 // Update only the row belonging to the logged-in user.
                 // The user ID comes from the session and not from the form.
@@ -417,8 +399,6 @@ if (
                     );
 
                     exit;
-
-
                 } else {
 
                     $error =
@@ -429,7 +409,7 @@ if (
     }
 
 
-    
+
     // KEEP FORM VALUES AFTER AN ERROR
     // If validation fails, keep the submitted text values so the
     // user does not have to type everything again.
@@ -472,8 +452,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
         <a
             href="profile.php"
-            class="edit-profile-back"
-        >
+            class="edit-profile-back">
             Back to profile
         </a>
 
@@ -507,8 +486,7 @@ require_once __DIR__ . "/includes/user_header.php";
         action="edit_profile.php"
         method="POST"
         enctype="multipart/form-data"
-        class="edit-profile-form"
-    >
+        class="edit-profile-form">
 
 
         <!--
@@ -521,11 +499,10 @@ require_once __DIR__ . "/includes/user_header.php";
             type="hidden"
             name="csrf_token"
             value="<?= htmlspecialchars(
-                csrf_token(),
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
-        >
+                        csrf_token(),
+                        ENT_QUOTES,
+                        "UTF-8"
+                    ) ?>">
 
 
         <!-- PROFILE PICTURE -->
@@ -541,31 +518,16 @@ require_once __DIR__ . "/includes/user_header.php";
 
                     <img
                         src="<?= htmlspecialchars(
-                            $user["profile_image"],
-                            ENT_QUOTES,
-                            "UTF-8"
-                        ) ?>"
-                        alt="Current profile picture"
-                    >
+                                    $user["profile_image"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>"
+                        alt="Current profile picture">
 
                 <?php else: ?>
-
-                    <div class="edit-profile-picture-fallback">
-
-                        <?= htmlspecialchars(
-                            strtoupper(
-                                substr(
-                                    $user["username"],
-                                    0,
-                                    1
-                                )
-                            ),
-                            ENT_QUOTES,
-                            "UTF-8"
-                        ) ?>
-
-                    </div>
-
+                    <img
+                        src="images/default-profile.jpg"
+                        alt="Default profile picture">
                 <?php endif; ?>
 
             </div>
@@ -583,8 +545,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     type="file"
                     id="profile_image"
                     name="profile_image"
-                    accept="image/jpeg,image/png,image/webp"
-                >
+                    accept="image/jpeg,image/png,image/webp">
 
                 <small>
                     JPG, PNG or WebP. Maximum 10 MB.
@@ -593,56 +554,54 @@ require_once __DIR__ . "/includes/user_header.php";
             </div>
 
         </div>
-        
-<div class="edit-profile-cover-field">
 
-    <!-- Current cover preview -->
-    <div class="edit-profile-cover-preview" id="cover_preview">
+        <div class="edit-profile-cover-field">
 
-        <?php if (!empty($user["cover_image"])): ?>
+            <!-- Current cover preview -->
+            <div class="edit-profile-cover-preview" id="cover_preview">
 
-            <img
-                id="cover_preview_image"
-                src="<?= htmlspecialchars(
-                    $user["cover_image"],
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>"
-                alt="Current profile cover"
-            >
+                <?php if (!empty($user["cover_image"])): ?>
 
-        <?php else: ?>
+                    <img
+                        id="cover_preview_image"
+                        src="<?= htmlspecialchars(
+                                    $user["cover_image"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>"
+                        alt="Current profile cover">
 
-            <span id="cover_preview_placeholder">
-                WITCHY
-            </span>
+                <?php else: ?>
 
-        <?php endif; ?>
+                    <span id="cover_preview_placeholder">
+                        WITCHY
+                    </span>
 
-    </div>
+                <?php endif; ?>
+
+            </div>
 
 
-    <!-- Cover upload controls -->
-    <div class="edit-profile-cover-controls">
+            <!-- Cover upload controls -->
+            <div class="edit-profile-cover-controls">
 
-        <label for="cover_image">
-            Profile cover
-        </label>
+                <label for="cover_image">
+                    Profile cover
+                </label>
 
-        <input
-            type="file"
-            id="cover_image"
-            name="cover_image"
-            accept="image/jpeg,image/png,image/webp"
-        >
+                <input
+                    type="file"
+                    id="cover_image"
+                    name="cover_image"
+                    accept="image/jpeg,image/png,image/webp">
 
-        <small>
-            JPG, PNG or WebP. Maximum 10 MB.
-        </small>
+                <small>
+                    JPG, PNG or WebP. Maximum 10 MB.
+                </small>
 
-    </div>
+            </div>
 
-</div>
+        </div>
 
 
         <!-- USERNAME
@@ -661,12 +620,11 @@ require_once __DIR__ . "/includes/user_header.php";
                 name="username"
                 maxlength="50"
                 value="<?= htmlspecialchars(
-                    $user["username"],
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>"
-                required
-            >
+                            $user["username"],
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                required>
 
         </div>
 
@@ -685,12 +643,11 @@ require_once __DIR__ . "/includes/user_header.php";
                 type="email"
                 id="email"
                 value="<?= htmlspecialchars(
-                    $user["email"],
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>"
-                disabled
-            >
+                            $user["email"],
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                disabled>
 
             <small>
                 Your email cannot be changed here.
@@ -713,11 +670,10 @@ require_once __DIR__ . "/includes/user_header.php";
                 id="birthdate"
                 name="birthdate"
                 value="<?= htmlspecialchars(
-                    $user["birthdate"] ?? "",
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>"
-            >
+                            $user["birthdate"] ?? "",
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>">
 
         </div>
 
@@ -736,12 +692,11 @@ require_once __DIR__ . "/includes/user_header.php";
                 name="bio"
                 rows="6"
                 maxlength="500"
-                placeholder="Tell the community a little about yourself..."
-            ><?= htmlspecialchars(
-                $user["bio"] ?? "",
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?></textarea>
+                placeholder="Tell the community a little about yourself..."><?= htmlspecialchars(
+                                                                                $user["bio"] ?? "",
+                                                                                ENT_QUOTES,
+                                                                                "UTF-8"
+                                                                            ) ?></textarea>
 
             <small>
                 Maximum 500 characters.
@@ -758,15 +713,13 @@ require_once __DIR__ . "/includes/user_header.php";
 
             <a
                 href="profile.php"
-                class="edit-profile-cancel"
-            >
+                class="edit-profile-cancel">
                 Cancel
             </a>
 
             <button
                 type="submit"
-                class="edit-profile-save"
-            >
+                class="edit-profile-save">
                 Save changes
             </button>
 

@@ -79,17 +79,16 @@ require_once __DIR__ . "/includes/user_header.php";
                     <a
                         href="profile.php?id=<?= (int) $post["user_id"] ?>"
                         class="post-author-avatar-link">
-
-                        <?php if (!empty($post["author_profile_image"])): ?>
-                            <img
-                                class="post-avatar"
-                                src="<?= htmlspecialchars($post["author_profile_image"], ENT_QUOTES, "UTF-8") ?>"
-                                alt="">
-                        <?php else: ?>
-                            <div class="post-avatar">
-                                <?= htmlspecialchars(strtoupper(substr($post["author_username"], 0, 1)), ENT_QUOTES, "UTF-8") ?>
-                            </div>
-                        <?php endif; ?>
+                      <img
+                            src="<?= htmlspecialchars(
+                                        !empty($post["author_profile_image"])
+                                            ? $post["author_profile_image"]
+                                            : "images/default-profile.jpg",
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>"
+                            alt="<?= htmlspecialchars($post["author_username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
+                            class="post-avatar">
                     </a>
                     <div>
                         <strong>

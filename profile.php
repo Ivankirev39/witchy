@@ -83,17 +83,19 @@ require_once __DIR__ . "/includes/user_header.php";
 
     </div>
     <section class="profile-header">
-        <div class="profile-avatar">
-            <?php if (!empty($user["profile_image"])): ?>
-                <img
-                    src="<?= htmlspecialchars($user["profile_image"], ENT_QUOTES, "UTF-8") ?>"
-                    alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
-                    class="profile-avatar-image"
-                    id="profile-avatar-image">
-            <?php else: ?>
-                <span><?= htmlspecialchars(strtoupper(substr($user["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?></span>
-            <?php endif; ?>
-        </div>
+ <div class="profile-avatar">
+    <img
+        src="<?= htmlspecialchars(
+            !empty($user["profile_image"])
+                ? $user["profile_image"]
+                : "images/default-profile.jpg",
+            ENT_QUOTES,
+            "UTF-8"
+        ) ?>"
+        alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
+        class="profile-avatar-image"
+        id="profile-avatar-image">
+</div>
         <div class="profile-identity">
             <div class="profile-name-row">
                 <div>
