@@ -25,6 +25,7 @@ if (isset($_SESSION["user_id"])) {
     <link rel="stylesheet" href="/witchy/assets/css/profile.css">
     <link rel="stylesheet" href="/witchy/assets/css/rules.css">
     <link rel="stylesheet" href="/witchy/assets/css/upload.css">
+    <link rel="stylesheet" href="/witchy/assets/css/post_not_found.css">
     <?php if (!empty($pageCss)): ?>
         <link rel="stylesheet" href="/witchy/assets/css/<?= htmlspecialchars($pageCss, ENT_QUOTES, "UTF-8") ?>?v=2"> <?php endif; ?>
     <script>

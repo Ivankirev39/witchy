@@ -71,8 +71,8 @@ $stmt->bind_param("iiii", $user_id, $user_id, $user_id, $post_id);
 $stmt->execute();
 $post = $stmt->get_result()->fetch_assoc();
 if (!$post) {
-    http_response_code(404);
-    die("Post not found.");
+    header("Location: post_not_found.php");
+    exit;
 }
 // GET POST MEDIA
 $mediaStmt = $conn->prepare("
