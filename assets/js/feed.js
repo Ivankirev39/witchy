@@ -178,8 +178,13 @@ document.querySelectorAll(".comment-form").forEach((form) => {
         const button = form.querySelector('button[type="submit"]');
         const comments = post.querySelector(".post-comments");
         const count = post.querySelector(".comment-count");
+        const mediaInput = form.querySelector(".comment-media-input");
 
-        if (input.value.trim() === "") {
+        if (input.value.trim() === "" && !mediaInput.files.length) {
+            return;
+        }
+        if (mediaInput.files.length && mediaInput.files[0].size > 5 * 1024 * 1024) {
+            alert("Image must be smaller than 5 MB.");
             return;
         }
 
@@ -206,24 +211,53 @@ document.querySelectorAll(".comment-form").forEach((form) => {
 
             const newComment = document.createElement("div");
             newComment.className = "comment";
-
             const username = document.createElement("strong");
             username.textContent = data.username;
-
-            const text = document.createElement("p");
-            text.textContent = data.comment;
-
+            const content = document.createElement("div");
+            content.className = "feed-comment-content";
+            if (data.comment) {
+                const text = document.createElement("p");
+                text.textContent = data.comment;
+                content.appendChild(text);
+            }
+            if (data.media_url) {
+                const image = document.createElement("img");
+                image.className = "comment-media";
+                image.src = data.media_url;
+                image.alt = "Comment attachment";
+                image.loading = "lazy";
+                content.appendChild(image);
+            }
+            const deleteForm = document.createElement("form");
+            deleteForm.action = "comment_delete.php";
+            deleteForm.method = "POST";
+            deleteForm.className = "delete-comment-form";
+            const commentId = document.createElement("input");
+            commentId.type = "hidden";
+            commentId.name = "comment_id";
+            commentId.value = data.comment_id;
+            const postId = document.createElement("input");
+            postId.type = "hidden";
+            postId.name = "post_id";
+            postId.value = form.querySelector('input[name="post_id"]').value;
+            const returnTo = document.createElement("input");
+            returnTo.type = "hidden";
+            returnTo.name = "return_to";
+            returnTo.value = "feed";
+            const deleteButton = document.createElement("button");
+            deleteButton.type = "submit";
+            deleteButton.className = "delete-comment-button";
+            deleteButton.textContent = "Delete";
+            deleteForm.append(commentId, postId, returnTo, deleteButton);
+            content.appendChild(deleteForm);
             const date = document.createElement("small");
             date.textContent = data.created_at;
-
             newComment.appendChild(username);
-            newComment.appendChild(text);
+            newComment.appendChild(content);
             newComment.appendChild(date);
-
             comments.appendChild(newComment);
-
             count.textContent = data.comment_count;
-            input.value = "";
+            form.reset();
 
         } catch (error) {
             console.error("Comment error:", error);
@@ -288,4 +322,74 @@ document.addEventListener("submit", async (event) => {
         console.error("Delete comment error:", error);
         button.disabled = false;
     }
+});
+
+// COMMENT IMAGE PREVIEW
+document.querySelectorAll(".comment-form").forEach((form) => {
+    const input = form.querySelector(".comment-media-input");
+    const preview = form.querySelector(".comment-media-preview");
+    const image = preview.querySelector(".comment-preview-image");
+    const remove = preview.querySelector(".comment-preview-remove");
+    let previewUrl = null;
+    function clearPreview() {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
+        input.value = "";
+        image.removeAttribute("src");
+        preview.hidden = true;
+    }
+    input.addEventListener("change", () => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
+        const file = input.files[0];
+        if (!file) {
+            clearPreview();
+            return;
+        }
+        if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type) || file.size > 5 * 1024 * 1024) {
+            alert("Choose a JPG, PNG, WEBP or GIF smaller than 5 MB.");
+            clearPreview();
+            return;
+        }
+        previewUrl = URL.createObjectURL(file);
+        image.src = previewUrl;
+        preview.hidden = false;
+    });
+    remove.addEventListener("click", clearPreview);
+    form.addEventListener("reset", () => {
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrl = null;
+        image.removeAttribute("src");
+        preview.hidden = true;
+    });
+});
+
+// COMMENT IMAGE LIGHTBOX
+const commentLightbox = document.createElement("div");
+commentLightbox.className = "comment-image-lightbox";
+commentLightbox.hidden = true;
+commentLightbox.innerHTML = '<button type="button" class="comment-image-lightbox-close" aria-label="Close image">×</button><img alt="Enlarged comment image">';
+document.body.appendChild(commentLightbox);
+const lightboxImage = commentLightbox.querySelector("img");
+let previousLightboxFocus = null;
+function closeCommentLightbox() {
+    commentLightbox.hidden = true;
+    lightboxImage.removeAttribute("src");
+    document.body.style.overflow = "";
+    if (previousLightboxFocus) previousLightboxFocus.focus();
+    previousLightboxFocus = null;
+}
+document.addEventListener("click", (event) => {
+    const image = event.target.closest(".comment-preview-image, .feed-comment-content .comment-media");
+    if (!image) return;
+    event.preventDefault();
+    previousLightboxFocus = document.activeElement;
+    lightboxImage.src = image.currentSrc || image.src;
+    commentLightbox.hidden = false;
+    document.body.style.overflow = "hidden";
+    commentLightbox.querySelector(".comment-image-lightbox-close").focus();
+});
+commentLightbox.addEventListener("click", closeCommentLightbox);
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !commentLightbox.hidden) closeCommentLightbox();
 });

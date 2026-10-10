@@ -217,6 +217,8 @@ require_once __DIR__ . "/includes/user_header.php";
                                 comment.comment_id,
                                 comment.user_id,
                                 comment.comment,
+                                comment.media_file,
+                                comment.media_type,
                                 comment.created_at,
                                 users.username
                             FROM comment
@@ -238,7 +240,14 @@ require_once __DIR__ . "/includes/user_header.php";
                                     </a>
                                 </strong>
                                 <div class="feed-comment-content">
-                                    <p><?= htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8") ?></p>
+                                    <?php if ($comment["comment"] !== ""): ?>
+                                        <p><?= htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8") ?></p>
+                                    <?php endif; ?>
+                                    <?php if (!empty($comment["media_file"])): ?>
+                                        <a class="comment-media-link" href="uploads/comments/<?= rawurlencode(basename($comment["media_file"])) ?>" target="_blank" rel="noopener noreferrer" aria-label="Open comment image">
+                                            <img class="comment-media" src="uploads/comments/<?= rawurlencode(basename($comment["media_file"])) ?>" alt="Comment attachment" loading="lazy">
+                                        </a>
+                                    <?php endif; ?>
                                     <?php if ((int) $comment["user_id"] === $user_id): ?>
                                         <form
                                             action="comment_delete.php"
@@ -268,15 +277,17 @@ require_once __DIR__ . "/includes/user_header.php";
                         <?php $commentStmt->close(); ?>
                     </div>
                     <!-- ADD COMMENT -->
-                    <form action="comment_post.php" method="POST" class="comment-form">
+                    <form action="comment_post.php" method="POST" enctype="multipart/form-data" class="comment-form">
                         <input type="hidden" name="post_id" value="<?= $postId ?>">
-                        <input
-                            type="text"
-                            name="comment"
-                            placeholder="Write a comment..."
-                            maxlength="500"
-                            autocomplete="off"
-                            required>
+                        <input type="text" name="comment" placeholder="Write a comment..." maxlength="500" autocomplete="off">
+                        <label class="comment-upload-button" title="Add image or GIF">
+                            📷
+                            <input type="file" name="comment_media" accept="image/jpeg,image/png,image/webp,image/gif" class="comment-media-input" hidden>
+                        </label>
+                        <div class="comment-media-preview" hidden>
+                            <img class="comment-preview-image" alt="Selected attachment">
+                            <button type="button" class="comment-preview-remove" aria-label="Remove selected image">×</button>
+                        </div>
                         <button type="submit">Post</button>
                     </form>
                 </div>
