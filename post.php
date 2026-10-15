@@ -165,6 +165,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 </div>
                 <?php if ((int) $post["user_id"] !== $user_id): ?>
                     <form action="follow_user.php" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                         <input type="hidden" name="user_id" value="<?= (int) $post["user_id"] ?>">
                         <input type="hidden" name="return_post" value="<?= $post_id ?>">
                         <button type="submit" class="post-detail-follow <?= $post["user_follows"] ? "active" : "" ?>"><?= $post["user_follows"] ? "Following" : "Follow" ?></button>

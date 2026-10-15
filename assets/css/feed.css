@@ -89,6 +89,37 @@
     color: inherit;
     text-decoration: none;
 }
+
+.feed-follow-form {
+    flex-shrink: 0;
+    margin: 0 0 0 auto;
+}
+
+.feed-follow-button {
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--brand-plum);
+    border-radius: 8px;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.feed-follow-button:hover {
+    background: var(--brand-black);
+    color: var(--brand-white);
+    transform: translateY(-1px);
+}
+
+.feed-follow-button.active {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
 /* ========================================
    POST MEDIA - GENERAL
    ======================================== */
@@ -497,6 +528,19 @@ html.dark-mode .post-author strong {
 }
 html.dark-mode .post-author p {
     color: #aaa2aa;
+}
+html.dark-mode .feed-follow-button {
+    background: #c084cc;
+    color: #100e12
+}
+html.dark-mode .feed-follow-button:hover {
+    background: #c5a6ca;
+    color: #100e12;
+}
+html.dark-mode .feed-follow-button.active {
+    background: #1f1d24;
+    border-color: #343039;
+    color: #f1e8dc;
 }
 html.dark-mode .post-media {
     background: #161416;

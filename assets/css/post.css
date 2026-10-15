@@ -251,13 +251,14 @@
     background: var(--brand-plum);
     color: var(--brand-white);
     font: inherit;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.15s ease;
 }
 .post-detail-follow:hover {
     background: var(--brand-black);
+    transform: translateY(-1px);    
 }
 .post-detail-follow:active {
     transform: translateY(1px);
@@ -647,12 +648,12 @@ html.dark-mode .post-detail-no-comments {
     color: #aaa2aa;
 }
 html.dark-mode .post-detail-follow {
-    background: #c084cc;
-    color: #ffffff;
+     background: #c084cc;
+     color: #100e12
 }
 html.dark-mode .post-detail-follow:hover {
     background: #c5a6ca;
-    color: #1f1d24;
+    color: #100e12;
 }
 html.dark-mode .post-detail-follow.active {
     border-color: #403b45;

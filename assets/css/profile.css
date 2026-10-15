@@ -103,6 +103,34 @@
     border-color: var(--accent);
     background: var(--accent-soft);
 }
+.profile-follow-form {
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.profile-follow-button {
+    min-height: 40px;
+    padding: 0 30px;
+    border: 1px solid var(--brand-plum);
+    border-radius: 9px;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.profile-follow-button:hover {
+    border-color: var(--brand-black);
+    background: var(--brand-black);
+    transform: translateY(-1px);
+}
+.profile-follow-button.active {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
 .profile-bio {
     max-width: 650px;
     margin: 14px 0 0;
@@ -488,6 +516,21 @@ html.dark-mode .profile-no-posts p {
 }
 html.dark-mode .profile-edit-button,
 html.dark-mode .profile-panel {
+    background: #1f1d24;
+    border-color: #343039;
+    color: #f1e8dc;
+}
+html.dark-mode .profile-follow-button {
+    background: #c084cc;
+    border-color: #c084cc;
+    color: #100e12;
+}
+html.dark-mode .profile-follow-button:hover {
+    background: #c5a6ca;
+    border-color: #c5a6ca;
+    color: #100e12;
+}
+html.dark-mode .profile-follow-button.active {
     background: #1f1d24;
     border-color: #343039;
     color: #f1e8dc;

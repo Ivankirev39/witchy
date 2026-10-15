@@ -30,7 +30,13 @@ $sql = "
             FROM save
             WHERE save.post_id = post.post_id
             AND save.user_id = $user_id
-        ) AS user_saved
+        ) AS user_saved,
+        EXISTS(
+            SELECT 1
+            FROM follow
+            WHERE follow.follower_id = $user_id
+            AND follow.following_id = post.user_id
+        ) AS user_follows
     FROM post
     JOIN users ON users.user_id = post.user_id
     ORDER BY post.created_at DESC
@@ -100,6 +106,17 @@ require_once __DIR__ . "/includes/user_header.php";
                         </strong>
                         <p><?= htmlspecialchars($post["created_at"], ENT_QUOTES, "UTF-8") ?></p>
                     </div>
+                     <?php if ((int) $post["user_id"] !== $user_id): ?>
+                        <form action="follow_user.php" method="POST" class="feed-follow-form">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                            <input type="hidden" name="user_id" value="<?= (int) $post["user_id"] ?>">
+                            <button
+                                type="submit"
+                                class="feed-follow-button <?= $post["user_follows"] ? "active" : "" ?>">
+                                <?= $post["user_follows"] ? "Following" : "Follow" ?>
+                            </button>
+                        </form>
+                    <?php endif; ?>
                 </div>
                 <!-- POST MEDIA -->
                 <?php if ($mediaCount > 0): ?>

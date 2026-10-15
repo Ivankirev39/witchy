@@ -9,6 +9,22 @@ $profile_id = (int) ($_GET["id"] ?? $user_id);
 
 $is_own_profile = $profile_id === $user_id;
 
+$is_following = false;
+
+if (!$is_own_profile) {
+    $followCheck = $conn->prepare("
+        SELECT 1
+        FROM follow
+        WHERE follower_id = ?
+          AND following_id = ?
+        LIMIT 1
+    ");
+    $followCheck->bind_param("ii", $user_id, $profile_id);
+    $followCheck->execute();
+    $is_following = $followCheck->get_result()->num_rows > 0;
+    $followCheck->close();
+}
+
 // GET PROFILE USER
 $stmt = $conn->prepare("
     SELECT username, email, birthdate, rank, bio, profile_image, cover_image
@@ -83,19 +99,19 @@ require_once __DIR__ . "/includes/user_header.php";
 
     </div>
     <section class="profile-header">
- <div class="profile-avatar">
-    <img
-        src="<?= htmlspecialchars(
-            !empty($user["profile_image"])
-                ? $user["profile_image"]
-                : "images/default-profile.jpg",
-            ENT_QUOTES,
-            "UTF-8"
-        ) ?>"
-        alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
-        class="profile-avatar-image"
-        id="profile-avatar-image">
-</div>
+        <div class="profile-avatar">
+            <img
+                src="<?= htmlspecialchars(
+                            !empty($user["profile_image"])
+                                ? $user["profile_image"]
+                                : "images/default-profile.jpg",
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
+                class="profile-avatar-image"
+                id="profile-avatar-image">
+        </div>
         <div class="profile-identity">
             <div class="profile-name-row">
                 <div>
@@ -106,6 +122,16 @@ require_once __DIR__ . "/includes/user_header.php";
                 </div>
                 <?php if ($is_own_profile): ?>
                     <a href="edit_profile.php" class="profile-edit-button">Edit Profile</a>
+                <?php else: ?>
+                    <form action="follow_user.php" method="POST" class="profile-follow-form">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                        <input type="hidden" name="user_id" value="<?= $profile_id ?>">
+                        <input type="hidden" name="action" value="<?= $is_following ? "unfollow" : "follow" ?>">
+                        <input type="hidden" name="return_to" value="profile.php?id=<?= $profile_id ?>">
+                        <button type="submit" class="profile-follow-button <?= $is_following ? "active" : "" ?>">
+                            <?= $is_following ? "Following" : "Follow" ?>
+                        </button>
+                    </form>
                 <?php endif; ?>
             </div>
             <?php if (!empty($user["bio"])): ?>
