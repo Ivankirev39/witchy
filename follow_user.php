@@ -65,6 +65,15 @@ if ($action === "follow") {
     exit("Invalid action.");
 }
 
+if (($_SERVER["HTTP_X_REQUESTED_WITH"] ?? "") === "XMLHttpRequest") {
+    header("Content-Type: application/json; charset=UTF-8");
+    echo json_encode([
+        "success" => true,
+        "following" => $action === "follow"
+    ]);
+    exit;
+}
+
 $returnTo = $_POST["return_to"] ?? "";
 
 if (preg_match('/^profile\.php\?id=\d+$/', $returnTo)) {

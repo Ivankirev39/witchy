@@ -393,3 +393,55 @@ commentLightbox.addEventListener("click", closeCommentLightbox);
 document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !commentLightbox.hidden) closeCommentLightbox();
 });
+
+// FOLLOW USER WITHOUT RELOAD
+document.querySelectorAll(".feed-follow-form").forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const userId = form.querySelector('input[name="user_id"]').value;
+        const matchingForms = Array.from(
+            document.querySelectorAll(".feed-follow-form")
+        ).filter((otherForm) => {
+            return otherForm.querySelector('input[name="user_id"]').value === userId;
+        });
+        const matchingButtons = matchingForms.map((matchingForm) => {
+            return matchingForm.querySelector(".feed-follow-button");
+        });
+
+        matchingButtons.forEach((button) => {
+            button.disabled = true;
+        });
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Follow request failed");
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error("Follow state was not updated");
+            }
+
+            matchingButtons.forEach((button) => {
+                button.classList.toggle("active", data.following);
+                button.textContent = data.following ? "Following" : "Follow";
+            });
+        } catch (error) {
+            console.error("Follow error:", error);
+        } finally {
+            matchingButtons.forEach((button) => {
+                button.disabled = false;
+            });
+        }
+    });
+});
