@@ -1,11 +1,22 @@
 <?php
-require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/config/db.php";
+
 $pageTitle = "Post | Witchy";
 $pageCss = "post.css";
-$user_id = (int) $_SESSION["user_id"];
 
-$backUrl = "feed.php";
+$isLoggedIn = isset($_SESSION["user_id"]);
+
+$user_id = $isLoggedIn
+    ? (int) $_SESSION["user_id"]
+    : 0
+;
+
+
+$backUrl = $isLoggedIn
+    ? "feed.php"
+    : "public-explore.php"
+;
 
 if (!empty($_SERVER["HTTP_REFERER"])) {
     $referer = parse_url($_SERVER["HTTP_REFERER"]);
@@ -26,7 +37,10 @@ if (!empty($_SERVER["HTTP_REFERER"])) {
 // GET POST ID
 $post_id = (int) ($_GET["id"] ?? 0);
 if ($post_id <= 0) {
-    header("Location: feed.php");
+    header(
+        "Location: " .
+        ($isLoggedIn ? "feed.php" : "public-explore.php")
+    );
     exit;
 }
 // GET POST + AUTHOR + COUNTS
@@ -106,7 +120,11 @@ $commentStmt = $conn->prepare("
 $commentStmt->bind_param("i", $post_id);
 $commentStmt->execute();
 $comments = $commentStmt->get_result();
-require_once __DIR__ . "/includes/user_header.php";
+if ($isLoggedIn) {
+    require_once __DIR__ . "/includes/user_header.php";
+} else {
+    require_once __DIR__ . "/includes/public-header.php";
+}
 ?>
 <section class="post-detail-page">
     <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, "UTF-8") ?>" class="post-detail-back">← Back</a>
@@ -163,7 +181,10 @@ require_once __DIR__ . "/includes/user_header.php";
                         <span class="post-detail-date"><?= htmlspecialchars(date("j M Y", strtotime($post["created_at"])), ENT_QUOTES, "UTF-8") ?></span>
                     </div>
                 </div>
-                <?php if ((int) $post["user_id"] !== $user_id): ?>
+                <?php if (
+                    $isLoggedIn &&
+                    (int) $post["user_id"] !== $user_id
+                    ): ?>
                     <form action="follow_user.php" method="POST">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                         <input type="hidden" name="user_id" value="<?= (int) $post["user_id"] ?>">
@@ -195,6 +216,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 <?php endif; ?>
             </div>
             <div class="post-detail-actions">
+            <?php if ($isLoggedIn): ?>
                 <form action="like_post.php" method="POST">
                     <input type="hidden" name="post_id" value="<?= $post_id ?>">
                     <button type="submit" class="post-detail-action <?= $post["user_liked"] ? "active" : "" ?>">
@@ -202,10 +224,17 @@ require_once __DIR__ . "/includes/user_header.php";
                         <span><?= (int) $post["like_count"] ?></span>
                     </button>
                 </form>
+                <?php else: ?>
+                    <a href="login.php" class="post-detail-action">
+                        ♡ <span>Log in to like</span>
+                    </a>
+                <?php endif; ?>
+
                 <div class="post-detail-action">
                     ◯
                     <span><?= (int) $post["comment_count"] ?></span>
                 </div>
+                <?php if ($isLoggedIn): ?>
                 <form action="save_post.php" method="POST">
                     <input type="hidden" name="post_id" value="<?= $post_id ?>">
                     <button type="submit" class="post-detail-action save-button <?= $post["user_saved"] ? "active" : "" ?>" aria-label="<?= $post["user_saved"] ? "Remove from saved" : "Save post" ?>" title="<?= $post["user_saved"] ? "Saved" : "Save" ?>">
@@ -214,8 +243,17 @@ require_once __DIR__ . "/includes/user_header.php";
                         </svg>
                     </button>
                 </form>
+                <?php else: ?>
+                    <a href="login.php" class="post-detail-action">
+                        Log in to save
+                    </a>
+                <?php endif; ?>
+
                 <!-- DELETE -->
-                <?php if ((int) $post["user_id"] === $user_id): ?>
+                <?php if (
+                    $isLoggedIn &&
+                    (int) $post["user_id"] === $user_id
+                ): ?>
 
                     <form
                         action="delete_post.php"
@@ -269,7 +307,10 @@ require_once __DIR__ . "/includes/user_header.php";
                                         </strong>
                                         <span><?= htmlspecialchars(date("j M", strtotime($comment["created_at"])), ENT_QUOTES, "UTF-8") ?></span>
 
-                                        <?php if ((int) $comment["user_id"] === $user_id): ?>
+                                        <?php if (
+                                            $isLoggedIn &&
+                                            (int) $comment["user_id"] === $user_id
+                                        ): ?>
                                             <form action="comment_delete.php" method="POST" class="delete-comment-form">
                                                 <input type="hidden" name="comment_id" value="<?= (int) $comment["comment_id"] ?>">
                                                 <input type="hidden" name="post_id" value="<?= $post_id ?>">
@@ -290,11 +331,17 @@ require_once __DIR__ . "/includes/user_header.php";
                         <p class="post-detail-no-comments">No comments yet. Be the first to comment.</p>
                     <?php endif; ?>
                 </div>
+                <?php if ($isLoggedIn): ?>
                 <form action="comment_post.php" method="POST" class="post-detail-comment-form">
                     <input type="hidden" name="post_id" value="<?= $post_id ?>">
                     <input type="text" name="comment" placeholder="Add a comment..." maxlength="1000" required>
                     <button type="submit" aria-label="Post comment">➤</button>
                 </form>
+                <?php else: ?>
+                    <p>
+                        <a href="login.php">Log in</a> to join the conversation.
+                    </p>
+                <?php endif; ?>
             </section>
         </article>
     </div>
@@ -325,5 +372,9 @@ require_once __DIR__ . "/includes/user_header.php";
 $mediaStmt->close();
 $commentStmt->close();
 $stmt->close();
-require_once __DIR__ . "/includes/user_footer.php";
+if ($isLoggedIn) {
+    require_once __DIR__ . "/includes/user_footer.php";
+} else {
+    require_once __DIR__ . "/includes/public-footer.php";
+}
 ?>

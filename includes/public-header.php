@@ -80,11 +80,11 @@ $isLoggedIn = isset($_SESSION["user_id"]);
         class="site-nav"
         aria-label="Main navigation"
     >
-        <a href="/witchy/index.php#about">
+        <a href="/witchy/index.php#abot">
             About
         </a>
 
-        <a href="/witchy/public-explore.php">
+        <a href="/witchy/index.php#topics">
             Explore
         </a>
 

@@ -366,27 +366,37 @@ function publicExploreUrl(array $overrides = []): string
 
                 <?php foreach ($posts as $post): ?>
                     <article class="explore-cards">
-
+                        
                         <div class="explore-cards-image">
-                            <?php if (!empty($post["image"])): ?>
-                                <img
-                                    src="uploads/posts/<?= rawurlencode(
-                                        basename($post["image"])
-                                    ) ?>"
-                                    alt="<?= htmlspecialchars(
-                                        $post["title"],
-                                        ENT_QUOTES,
-                                        "UTF-8"
-                                    ) ?>"
-                                    loading="lazy"
-                                >
-                            <?php else: ?>
-                                <div class="explore-cards-placeholder">
-                                    <span aria-hidden="true">✦</span>
-                                    No image
-                                </div>
-                            <?php endif; ?>
+                            <a
+                                href="post.php?id=<?= (int) $post["post_id"] ?>"
+                                aria-label="View post: <?= htmlspecialchars(
+                                    $post["title"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>"
+                            >
+                                <?php if (!empty($post["image"])): ?>
+                                    <img
+                                        src="uploads/posts/<?= rawurlencode(
+                                            basename($post["image"])
+                                        ) ?>"
+                                        alt="<?= htmlspecialchars(
+                                            $post["title"],
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        ) ?>"
+                                        loading="lazy"
+                                    >
+                                <?php else: ?>
+                                    <div class="explore-cards-placeholder">
+                                        <span aria-hidden="true">✦</span>
+                                        No image
+                                    </div>
+                                <?php endif; ?>
+                            </a>
                         </div>
+
 
                         <div class="explore-cards-body">
                             <p class="explore-cards-author">
@@ -398,11 +408,15 @@ function publicExploreUrl(array $overrides = []): string
                             </p>
 
                             <h2 class="explore-cards-title">
-                                <?= htmlspecialchars(
-                                    $post["title"],
-                                    ENT_QUOTES,
-                                    "UTF-8"
-                                ) ?>
+                                <a
+                                    href="post.php?id=<?= (int) $post["post_id"] ?>"
+                                >
+                                    <?= htmlspecialchars(
+                                        $post["title"],
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>
+                                </a>
                             </h2>
 
                             <?php if (!empty($post["description"])): ?>
