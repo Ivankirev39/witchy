@@ -148,12 +148,12 @@ require_once __DIR__ . "/includes/public-header.php";
     </section>
 
 
+    
     <!-- TOPICS -->
     <section
         class="landing-section topics-section"
         id="topics"
     >
-
         <div class="section-heading">
             <div>
                 <p class="section-eyebrow">
@@ -172,113 +172,56 @@ require_once __DIR__ . "/includes/public-header.php";
             </div>
         </div>
 
-
         <div class="topic-grid">
 
-            <a
-                href="#"
-                class="topic-card"
-            >
-                <div
-                    class="topic-card-visual"
-                    aria-hidden="true"
-                >
-                    ✿
-                </div>
-
-                <span>
-                    Herbs &amp; plants
-                </span>
+            <a href="public-explore.php?topic=Spells" class="topic-card">
+                <div class="topic-card-visual" aria-hidden="true">✦</div>
+                <span>Spells</span>
             </a>
 
-
-            <a
-                href="#"
-                class="topic-card"
-            >
-                <div
-                    class="topic-card-visual"
-                    aria-hidden="true"
-                >
-                    ☾
-                </div>
-
-                <span>
-                    Spirituality
-                </span>
+            <a href="public-explore.php?topic=Altars" class="topic-card">
+                <div class="topic-card-visual" aria-hidden="true">☾</div>
+                <span>Altars</span>
             </a>
 
-
-            <a
-                href="#"
-                class="topic-card"
-            >
-                <div
-                    class="topic-card-visual"
-                    aria-hidden="true"
-                >
-                    ✦
-                </div>
-
-                <span>
-                    Rituals &amp; spellwork
-                </span>
+            <a href="public-explore.php?topic=Tarot" class="topic-card">
+                <div class="topic-card-visual" aria-hidden="true">◇</div>
+                <span>Tarot</span>
             </a>
 
-
-            <a
-                href="#"
-                class="topic-card"
-            >
-                <div
-                    class="topic-card-visual"
-                    aria-hidden="true"
-                >
-                    ☼
-                </div>
-
-                <span>
-                    Astrology
-                </span>
+            <a href="public-explore.php?topic=Herbs" class="topic-card">
+                <div class="topic-card-visual" aria-hidden="true">✿</div>
+                <span>Herbs</span>
             </a>
 
-
-            <a
-                href="#"
-                class="topic-card"
-            >
-                <div
-                    class="topic-card-visual"
-                    aria-hidden="true"
-                >
-                    ◇
-                </div>
-
-                <span>
-                    Tarot &amp; oracle
-                </span>
+            <a href="public-explore.php?topic=Crystals" class="topic-card">
+                <div class="topic-card-visual" aria-hidden="true">✧</div>
+                <span>Crystals</span>
             </a>
 
+            <a href="public-explore.php?topic=Books" class="topic-card">
+                <div class="topic-card-visual" aria-hidden="true">❧</div>
+                <span>Books</span>
+            </a>
 
-            <a
-                href="#"
-                class="topic-card"
-            >
-                <div
-                    class="topic-card-visual"
-                    aria-hidden="true"
-                >
-                    ❧
-                </div>
+            <a href="public-explore.php?topic=Artwork" class="topic-card">
+                <div class="topic-card-visual" aria-hidden="true">❋</div>
+                <span>Artwork</span>
+            </a>
 
-                <span>
-                    Folk practices
-                </span>
+            <a href="public-explore.php?topic=Occult%20Studies" class="topic-card">
+                <div class="topic-card-visual" aria-hidden="true">☼</div>
+                <span>Occult Studies</span>
+            </a>
+
+            <a href="public-explore.php?topic=Others" class="topic-card">
+                <div class="topic-card-visual" aria-hidden="true">◎</div>
+                <span>Others</span>
             </a>
 
         </div>
-
     </section>
+
 
 
     <!-- EXPLORE / COMMUNITY -->
