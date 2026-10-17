@@ -1,15 +1,10 @@
-
-/* ========================================
-   PUBLIC EXPLORE PAGE
-   ======================================== */
-
-   .explore-page {
-    --public-bg: var(--background-color, #faf7f2);
-    --public-card: var(--card-background, #ffffff);
-    --public-text: var(--text-color, #30283a);
-    --public-muted: #766d7e;
+.explore-page {
+    --public-bg: var(--background);
+    --public-card: var(--surface);
+    --public-text: var(--text);
+    --public-muted: var(--text-secondary);
     --public-accent: #79549a;
-    --public-border: #e8dfeb;
+    --public-border: var(--border);
 
     width: min(1200px, calc(100% - 40px));
     margin: 0 auto;
@@ -317,45 +312,7 @@
     text-decoration: none;
 }
 
-/* Pagination */
 
-.explore-page .explore-pagination {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    margin-top: 36px;
-}
-
-.explore-page .explore-pagination-pages {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
-}
-
-.explore-page .explore-pagination a {
-    display: inline-flex;
-    min-width: 40px;
-    min-height: 40px;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 12px;
-    border: 1px solid var(--public-border);
-    border-radius: 10px;
-    background: var(--public-card);
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease;
-}
-
-.explore-page .explore-pagination a:hover,
-.explore-page .explore-pagination a.active {
-    border-color: var(--public-accent);
-    background: var(--public-accent);
-    color: #ffffff;
-}
 
 .explore-page .public-explore-join {
     margin: 36px 0 0;
@@ -433,6 +390,21 @@
     .explore-page .explore-pagination {
         gap: 10px;
     }
+
+    .explore-page .explore-pagination-pages {
+        gap: 6px;
+    }
+
+    .explore-page .explore-pagination a {
+        min-width: 38px;
+        min-height: 38px;
+        padding: 7px 10px;
+        font-size: 0.85rem;
+    }
+
+    .explore-page .explore-pagination .explore-pagination-button {
+        padding-inline: 12px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -444,3 +416,148 @@
         transition-duration: 0.01ms !important;
     }
 }
+
+
+
+body.dark-mode .explore-page {
+    background: var(--background);
+    color: var(--text);
+}
+
+body.dark-mode .explore-header,
+body.dark-mode .explore-topics,
+body.dark-mode .explore-sort,
+body.dark-mode .explore-empty {
+    color: var(--text);
+}
+
+body.dark-mode .explore-page h1,
+body.dark-mode .explore-page h2,
+body.dark-mode .explore-page h3,
+body.dark-mode .explore-page label {
+    color: var(--text);
+}
+
+body.dark-mode .explore-page p,
+body.dark-mode .explore-page .explore-empty {
+    color: var(--text-secondary);
+}
+
+/* Search field */
+body.dark-mode .public-explore-search input {
+    background: var(--input-background);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+body.dark-mode .public-explore-search input::placeholder {
+    color: var(--placeholder);
+}
+
+/* Topic filters and sorting controls */
+body.dark-mode .explore-page select,
+body.dark-mode .explore-page button {
+    border-color: var(--border);
+}
+
+/* Post cards */
+body.dark-mode .explore-cards > * {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+body.dark-mode .explore-cards-topic {
+    background: #3e2a4d;
+    color: #c9b6d8;
+}
+
+/* Pagination - Dark Mode */
+body.dark-mode .explore-page .pagination,
+body.dark-mode .explore-page .pagination a,
+body.dark-mode .explore-page .pagination span {
+    color: var(--text);
+}
+
+
+/* PAGINATION */
+
+.explore-page .explore-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 36px;
+}
+
+.explore-page .explore-pagination-pages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.explore-page .explore-pagination a {
+    display: inline-flex;
+    min-width: 42px;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+
+    border: 1px solid var(--public-border);
+    border-radius: 10px;
+    background: var(--public-card);
+    color: var(--public-text);
+
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-decoration: none;
+
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* Previous and Next links */
+.explore-page .explore-pagination .explore-pagination-button {
+    padding-inline: 16px;
+    font-weight: 600;
+}
+
+/* Hover state */
+.explore-page .explore-pagination a:hover {
+    border-color: var(--public-accent);
+    color: var(--public-accent);
+    transform: translateY(-1px);
+}
+
+/* Current page */
+.explore-page .explore-pagination a.active,
+.explore-page .explore-pagination a[aria-current="page"] {
+    border-color: var(--public-accent);
+    background: var(--public-accent);
+    color: #ffffff;
+    font-weight: 700;
+    cursor: default;
+}
+
+/* Keep the current page from looking hoverable */
+.explore-page .explore-pagination a.active:hover,
+.explore-page .explore-pagination a[aria-current="page"]:hover {
+    background: var(--public-accent);
+    color: #ffffff;
+    transform: none;
+}
+
+/* Keyboard focus */
+.explore-page .explore-pagination a:focus-visible {
+    outline: 3px solid var(--public-accent);
+    outline-offset: 3px;
+}
+

@@ -523,7 +523,7 @@ function publicExploreUrl(array $overrides = []): string
     <p class="public-explore-join">
         Want to like, save or discuss posts?
         <a href="register.php">Join Witchy</a>
-        or <a href="login.php">log in</a>.
+        or <a href="login.php">Log in</a>.
     </p>
 
 </main>

@@ -84,7 +84,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
             About
         </a>
 
-        <a href="/witchy/index.php#topics">
+        <a href="/witchy/public-explore.php">
             Explore
         </a>
 

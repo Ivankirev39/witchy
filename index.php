@@ -284,10 +284,7 @@ require_once __DIR__ . "/includes/public-header.php";
     <!-- FINAL CTA -->
     <section class="landing-final-cta">
 
-        <div
-            class="cta-decoration"
-            aria-hidden="true"
-        >
+        <div class="cta-decoration" aria-hidden="true">
             ☾
         </div>
 
@@ -305,35 +302,23 @@ require_once __DIR__ . "/includes/public-header.php";
 
             <?php if ($isLoggedIn): ?>
 
-                <a
-                    href="#topics"
-                    class="button button-primary button-large"
-                >
+                <a href="#topics" class="button button-primary button-large">
                     Explore Witchy
                 </a>
 
             <?php else: ?>
 
-                <a
-                    href="register.php"
-                    class="button button-primary button-large"
-                >
+                <a href="register.php" class="button button-primary button-large">
                     Join Witchy
                 </a>
 
-                <a
-                    href="#topics"
-                    class="button button-secondary button-large"
-                >
+                <a href="#topics" class="button button-secondary button-large">
                     Explore first
                 </a>
 
             <?php endif; ?>
-
         </div>
-
     </section>
-
 </main>
 
 <?php
