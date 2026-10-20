@@ -206,7 +206,7 @@ if ($isLoggedIn) {
             <div class="post-detail-actions">
             <?php if ($isLoggedIn): ?>
                 
-                <form action="like_post.php" method="POST">
+                <form action="like_post.php" method="POST" class="post-like-form">
                     <input
                         type="hidden"
                         name="csrf_token"

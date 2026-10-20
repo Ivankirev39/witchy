@@ -3,6 +3,7 @@ require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/classes/Post.php";
 require_once __DIR__ . "/classes/Comment.php";
+require_once __DIR__ . "/includes/csrf.php";
 $pageTitle = "Home | Witchy";
 $user_id = (int) $_SESSION["user_id"];
 $postModel = new Post($conn);
@@ -124,7 +125,17 @@ require_once __DIR__ . "/includes/user_header.php";
                 <div class="post-actions">
                     <!-- LIKE -->
                     <form action="like_post.php" method="POST" class="like-form">
-                        <input type="hidden" name="post_id" value="<?= $postId ?>">
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                        >
+                        <input
+                            type="hidden"
+                            name="post_id"
+                            value="<?= $postId ?>"
+                        >
+
                         <button
                             type="submit"
                             class="post-action-button like-button <?= $post["user_liked"] ? "active" : "" ?>"

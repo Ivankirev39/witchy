@@ -36,7 +36,7 @@ if (
     isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
     strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) === "xmlhttprequest"
 ) {
-    header("Content-Type: application/json");
+    header("Content-Type: application/json; charset=UTF-8");
 
     echo json_encode([
         "success" => true,

@@ -79,3 +79,62 @@ if (coverInput && coverPreview) {
         previewImage.src = imageUrl;
     });
 }
+
+// Like / Unlike Functionality (AJAX)
+const likeForms = document.querySelectorAll(".post-like-form");
+
+likeForms.forEach((form) => {
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const button = form.querySelector('button[type="submit"]');
+        const heartCount = button?.querySelector("span");
+
+        if (!button || !heartCount || button.disabled) {
+            return;
+        }
+
+        // Prevent repeated clicks while the request is processing.
+        button.disabled = true;
+
+        try {
+            const response = await fetch(form.action, {
+                method: "POST",
+                body: new FormData(form),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
+                credentials: "same-origin"
+            });
+
+            if (!response.ok) {
+                throw new Error("The like request failed.");
+            }
+
+            const data = await response.json();
+
+            if (
+                !data.success ||
+                typeof data.liked !== "boolean" ||
+                !Number.isInteger(Number(data.like_count))
+            ) {
+                throw new Error("Invalid server response.");
+            }
+
+            // Update the heart and count without reloading the page.
+            button.classList.toggle("active", data.liked);
+            button.firstChild.textContent = data.liked ? "♥ " : "♡ ";
+            heartCount.textContent = data.like_count;
+
+            button.setAttribute(
+                "aria-label",
+                data.liked ? "Unlike post" : "Like post"
+            );
+        } catch (error) {
+            console.error("Could not update like:", error);
+            alert("We couldn't update your like. Please try again.");
+        } finally {
+            button.disabled = false;
+        }
+    });
+});
