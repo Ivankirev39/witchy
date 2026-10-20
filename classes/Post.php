@@ -73,4 +73,65 @@ class Post
 
         return $media;
     }
+
+    public function toggleLike(int $userId, int $postId): array
+    {
+        // Check whether this user has already liked the post.
+        $stmt = $this->db->prepare("
+            SELECT post_id
+            FROM post_like
+            WHERE user_id = ? AND post_id = ?
+        ");
+
+        $stmt->bind_param("ii", $userId, $postId);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+        $liked = $result->num_rows > 0;
+        $stmt->close();
+
+        // Remove the existing like, or create a new one.
+        if ($liked) {
+            $stmt = $this->db->prepare("
+                DELETE FROM post_like
+                WHERE user_id = ? AND post_id = ?
+            ");
+
+            $stmt->bind_param("ii", $userId, $postId);
+            $stmt->execute();
+            $stmt->close();
+
+            $liked = false;
+        } else {
+            $stmt = $this->db->prepare("
+                INSERT INTO post_like (user_id, post_id)
+                VALUES (?, ?)
+            ");
+
+            $stmt->bind_param("ii", $userId, $postId);
+            $stmt->execute();
+            $stmt->close();
+
+            $liked = true;
+        }
+
+        // Get the updated like count.
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) AS like_count
+            FROM post_like
+            WHERE post_id = ?
+        ");
+
+        $stmt->bind_param("i", $postId);
+        $stmt->execute();
+
+        $row = $stmt->get_result()->fetch_assoc();
+        $likeCount = (int) $row["like_count"];
+        $stmt->close();
+
+        return [
+            "liked" => $liked,
+            "like_count" => $likeCount
+        ];
+    }
 }

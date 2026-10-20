@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/includes/csrf.php";
 
 $pageTitle = "Post | Witchy";
 $pageCss = "post.css";
@@ -217,13 +218,24 @@ if ($isLoggedIn) {
             </div>
             <div class="post-detail-actions">
             <?php if ($isLoggedIn): ?>
+                
                 <form action="like_post.php" method="POST">
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                    >
                     <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                    <button type="submit" class="post-detail-action <?= $post["user_liked"] ? "active" : "" ?>">
+
+                    <button
+                        type="submit"
+                        class="post-detail-action <?= $post["user_liked"] ? "active" : "" ?>"
+                    >
                         <?= $post["user_liked"] ? "♥" : "♡" ?>
                         <span><?= (int) $post["like_count"] ?></span>
                     </button>
                 </form>
+
                 <?php else: ?>
                     <a href="login.php" class="post-detail-action">
                         ♡ <span>Log in to like</span>
