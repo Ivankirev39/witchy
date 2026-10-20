@@ -8,11 +8,50 @@ if (isset($_SESSION["user_id"]) && ($_GET["preview"] ?? "") !== "1") {
 
 $pageTitle = "Witchy";
 
+require_once __DIR__ . "/config/db.php";
+
+$recentPosts = [];
+
+
+$sql = "
+    SELECT
+        p.post_id,
+        p.title,
+        p.description,
+        p.topic,
+        p.created_at,
+        u.username,
+        (
+            SELECT pm.file
+            FROM post_media pm
+            WHERE pm.post_id = p.post_id
+            ORDER BY pm.sort_order ASC, pm.media_id ASC
+            LIMIT 1
+        ) AS media_file,
+        (
+            SELECT pm.media_type
+            FROM post_media pm
+            WHERE pm.post_id = p.post_id
+            ORDER BY pm.sort_order ASC, pm.media_id ASC
+            LIMIT 1
+        ) AS media_type,
+        (
+            SELECT COUNT(*)
+            FROM post_media pm
+            WHERE pm.post_id = p.post_id
+        ) AS media_count
+    FROM post p
+    INNER JOIN users u ON u.user_id = p.user_id
+    ORDER BY p.created_at DESC, p.post_id DESC
+    LIMIT 6
+";
+$result = $conn->query($sql);
+while ($post = $result->fetch_assoc()) {
+    $recentPosts[] = $post;
+}
 require_once __DIR__ . "/includes/public-header.php";
 ?>
-
 <main>
-
     <!-- HERO -->
     <section class="landing-hero" id="about">
         <div class="landing-hero-content">
@@ -222,7 +261,123 @@ require_once __DIR__ . "/includes/public-header.php";
         </div>
     </section>
 
+    
 
+    <!-- LATEST COMMUNITY POSTS -->
+    <section class="landing-section latest-posts-section" id="latest-posts">
+        <div class="section-heading">
+            <div>
+                <p class="section-eyebrow">Community</p>
+                <h2>Latest from the Community</h2>
+                <p class="section-description">
+                    Discover what others have been sharing on Witchy.
+                </p>
+            </div>
+        </div>
+
+        <?php if (!empty($recentPosts)): ?>
+            <div class="latest-posts-grid">
+
+                <?php foreach ($recentPosts as $post): ?>
+                    <?php
+                    $postUrl = "post.php?id=" . (int) $post["post_id"];
+                    $mediaFile = $post["media_file"] ?? "";
+                    $mediaType = $post["media_type"] ?? "";
+                    $mediaPath = $mediaFile !== ""
+                        ? "uploads/posts/" . rawurlencode(basename($mediaFile))
+                        : "";
+                    ?>
+
+                    <article class="latest-post-card">
+
+                        <div class="latest-post-image">
+
+                            <?php if ($mediaType === "image" && $mediaPath !== ""): ?>
+
+                                <a href="<?= $postUrl ?>">
+                                    <img
+                                        src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
+                                        alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
+                                        loading="lazy"
+                                    >
+                                </a>
+
+                            <?php elseif ($mediaType === "video" && $mediaPath !== ""): ?>
+
+                                <video controls playsinline preload="metadata">
+                                    <source src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>">
+                                    Your browser does not support video playback.
+                                </video>
+
+                            <?php else: ?>
+
+                                <a href="<?= $postUrl ?>" class="latest-post-placeholder latest-post-text-preview">
+                                    <span aria-hidden="true">✦</span>
+
+                                    <p>
+                                        <?php
+                                        $preview = trim($post["description"] ?? "");
+                                        if ($preview === "") {
+                                            $preview = "Explore this post on Witchy";
+                                        }
+                                        echo htmlspecialchars(
+                                            mb_strimwidth($preview, 0, 220, "..."),
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        );
+                                        ?>
+                                    </p>
+                                </a>
+
+                            <?php endif; ?>
+
+                            <?php if ((int) $post["media_count"] > 1): ?>
+                                <span class="latest-post-media-count">
+                                    +<?= (int) $post["media_count"] - 1 ?>
+                                </span>
+                            <?php endif; ?>
+
+                        </div>
+
+                        <div class="latest-post-content">
+
+                            <?php if (!empty($post["topic"])): ?>
+                                <span class="latest-post-topic">
+                                    <?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
+                                </span>
+                            <?php endif; ?>
+
+                            <h3>
+                                <a href="<?= $postUrl ?>">
+                                    <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
+                                </a>
+                            </h3>
+
+                            <p class="latest-post-author">
+                                @<?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
+                            </p>
+
+                        </div>
+                    </article>
+
+                <?php endforeach; ?>
+
+            </div>
+
+            <div class="latest-posts-footer">
+                <a href="public-explore.php" class="button button-secondary">
+                    Explore all posts →
+                </a>
+            </div>
+
+        <?php else: ?>
+
+            <p class="latest-posts-empty">
+                No community posts yet. Check back soon!
+            </p>
+
+        <?php endif; ?>
+    </section>
 
     <!-- EXPLORE / COMMUNITY -->
     <section class="landing-split-section">
