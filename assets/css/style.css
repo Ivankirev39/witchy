@@ -1486,3 +1486,53 @@ body.dark-mode .latest-post-text-preview {
 .latest-post-content h3 a:visited {
     color: inherit;
 }
+
+
+.hero-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* HERO IMAGE FIX */
+
+.landing-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.landing-hero-visual {
+    width: 100%;
+    min-width: 0;
+    max-width: 600px;
+    height: auto;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin: 0 auto;
+}
+
+.landing-hero-visual .hero-image {
+    display: block;
+    width: 100%;
+    max-width: 580px;
+    height: auto;
+    max-height: 580px;
+    object-fit: contain;
+}
+
+@media (max-width: 768px) {
+    .landing-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .landing-hero-visual {
+        max-width: 420px;
+    }
+
+    .landing-hero-visual .hero-image {
+        max-height: 420px;
+    }
+}

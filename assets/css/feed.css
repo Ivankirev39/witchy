@@ -813,3 +813,10 @@ html.dark-mode .save-button.active:hover {
     font-size: 32px;
     cursor: pointer;
 }
+
+.hero-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}

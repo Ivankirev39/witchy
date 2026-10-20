@@ -5,14 +5,9 @@ if (isset($_SESSION["user_id"]) && ($_GET["preview"] ?? "") !== "1") {
     header("Location: feed.php");
     exit;
 }
-
 $pageTitle = "Witchy";
-
 require_once __DIR__ . "/config/db.php";
-
 $recentPosts = [];
-
-
 $sql = "
     SELECT
         p.post_id,
@@ -70,26 +65,21 @@ require_once __DIR__ . "/includes/public-header.php";
                 perspectives, and connect with people who share
                 your interests.
             </p>
-
             <div class="landing-hero-actions">
                 <?php if ($isLoggedIn): ?>
-
                     <a
                         href="#topics"
                         class="button button-primary button-large"
                     >
                         Explore Witchy
                     </a>
-
                 <?php else: ?>
-
                     <a
                         href="register.php"
                         class="button button-primary button-large"
                     >
                         Join Witchy
                     </a>
-
                     <a
                         href="#topics"
                         class="button button-secondary button-large"
@@ -101,19 +91,12 @@ require_once __DIR__ . "/includes/public-header.php";
             </div>
         </div>
 
-        <div
-            class="landing-hero-visual"
-            aria-hidden="true"
-        >
-            <div class="hero-image-placeholder">
-                <span class="hero-moon">☾</span>
-                <span class="hero-star">✦</span>
-                <p>Witchy</p>
-            </div>
-
-            <div class="hero-floating-symbol">
-                ✧
-            </div>
+        <div class="landing-hero-visual">
+            <img
+                src="images/witchy-hero.png"
+                alt="Witchcraft altar with herbs, tarot cards, crystals and candles"
+                class="hero-image"
+            >
         </div>
     </section>
 
@@ -176,18 +159,13 @@ require_once __DIR__ . "/includes/public-header.php";
             >
                 ✦
             </div>
-
             <h2>Explore</h2>
-
             <p>
                 Topics that interest you
             </p>
         </article>
-
     </section>
 
-
-    
     <!-- TOPICS -->
     <section
         class="landing-section topics-section"
