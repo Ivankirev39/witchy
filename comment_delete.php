@@ -1,6 +1,8 @@
 <?php
+
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/classes/Comment.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
@@ -15,33 +17,18 @@ $isAjax =
     isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
     strtolower($_SERVER["HTTP_X_REQUESTED_WITH"]) === "xmlhttprequest";
 
-// Delete only if the comment belongs to the logged-in user
-$stmt = $conn->prepare("
-    DELETE FROM comment
-    WHERE comment_id = ?
-    AND user_id = ?
-");
+// Use Comment.php for database operations
+$commentModel = new Comment($conn);
 
-$stmt->bind_param("ii", $comment_id, $user_id);
-$stmt->execute();
+$deleted = $commentModel->deleteComment(
+    $comment_id,
+    $user_id
+);
 
-$deleted = $stmt->affected_rows > 0;
-$stmt->close();
-
-// Get updated comment count
-$countStmt = $conn->prepare("
-    SELECT COUNT(*) AS comment_count
-    FROM comment
-    WHERE post_id = ?
-");
-
-$countStmt->bind_param("i", $post_id);
-$countStmt->execute();
-
-$countRow = $countStmt->get_result()->fetch_assoc();
-$commentCount = (int) $countRow["comment_count"];
-
-$countStmt->close();
+// Get the updated comment count
+$commentCount = $commentModel->getCommentCountByPostId(
+    $post_id
+);
 
 if ($isAjax) {
     header("Content-Type: application/json");
@@ -57,4 +44,3 @@ if ($isAjax) {
 // Fallback if JavaScript is unavailable
 header("Location: feed.php#post-" . $post_id);
 exit;
-?>
