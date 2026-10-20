@@ -2,9 +2,11 @@
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/classes/Post.php";
+require_once __DIR__ . "/classes/Comment.php";
 $pageTitle = "Home | Witchy";
 $user_id = (int) $_SESSION["user_id"];
 $postModel = new Post($conn);
+$commentModel = new Comment($conn);
 $posts = $postModel->getFeedPosts((int) $user_id);
 
 require_once __DIR__ . "/includes/user_header.php";
@@ -37,7 +39,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     <a
                         href="profile.php?id=<?= (int) $post["user_id"] ?>"
                         class="post-author-avatar-link">
-                      <img
+                        <img
                             src="<?= htmlspecialchars(
                                         !empty($post["author_profile_image"])
                                             ? $post["author_profile_image"]
@@ -58,7 +60,7 @@ require_once __DIR__ . "/includes/user_header.php";
                         </strong>
                         <p><?= htmlspecialchars($post["created_at"], ENT_QUOTES, "UTF-8") ?></p>
                     </div>
-                     <?php if ((int) $post["user_id"] !== $user_id): ?>
+                    <?php if ((int) $post["user_id"] !== $user_id): ?>
                         <form action="follow_user.php" method="POST" class="feed-follow-form">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                             <input type="hidden" name="user_id" value="<?= (int) $post["user_id"] ?>">
@@ -181,25 +183,9 @@ require_once __DIR__ . "/includes/user_header.php";
                 <div class="comments-area" hidden>
                     <div class="post-comments">
                         <?php
-                        $commentStmt = $conn->prepare("
-                            SELECT
-                                comment.comment_id,
-                                comment.user_id,
-                                comment.comment,
-                                comment.media_file,
-                                comment.media_type,
-                                comment.created_at,
-                                users.username
-                            FROM comment
-                            JOIN users ON comment.user_id = users.user_id
-                            WHERE comment.post_id = ?
-                            ORDER BY comment.created_at ASC
-                        ");
-                        $commentStmt->bind_param("i", $postId);
-                        $commentStmt->execute();
-                        $comments = $commentStmt->get_result();
+                        $postComments = $commentModel->getCommentsByPostId($postId);
                         ?>
-                        <?php while ($comment = $comments->fetch_assoc()): ?>
+                        <?php foreach ($postComments as $comment): ?>
                             <div class="comment">
                                 <strong>
                                     <a
@@ -242,8 +228,7 @@ require_once __DIR__ . "/includes/user_header.php";
                                 </div>
                                 <small><?= htmlspecialchars($comment["created_at"], ENT_QUOTES, "UTF-8") ?></small>
                             </div>
-                        <?php endwhile; ?>
-                        <?php $commentStmt->close(); ?>
+                        <?php endforeach; ?>
                     </div>
                     <!-- ADD COMMENT -->
                     <form action="comment_post.php" method="POST" enctype="multipart/form-data" class="comment-form">
@@ -262,7 +247,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 </div>
             </article>
         <?php endforeach; ?>
-        
+
     </section>
 </section>
 <script src="assets/js/feed.js" defer></script>
