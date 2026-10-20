@@ -21,7 +21,8 @@ class Comment
                 comment.media_file,
                 comment.media_type,
                 comment.created_at,
-                users.username
+                users.username,
+                users.profile_image
             FROM comment
             JOIN users
                 ON comment.user_id = users.user_id

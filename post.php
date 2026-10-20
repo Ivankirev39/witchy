@@ -2,7 +2,9 @@
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
+require_once __DIR__ . "/classes/Comment.php";
 
+$commentModel = new Comment($conn);
 $pageTitle = "Post | Witchy";
 $pageCss = "post.css";
 
@@ -105,22 +107,7 @@ while ($media = $mediaResult->fetch_assoc()) {
 }
 $mediaCount = count($postMedia);
 // GET COMMENTS + COMMENT AUTHORS
-$commentStmt = $conn->prepare("
-    SELECT
-        comment.comment_id,
-        comment.comment,
-        comment.created_at,
-        users.user_id,
-        users.username,
-        users.profile_image
-    FROM comment
-    INNER JOIN users ON users.user_id = comment.user_id
-    WHERE comment.post_id = ?
-    ORDER BY comment.created_at ASC
-");
-$commentStmt->bind_param("i", $post_id);
-$commentStmt->execute();
-$comments = $commentStmt->get_result();
+$comments = $commentModel->getCommentsByPostId($post_id);
 if ($isLoggedIn) {
     require_once __DIR__ . "/includes/user_header.php";
 } else {
@@ -293,8 +280,8 @@ if ($isLoggedIn) {
             <section class="post-detail-comments">
                 <h2>Comments</h2>
                 <div class="post-detail-comment-list">
-                    <?php if ($comments->num_rows > 0): ?>
-                        <?php while ($comment = $comments->fetch_assoc()): ?>
+                    <?php if (!empty($comments)): ?>
+                        <?php foreach ($comments as $comment): ?>
                             <article class="post-detail-comment">
                                 <a href="profile.php?id=<?= (int) $comment["user_id"] ?>"
                                     class="comment-avatar-link">
@@ -338,7 +325,7 @@ if ($isLoggedIn) {
                                     <p><?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?></p>
                                 </div>
                             </article>
-                        <?php endwhile; ?>
+                        <?php endforeach; ?>
                     <?php else: ?>
                         <p class="post-detail-no-comments">No comments yet. Be the first to comment.</p>
                     <?php endif; ?>
@@ -382,7 +369,6 @@ if ($isLoggedIn) {
 
 <?php
 $mediaStmt->close();
-$commentStmt->close();
 $stmt->close();
 if ($isLoggedIn) {
     require_once __DIR__ . "/includes/user_footer.php";
