@@ -101,70 +101,56 @@ require_once __DIR__ . "/includes/public-header.php";
     </section>
 
 
+    
     <!-- FOUR CORE PARTS -->
-    <section
-        class="core-actions"
-        aria-label="What you can do on Witchy"
-    >
+    <section class="core-actions" aria-label="What you can do on Witchy">
 
+        <!-- SHARE -->
         <article class="core-action">
-            <div
-                class="core-action-icon"
-                aria-hidden="true"
-            >
-                ◇
+            <img src="images/share.png" alt="" class="core-action-image">
+
+            <div class="core-action-content">
+                <div class="core-action-icon" aria-hidden="true">◇</div>
+                <h2>Share</h2>
+                <p>Ideas &amp; knowledge</p>
             </div>
-
-            <h2>Share</h2>
-
-            <p>
-                Ideas &amp; knowledge
-            </p>
         </article>
 
+        <!-- CONNECT -->
         <article class="core-action">
-            <div
-                class="core-action-icon"
-                aria-hidden="true"
-            >
-                ◎
+            <img src="images/connect.png" alt="" class="core-action-image">
+
+            <div class="core-action-content">
+                <div class="core-action-icon" aria-hidden="true">◎</div>
+                <h2>Connect</h2>
+                <p>With the community</p>
             </div>
-
-            <h2>Connect</h2>
-
-            <p>
-                With the community
-            </p>
         </article>
 
+        <!-- SAVE -->
         <article class="core-action">
-            <div
-                class="core-action-icon"
-                aria-hidden="true"
-            >
-                ♡
+            <img src="images/save.png" alt="" class="core-action-image">
+
+            <div class="core-action-content">
+                <div class="core-action-icon" aria-hidden="true">♡</div>
+                <h2>Save</h2>
+                <p>Inspiration for later</p>
             </div>
-
-            <h2>Save</h2>
-
-            <p>
-                Inspiration for later
-            </p>
         </article>
 
+        <!-- EXPLORE -->
         <article class="core-action">
-            <div
-                class="core-action-icon"
-                aria-hidden="true"
-            >
-                ✦
+            <img src="images/explore.png" alt="" class="core-action-image">
+
+            <div class="core-action-content">
+                <div class="core-action-icon" aria-hidden="true">✦</div>
+                <h2>Explore</h2>
+                <p>Topics that interest you</p>
             </div>
-            <h2>Explore</h2>
-            <p>
-                Topics that interest you
-            </p>
         </article>
+
     </section>
+
 
     <!-- TOPICS -->
     <section
