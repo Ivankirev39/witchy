@@ -6,6 +6,7 @@ if (isset($_SESSION["user_id"]) && ($_GET["preview"] ?? "") !== "1") {
     exit;
 }
 $pageTitle = "Witchy";
+$pageCss = "index.css";
 require_once __DIR__ . "/config/db.php";
 $recentPosts = [];
 $sql = "
