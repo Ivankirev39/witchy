@@ -6,13 +6,7 @@ $pageTitle = "Home | Witchy";
 $user_id = (int) $_SESSION["user_id"];
 $postModel = new Post($conn);
 $posts = $postModel->getFeedPosts((int) $user_id);
-// PREPARE MEDIA QUERY
-$mediaStmt = $conn->prepare("
-    SELECT media_id, file, media_type, sort_order
-    FROM post_media
-    WHERE post_id = ?
-    ORDER BY sort_order ASC, media_id ASC
-");
+
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 <section class="feed-page">
@@ -33,14 +27,8 @@ require_once __DIR__ . "/includes/user_header.php";
         <?php foreach ($posts as $post): ?>
             <?php
             $postId = (int) $post["post_id"];
-            // GET MEDIA FOR THIS POST
-            $mediaStmt->bind_param("i", $postId);
-            $mediaStmt->execute();
-            $mediaResult = $mediaStmt->get_result();
-            $postMedia = [];
-            while ($media = $mediaResult->fetch_assoc()) {
-                $postMedia[] = $media;
-            }
+            $postId = (int) $post["post_id"];
+            $postMedia = $postModel->getPostMedia($postId);
             $mediaCount = count($postMedia);
             ?>
             <article class="post-card" id="post-<?= $postId ?>">
@@ -274,7 +262,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 </div>
             </article>
         <?php endforeach; ?>
-        <?php $mediaStmt->close(); ?>
+        
     </section>
 </section>
 <script src="assets/js/feed.js" defer></script>

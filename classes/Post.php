@@ -1,4 +1,3 @@
-
 <?php
 
 class Post
@@ -55,5 +54,23 @@ class Post
         $stmt->execute();
 
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+    public function getPostMedia(int $postId): array
+    {
+        $sql = "
+            SELECT media_id, file, media_type, sort_order
+            FROM post_media
+            WHERE post_id = ?
+            ORDER BY sort_order ASC, media_id ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $postId);
+        $stmt->execute();
+
+        $media = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+
+        return $media;
     }
 }
