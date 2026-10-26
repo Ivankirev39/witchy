@@ -1,5 +1,4 @@
 <?php
-
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/models/DBConnector.php";
 
@@ -10,7 +9,6 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 
 $user_id = (int) $_SESSION["user_id"];
 $post_id = (int) ($_POST["post_id"] ?? 0);
-
 $connector = new \DataAccess\DB\DBConnector();
 $pdo = $connector->connectToDB();
 
