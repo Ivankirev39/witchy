@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . "/includes/auth.php";
-require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/models/DBConnector.php";
+
+$pdoConnector = new \DataAccess\DB\DBConnector();
+$pdo = $pdoConnector->connectToDB();
 
 $pageTitle = "Create a post | Witchy";
 /* PROCESS FORM */
@@ -130,7 +133,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     /* DATABASE TRANSACTION */
-    $conn->begin_transaction();
+    $pdo->beginTransaction();
     $movedFiles = [];
 
     try {
@@ -139,101 +142,73 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
            CREATE POST
            ======================================== */
 
-        $stmt = $conn->prepare("
-            INSERT INTO post
-                (
-                    user_id,
-                    title,
-                    description,
-                    topic,
-                    sources
-                )
-            VALUES (?, ?, ?, ?, ?)
-        ");
-
-
-        $stmt->bind_param(
-            "issss",
-            $userId,
-            $title,
-            $description,
-            $topic,
-            $sources
-        );
-
-
-        $stmt->execute();
-
-
-        /* Get new post ID */
-
-        $postId = $conn->insert_id;
-
-
-        $stmt->close();
+           $stmt = $pdo->prepare("
+           INSERT INTO post
+           (
+               user_id,
+               title,
+               description,
+               topic,
+               sources
+           )
+           VALUES (?, ?, ?, ?, ?)
+            ");
+       
+       $stmt->execute([
+           $userId,
+           $title,
+           $description,
+           $topic,
+           $sources
+       ]);
+       
+       /* Get new post ID */
+       $postId = (int) $pdo->lastInsertId();
 
 
         /* ========================================
            SAVE MEDIA
            ======================================== */
 
-        if (!empty($validatedMedia)) {
-
-            $mediaStmt = $conn->prepare("
+           if (!empty($validatedMedia)) {
+            $mediaStmt = $pdo->prepare("
                 INSERT INTO post_media
-                    (
-                        post_id,
-                        file,
-                        media_type,
-                        sort_order
-                    )
+                (
+                    post_id,
+                    file,
+                    media_type,
+                    sort_order
+                )
                 VALUES (?, ?, ?, ?)
             ");
-
-
+        
             foreach ($validatedMedia as $index => $media) {
-
                 /* Move file into uploads/posts */
-
                 if (
                     !move_uploaded_file(
                         $media["tmp_name"],
                         $media["upload_path"]
                     )
                 ) {
-
                     throw new Exception(
                         "Failed to save one of the uploaded files."
                     );
                 }
-
-
+        
                 /* Remember file in case rollback is needed */
-
                 $movedFiles[] = $media["upload_path"];
-
-
+        
                 /* Position of media in post */
-
                 $sortOrder = $index + 1;
-
-
+        
                 /* Save media in database */
-
-                $mediaStmt->bind_param(
-                    "issi",
+                $mediaStmt->execute([
                     $postId,
                     $media["file_name"],
                     $media["media_type"],
                     $sortOrder
-                );
-
-
-                $mediaStmt->execute();
+                ]);
             }
-
-
-            $mediaStmt->close();
         }
 
 
@@ -241,7 +216,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
            SUCCESS
            ======================================== */
 
-        $conn->commit();
+           $pdo->commit();
 
 
         /* ========================================
@@ -256,7 +231,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         /* Undo database changes */
 
-        $conn->rollback();
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
 
 
         /* Remove files that were already moved */
