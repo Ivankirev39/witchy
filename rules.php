@@ -1,4 +1,4 @@
-x<?php
+<?php
 require_once __DIR__ . "/models/DBConnector.php";
 
 $pdoConnector = new \DataAccess\DB\DBConnector();
