@@ -27,4 +27,3 @@ require_once __DIR__ . "/includes/user_header.php";
 <?php
 require_once __DIR__ . "/includes/user_footer.php";
 ?>
-```

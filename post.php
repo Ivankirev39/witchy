@@ -16,13 +16,11 @@ $isLoggedIn = isset($_SESSION["user_id"]);
 
 $user_id = $isLoggedIn
     ? (int) $_SESSION["user_id"]
-    : 0
-;
+    : 0;
 
 $backUrl = $isLoggedIn
     ? "feed.php"
-    : "public-explore.php"
-;
+    : "public-explore.php";
 
 if (!empty($_SERVER["HTTP_REFERER"])) {
     $referer = parse_url($_SERVER["HTTP_REFERER"]);
@@ -45,7 +43,7 @@ $post_id = (int) ($_GET["id"] ?? 0);
 if ($post_id <= 0) {
     header(
         "Location: " .
-        ($isLoggedIn ? "feed.php" : "public-explore.php")
+            ($isLoggedIn ? "feed.php" : "public-explore.php")
     );
     exit;
 }
@@ -227,14 +225,12 @@ if ($isLoggedIn) {
                         <input
                             type="hidden"
                             name="csrf_token"
-                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
-                        >
+                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                         <input type="hidden" name="post_id" value="<?= $post_id ?>">
 
                         <button
                             type="submit"
-                            class="post-detail-action <?= $post["user_liked"] ? "active" : "" ?>"
-                        >
+                            class="post-detail-action <?= $post["user_liked"] ? "active" : "" ?>">
                             <?= $post["user_liked"] ? "♥" : "♡" ?>
                             <span><?= (int) $post["like_count"] ?></span>
                         </button>
@@ -308,12 +304,12 @@ if ($isLoggedIn) {
                                     <img
                                         class="comment-avatar"
                                         src="<?= htmlspecialchars(
-                                            !empty($comment["profile_image"])
-                                                ? $comment["profile_image"]
-                                                : "images/default-profile.jpg",
-                                            ENT_QUOTES,
-                                            "UTF-8"
-                                        ) ?>"
+                                                    !empty($comment["profile_image"])
+                                                        ? $comment["profile_image"]
+                                                        : "images/default-profile.jpg",
+                                                    ENT_QUOTES,
+                                                    "UTF-8"
+                                                ) ?>"
                                         alt="<?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
                                 </a>
 
@@ -345,7 +341,15 @@ if ($isLoggedIn) {
                                         <?php endif; ?>
                                     </div>
 
-                                    <p><?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?></p>
+                                    <?php if ($comment["comment"] !== ""): ?>
+                                        <p><?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?></p>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($comment["media_file"])): ?>
+                                        <?php $commentImage = "uploads/comments/" . rawurlencode(basename($comment["media_file"])); ?>
+                                        <a href="<?= htmlspecialchars($commentImage, ENT_QUOTES, "UTF-8") ?>" target="_blank" rel="noopener noreferrer">
+                                            <img class="post-comment-media" src="<?= htmlspecialchars($commentImage, ENT_QUOTES, "UTF-8") ?>" alt="Comment attachment" loading="lazy"> </a>
+                                    <?php endif; ?>
                                 </div>
                             </article>
                         <?php endforeach; ?>
@@ -355,10 +359,28 @@ if ($isLoggedIn) {
                 </div>
 
                 <?php if ($isLoggedIn): ?>
-                    <form action="comment_post.php" method="POST" class="post-detail-comment-form">
+                    <form action="comment_post.php" method="POST" enctype="multipart/form-data" class="post-detail-comment-form">
                         <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                        <input type="text" name="comment" placeholder="Add a comment..." maxlength="1000" required>
+                        <input type="hidden" name="return_to" value="post">
+                        <input type="text" name="comment" placeholder="Add a comment..." maxlength="1000">
+
+                        <label class="comment-upload-button" title="Add image or GIF">
+                            📷
+                            <input
+                                type="file"
+                                name="comment_media"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                class="comment-media-input"
+                                hidden>
+                        </label>
+
                         <button type="submit" aria-label="Post comment">➤</button>
+
+                        <div class="comment-media-preview" hidden>
+                            <img class="comment-preview-image" alt="Selected attachment">
+                            <button type="button" class="comment-preview-remove" aria-label="Remove selected image">×</button>
+                        </div>
+
                     </form>
                 <?php else: ?>
                     <p>
@@ -391,6 +413,7 @@ if ($isLoggedIn) {
 </div>
 
 <script src="assets/js/main.js"></script>
+<script src="assets/js/post.js"></script>
 
 <?php
 if ($isLoggedIn) {
