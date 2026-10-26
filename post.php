@@ -2,7 +2,7 @@
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
-require_once __DIR__ . "/classes/Comment.php";
+require_once __DIR__ . "/models/Comment.php";
 
 $commentModel = new Comment($conn);
 $pageTitle = "Post | Witchy";
