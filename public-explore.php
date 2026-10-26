@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/models/DBConnector.php";
@@ -7,17 +8,15 @@ $pdo = $pdoConnector->connectToDB();
 
 $pageTitle = "Explore | Witchy";
 $pageCss = "public-explore.css";
-$isLoggedIn = isset($_SESSION["user_id"]);
 
-$posts = [];
 $search = trim($_GET["search"] ?? "");
 $topic = trim($_GET["topic"] ?? "");
 
 $allowedSorts = [
-    "newest" => "p.created_at DESC",
-    "oldest" => "p.created_at ASC",
-    "title_asc" => "p.title ASC",
-    "title_desc" => "p.title DESC"
+    "newest" => "p.created_at DESC, p.post_id DESC",
+    "oldest" => "p.created_at ASC, p.post_id ASC",
+    "title_asc" => "p.title ASC, p.post_id DESC",
+    "title_desc" => "p.title DESC, p.post_id DESC"
 ];
 
 $sort = $_GET["sort"] ?? "newest";
@@ -32,6 +31,7 @@ $page = max(1, (int) ($_GET["page"] ?? 1));
 $conditions = [];
 $params = [];
 
+/* SEARCH */
 if ($search !== "") {
     $conditions[] = "(
         p.title LIKE ?
@@ -48,23 +48,23 @@ if ($search !== "") {
     $params[] = $searchTerm;
 }
 
+/* TOPIC FILTER */
 if ($topic !== "") {
-    $conditions[] = "p.topic = ?";
+    $conditions[] = "LOWER(p.topic) = LOWER(?)";
     $params[] = $topic;
 }
 
 $whereSql = "";
 
-if (!empty($conditions)) {
+if ($conditions) {
     $whereSql = " WHERE " . implode(" AND ", $conditions);
 }
 
-/** Count matching posts for pagination. */
+/* COUNT MATCHING POSTS */
 $countSql = "
-    SELECT COUNT(*) AS total
+    SELECT COUNT(*)
     FROM post p
-    INNER JOIN users u
-        ON u.user_id = p.user_id
+    INNER JOIN users u ON u.user_id = p.user_id
     $whereSql
 ";
 
@@ -73,33 +73,38 @@ $countStatement->execute($params);
 
 $totalPosts = (int) $countStatement->fetchColumn();
 
-$totalPages = max(
-    1,
-    (int) ceil($totalPosts / $postsPerPage)
-);
-
+$totalPages = max(1, (int) ceil($totalPosts / $postsPerPage));
 $page = min($page, $totalPages);
 $offset = ($page - 1) * $postsPerPage;
 
-/*
- * Retrieve the matching posts.
- */
+/* FETCH POSTS AND THEIR FIRST MEDIA FILE */
 $sql = "
     SELECT
         p.post_id,
-        p.user_id,
         p.title,
         p.description,
-        p.image,
         p.topic,
         p.created_at,
-        u.username
+        u.username,
+        (
+            SELECT pm.file
+            FROM post_media pm
+            WHERE pm.post_id = p.post_id
+            ORDER BY pm.sort_order ASC, pm.media_id ASC
+            LIMIT 1
+        ) AS media_file,
+        (
+            SELECT pm.media_type
+            FROM post_media pm
+            WHERE pm.post_id = p.post_id
+            ORDER BY pm.sort_order ASC, pm.media_id ASC
+            LIMIT 1
+        ) AS media_type
     FROM post p
-    INNER JOIN users u
-        ON u.user_id = p.user_id
+    INNER JOIN users u ON u.user_id = p.user_id
     $whereSql
     ORDER BY {$allowedSorts[$sort]}
-    LIMIT $postsPerPage OFFSET $offset
+    LIMIT {$postsPerPage} OFFSET {$offset}
 ";
 
 $statement = $pdo->prepare($sql);
@@ -107,14 +112,54 @@ $statement->execute($params);
 
 $posts = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-require_once __DIR__ . "/includes/public-header.php";
+/*
+ * Return a readable preview without cutting a word in half.
+ * The full description stays in the database and is shown on the post page.
+ */
+function publicExploreDescriptionPreview(string $description, int $limit = 105): array
+{
+    $description = trim($description);
 
+    if (function_exists("mb_strlen")) {
+        $length = mb_strlen($description, "UTF-8");
+    } else {
+        $length = strlen($description);
+    }
+
+    if ($length <= $limit) {
+        return [
+            "text" => $description,
+            "truncated" => false
+        ];
+    }
+
+    if (function_exists("mb_substr")) {
+        $preview = mb_substr($description, 0, $limit, "UTF-8");
+    } else {
+        $preview = substr($description, 0, $limit);
+    }
+
+    // Prefer ending the preview at a word boundary.
+    $lastSpace = strrpos($preview, " ");
+
+    if ($lastSpace !== false && $lastSpace > (int) ($limit * 0.65)) {
+        $preview = substr($preview, 0, $lastSpace);
+    }
+
+    return [
+        "text" => rtrim($preview, " \t\n\r\0\x0B.,;:!?-") . "…",
+        "truncated" => true
+    ];
+}
+
+/* BUILD FILTER AND PAGINATION URLS */
 function publicExploreUrl(array $overrides = []): string
 {
     $parameters = [
         "search" => trim($_GET["search"] ?? ""),
         "topic" => trim($_GET["topic"] ?? ""),
-        "sort" => $_GET["sort"] ?? "newest"
+        "sort" => $_GET["sort"] ?? "newest",
+        "page" => $_GET["page"] ?? 1
     ];
 
     foreach ($overrides as $key => $value) {
@@ -125,14 +170,19 @@ function publicExploreUrl(array $overrides = []): string
         unset($parameters["sort"]);
     }
 
+    if ((int) ($parameters["page"] ?? 1) <= 1) {
+        unset($parameters["page"]);
+    }
+
     $parameters = array_filter(
         $parameters,
-        static fn($value) => $value !== ""
-            && $value !== null
+        static fn($value) => $value !== "" && $value !== null
     );
 
     return "public-explore.php?" . http_build_query($parameters);
 }
+
+require_once __DIR__ . "/includes/public-header.php";
 ?>
 
 <main class="explore-page">
@@ -140,11 +190,7 @@ function publicExploreUrl(array $overrides = []): string
     <header class="explore-header">
         <h1>
             <?php if ($topic !== ""): ?>
-                Explore: <?= htmlspecialchars(
-                    $topic,
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>
+                Explore: <?= htmlspecialchars($topic, ENT_QUOTES, "UTF-8") ?>
             <?php elseif ($search !== ""): ?>
                 Search results
             <?php else: ?>
@@ -164,20 +210,13 @@ function publicExploreUrl(array $overrides = []): string
         <?php endif; ?>
     </header>
 
-    <form
-        class="public-explore-search"
-        action="public-explore.php"
-        method="GET"
-    >
+    <!-- SEARCH -->
+    <form class="public-explore-search" action="public-explore.php" method="GET">
         <?php if ($topic !== ""): ?>
             <input
                 type="hidden"
                 name="topic"
-                value="<?= htmlspecialchars(
-                    $topic,
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>"
+                value="<?= htmlspecialchars($topic, ENT_QUOTES, "UTF-8") ?>"
             >
         <?php endif; ?>
 
@@ -190,24 +229,22 @@ function publicExploreUrl(array $overrides = []): string
                 name="search"
                 maxlength="150"
                 placeholder="Search titles, topics or authors..."
-                value="<?= htmlspecialchars(
-                    $search,
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>"
+                value="<?= htmlspecialchars($search, ENT_QUOTES, "UTF-8") ?>"
             >
-
             <button type="submit">Search</button>
         </div>
     </form>
 
+    <!-- TOPIC FILTERS -->
     <nav class="explore-topics" aria-label="Browse topics">
         <a
-            href="public-explore.php"
+            href="<?= htmlspecialchars(
+                publicExploreUrl(["topic" => "", "page" => 1]),
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>"
             class="<?= $topic === "" ? "active" : "" ?>"
-        >
-            All
-        </a>
+        >All</a>
 
         <?php
         $topics = [
@@ -233,17 +270,14 @@ function publicExploreUrl(array $overrides = []): string
                     ENT_QUOTES,
                     "UTF-8"
                 ) ?>"
-                class="<?= $topic === $topicOption ? "active" : "" ?>"
+                class="<?= strcasecmp($topic, $topicOption) === 0 ? "active" : "" ?>"
             >
-                <?= htmlspecialchars(
-                    $topicOption,
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>
+                <?= htmlspecialchars($topicOption, ENT_QUOTES, "UTF-8") ?>
             </a>
         <?php endforeach; ?>
     </nav>
 
+    <!-- SORT -->
     <div class="explore-sort">
         <label for="explore-sort">Sort by:</label>
 
@@ -258,9 +292,9 @@ function publicExploreUrl(array $overrides = []): string
                 "title_asc" => "Title A–Z",
                 "title_desc" => "Title Z–A"
             ];
-
-            foreach ($sortLabels as $sortValue => $sortLabel):
             ?>
+
+            <?php foreach ($sortLabels as $sortValue => $sortLabel): ?>
                 <option
                     value="<?= htmlspecialchars(
                         publicExploreUrl([
@@ -272,148 +306,124 @@ function publicExploreUrl(array $overrides = []): string
                     ) ?>"
                     <?= $sort === $sortValue ? "selected" : "" ?>
                 >
-                    <?= htmlspecialchars(
-                        $sortLabel,
-                        ENT_QUOTES,
-                        "UTF-8"
-                    ) ?>
+                    <?= htmlspecialchars($sortLabel, ENT_QUOTES, "UTF-8") ?>
                 </option>
             <?php endforeach; ?>
         </select>
     </div>
 
-    <section class="explore-content">
+    <!-- POSTS -->
+    <section class="explore-content" aria-label="Explore posts">
         <div class="explore-grid">
 
             <?php if (empty($posts)): ?>
                 <div class="explore-empty">
                     <h2>No posts found</h2>
-
                     <p>
-                        Try another search or topic, or check back
-                        later for new posts from the community.
+                        Try another search or topic, or check back later
+                        for new posts from the community.
                     </p>
-
-                    <a href="public-explore.php">
-                        Browse all posts
-                    </a>
+                    <a href="public-explore.php">Browse all posts</a>
                 </div>
-
             <?php else: ?>
 
                 <?php foreach ($posts as $post): ?>
+                    <?php
+                    $postUrl = "post.php?id=" . (int) $post["post_id"];
+
+                    $mediaFile = trim($post["media_file"] ?? "");
+                    $mediaType = strtolower(trim($post["media_type"] ?? ""));
+
+                    $mediaPath = $mediaFile !== ""
+                        ? "/witchy/uploads/posts/" . rawurlencode(basename($mediaFile))
+                        : "";
+
+                    $isImage = $mediaPath !== ""
+                        && in_array($mediaType, ["image", "photo"], true);
+
+                    $isVideo = $mediaPath !== "" && $mediaType === "video";
+
+                    $description = trim($post["description"] ?? "");
+                    $preview = publicExploreDescriptionPreview($description);
+                    ?>
+
                     <article class="explore-cards">
+                        <!-- IMAGE -->
+                        <a
+                            class="explore-cards-image"
+                            href="<?= htmlspecialchars($postUrl, ENT_QUOTES, "UTF-8") ?>"
+                            aria-label="View post: <?= htmlspecialchars($post["title"] ?: "Untitled post", ENT_QUOTES, "UTF-8") ?>"
+                        >
+                            <?php if ($isImage): ?>
+                                <img
+                                    src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
+                                    alt="<?= htmlspecialchars($post["title"] ?: "Post image", ENT_QUOTES, "UTF-8") ?>"
+                                    loading="lazy"
+                                >
+                            <?php elseif ($isVideo): ?>
+                                <video
+                                    preload="metadata"
+                                    muted
+                                    playsinline
+                                    aria-label="<?= htmlspecialchars($post["title"] ?: "Post video", ENT_QUOTES, "UTF-8") ?>"
+                                >
+                                    <source src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>">
+                                </video>
+                                <span class="explore-video-label">Video</span>
+                            <?php else: ?>
+                                <span class="explore-cards-placeholder" aria-hidden="true">
+                                    <span class="explore-placeholder-icon">✦</span>
+                                    <span>No image</span>
+                                </span>
+                            <?php endif; ?>
+                        </a>
 
-                        <div class="explore-cards-image">
-                            <a
-                                href="post.php?id=<?= (int) $post["post_id"] ?>"
-                                aria-label="View post: <?= htmlspecialchars(
-                                    $post["title"],
-                                    ENT_QUOTES,
-                                    "UTF-8"
-                                ) ?>"
-                            >
-                                <?php if (!empty($post["image"])): ?>
-                                    <img
-                                        src="uploads/posts/<?= rawurlencode(
-                                            basename($post["image"])
-                                        ) ?>"
-                                        alt="<?= htmlspecialchars(
-                                            $post["title"],
-                                            ENT_QUOTES,
-                                            "UTF-8"
-                                        ) ?>"
-                                        loading="lazy"
-                                    >
-                                <?php else: ?>
-                                    <div class="explore-cards-placeholder">
-                                        <span aria-hidden="true">✦</span>
-                                        No image
-                                    </div>
-                                <?php endif; ?>
-                            </a>
-                        </div>
-
+                        <!-- CARD CONTENT -->
                         <div class="explore-cards-body">
                             <p class="explore-cards-author">
-                                @<?= htmlspecialchars(
-                                    $post["username"],
-                                    ENT_QUOTES,
-                                    "UTF-8"
-                                ) ?>
+                                @<?= htmlspecialchars($post["username"] ?? "user", ENT_QUOTES, "UTF-8") ?>
                             </p>
 
                             <h2 class="explore-cards-title">
-                                <a
-                                    href="post.php?id=<?= (int) $post["post_id"] ?>"
-                                >
-                                    <?= htmlspecialchars(
-                                        $post["title"],
-                                        ENT_QUOTES,
-                                        "UTF-8"
-                                    ) ?>
+                                <a href="<?= htmlspecialchars($postUrl, ENT_QUOTES, "UTF-8") ?>">
+                                    <?= htmlspecialchars($post["title"] ?: "Untitled post", ENT_QUOTES, "UTF-8") ?>
                                 </a>
                             </h2>
 
-                            <?php if (!empty($post["description"])): ?>
+                            <?php if ($description !== ""): ?>
                                 <p class="explore-cards-description">
-                                    <?php
-                                    $description = $post["description"];
-
-                                    $shortDescription =
-                                        function_exists("mb_strimwidth")
-                                            ? mb_strimwidth(
-                                                $description,
-                                                0,
-                                                140,
-                                                "..."
-                                            )
-                                            : (
-                                                strlen($description) > 140
-                                                    ? substr(
-                                                        $description,
-                                                        0,
-                                                        137
-                                                    ) . "..."
-                                                    : $description
-                                            );
-
-                                    echo htmlspecialchars(
-                                        $shortDescription,
-                                        ENT_QUOTES,
-                                        "UTF-8"
-                                    );
-                                    ?>
+                                    <?= htmlspecialchars($preview["text"], ENT_QUOTES, "UTF-8") ?>
+                                    <?php if ($preview["truncated"]): ?>
+                                        <a
+                                            class="explore-read-more"
+                                            href="<?= htmlspecialchars($postUrl, ENT_QUOTES, "UTF-8") ?>"
+                                            aria-label="Read the full post: <?= htmlspecialchars($post["title"] ?: "Untitled post", ENT_QUOTES, "UTF-8") ?>"
+                                        >Read more</a>
+                                    <?php endif; ?>
+                                </p>
+                            <?php else: ?>
+                                <p class="explore-cards-description explore-no-description">
+                                    No description provided.
                                 </p>
                             <?php endif; ?>
 
                             <div class="explore-cards-meta">
                                 <?php if (!empty($post["topic"])): ?>
-                                    <p class="explore-cards-topic">
-                                        <?= htmlspecialchars(
-                                            $post["topic"],
-                                            ENT_QUOTES,
-                                            "UTF-8"
-                                        ) ?>
-                                    </p>
+                                    <span class="explore-cards-topic">
+                                        <?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span></span>
                                 <?php endif; ?>
 
                                 <time
                                     class="explore-cards-date"
-                                    datetime="<?= htmlspecialchars(
-                                        $post["created_at"],
-                                        ENT_QUOTES,
-                                        "UTF-8"
-                                    ) ?>"
+                                    datetime="<?= htmlspecialchars($post["created_at"], ENT_QUOTES, "UTF-8") ?>"
                                 >
-                                    <?= date(
-                                        "M j, Y",
-                                        strtotime($post["created_at"])
-                                    ) ?>
+                                    <?= date("M j, Y", strtotime($post["created_at"])) ?>
                                 </time>
                             </div>
                         </div>
-
                     </article>
                 <?php endforeach; ?>
 
@@ -422,11 +432,9 @@ function publicExploreUrl(array $overrides = []): string
         </div>
     </section>
 
+    <!-- PAGINATION -->
     <?php if ($totalPages > 1): ?>
-        <nav
-            class="explore-pagination"
-            aria-label="Explore pages"
-        >
+        <nav class="explore-pagination" aria-label="Explore pages">
             <?php if ($page > 1): ?>
                 <a
                     class="explore-pagination-button"
@@ -435,17 +443,11 @@ function publicExploreUrl(array $overrides = []): string
                         ENT_QUOTES,
                         "UTF-8"
                     ) ?>"
-                >
-                    ← Previous
-                </a>
+                >← Previous</a>
             <?php endif; ?>
 
             <div class="explore-pagination-pages">
-                <?php for (
-                    $pageNumber = 1;
-                    $pageNumber <= $totalPages;
-                    $pageNumber++
-                ): ?>
+                <?php for ($pageNumber = 1; $pageNumber <= $totalPages; $pageNumber++): ?>
                     <a
                         href="<?= htmlspecialchars(
                             publicExploreUrl(["page" => $pageNumber]),
@@ -453,9 +455,7 @@ function publicExploreUrl(array $overrides = []): string
                             "UTF-8"
                         ) ?>"
                         class="<?= $pageNumber === $page ? "active" : "" ?>"
-                        <?= $pageNumber === $page
-                            ? 'aria-current="page"'
-                            : "" ?>
+                        <?= $pageNumber === $page ? 'aria-current="page"' : "" ?>
                     >
                         <?= $pageNumber ?>
                     </a>
@@ -470,9 +470,7 @@ function publicExploreUrl(array $overrides = []): string
                         ENT_QUOTES,
                         "UTF-8"
                     ) ?>"
-                >
-                    Next →
-                </a>
+                >Next →</a>
             <?php endif; ?>
         </nav>
     <?php endif; ?>
@@ -485,6 +483,4 @@ function publicExploreUrl(array $overrides = []): string
 
 </main>
 
-<?php
-require_once __DIR__ . "/includes/public-footer.php";
-?>
+<?php require_once __DIR__ . "/includes/public-footer.php"; ?>
