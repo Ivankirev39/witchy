@@ -1,5 +1,6 @@
 # Database credentials
 /config/db.php
+/config/constants.php
 
 # Environment secrets
 .env
