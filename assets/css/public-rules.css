@@ -135,83 +135,125 @@
     }
 }
 
-/* PUBLIC RULES — DARK MODE */
+/* PUBLIC RULES Dark Mode */
 
 body.dark-mode .public-rules-page {
-    --text-color: #f2edf5;
-    --muted-text: #c2b7c9;
-    --primary-color: #c6a9df;
-    --card-background: #241e29;
+    --rules-bg: #19151d;
+    --rules-surface: #241e29;
+    --rules-surface-soft: #2b2331;
+    --rules-text: #f4eff7;
+    --rules-muted: #c1b6c9;
+    --rules-accent: #c9a9e2;
+    --rules-border: #493b51;
+
+    color: var(--rules-text);
+    background: var(--rules-bg);
 }
 
-/* Hero section */
-body.dark-mode .public-rules-hero {
+/* Consistent page background */
+body.dark-mode .public-rules-page .public-rules-hero,
+body.dark-mode .public-rules-page .public-rules-cta {
+    background: var(--rules-bg);
+}
+
+/* Subtle lavender atmosphere, without harsh color blocks */
+body.dark-mode .public-rules-page .public-rules-hero {
     background:
         radial-gradient(
-            circle at 15% 20%,
-            rgba(151, 112, 178, 0.16),
-            transparent 38%
+            ellipse at 50% 0%,
+            rgba(145, 105, 169, 0.14),
+            transparent 65%
         ),
-        radial-gradient(
-            circle at 85% 80%,
-            rgba(174, 133, 190, 0.1),
-            transparent 35%
+        var(--rules-bg);
+}
+
+body.dark-mode .public-rules-page .public-rules-cta {
+    border-top: 1px solid var(--rules-border);
+    background:
+        linear-gradient(
+            180deg,
+            var(--rules-surface) 0%,
+            var(--rules-bg) 100%
         );
 }
 
-/* Rule cards */
-body.dark-mode .public-rule {
-    background: #241e29;
-    border-color: #493b50;
+/* Decorative details */
+body.dark-mode .public-rules-page .public-rules-hero::before,
+body.dark-mode .public-rules-page .public-rules-hero::after {
+    color: var(--rules-accent);
+    opacity: 0.2;
+}
+
+/* Main headings */
+body.dark-mode .public-rules-page h1,
+body.dark-mode .public-rules-page h2 {
+    color: var(--rules-text);
+}
+
+/* Eyebrows and accent text */
+body.dark-mode .public-rules-page .public-rules-eyebrow {
+    color: var(--rules-accent);
+}
+
+/* Supporting text */
+body.dark-mode .public-rules-page .public-rules-hero > p:last-child,
+body.dark-mode .public-rules-page .public-rule p,
+body.dark-mode .public-rules-page .public-rules-cta > p {
+    color: var(--rules-muted);
+}
+
+/* Rule cards — same surface, border and corner style */
+body.dark-mode .public-rules-page .public-rule {
+    background: var(--rules-surface);
+    border: 1px solid var(--rules-border);
     box-shadow: none;
+    transition:
+        background-color 180ms ease,
+        border-color 180ms ease,
+        transform 180ms ease;
 }
 
-body.dark-mode .public-rule h2 {
-    color: #f2edf5;
+body.dark-mode .public-rules-page .public-rule:hover {
+    background: var(--rules-surface-soft);
+    border-color: #776086;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
 }
 
-body.dark-mode .public-rule p {
-    color: #c2b7c9;
+/* Primary button — retain the site's existing button styling */
+body.dark-mode .public-rules-page .public-rules-actions .button-primary {
+    color: #fff;
 }
 
-body.dark-mode .public-rule:hover {
-    border-color: #806494;
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
-}
-
-/* Eyebrows and headings */
-body.dark-mode .public-rules-eyebrow {
-    color: #c6a9df;
-}
-
-body.dark-mode .public-rules-hero h1,
-body.dark-mode .public-rules-cta h2 {
-    color: #f7f1fa;
-}
-
-body.dark-mode .public-rules-hero > p:last-child,
-body.dark-mode .public-rules-cta > p {
-    color: #c2b7c9;
-}
-
-/* Bottom call-to-action */
-body.dark-mode .public-rules-cta {
-    background: #1e1823;
-    border-top: 1px solid #493b50;
-}
-
-/* Buttons */
-body.dark-mode .public-rules-actions .button-secondary {
-    color: #eee3f5;
-    border-color: #806494;
+/* Secondary button */
+body.dark-mode .public-rules-page .public-rules-actions .button-secondary {
+    color: var(--rules-text);
     background: transparent;
+    border: 1px solid #776086;
 }
 
-body.dark-mode .public-rules-actions .button-secondary:hover {
-    background: rgba(198, 169, 223, 0.12);
+body.dark-mode .public-rules-page .public-rules-actions .button-secondary:hover {
+    background: var(--rules-surface-soft);
+    border-color: var(--rules-accent);
 }
 
-/* Keyboard accessibility */
-body.dark-mode .public-rules-actions .button:focus-visible {
-    outline-color: #d9b9f4;
+/* Links and keyboard focus */
+body.dark-mode .public-rules-page a {
+    text-underline-offset: 4px;
+}
+
+body.dark-mode .public-rules-page .button:focus-visible {
+    outline: 2px solid var(--rules-accent);
+    outline-offset: 4px;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+    body.dark-mode .public-rules-page .public-rule {
+        transition: none;
+    }
+
+    body.dark-mode .public-rules-page .public-rule:hover {
+        transform: none;
+    }
 }
