@@ -134,3 +134,84 @@
         width: 100%;
     }
 }
+
+/* PUBLIC RULES — DARK MODE */
+
+body.dark-mode .public-rules-page {
+    --text-color: #f2edf5;
+    --muted-text: #c2b7c9;
+    --primary-color: #c6a9df;
+    --card-background: #241e29;
+}
+
+/* Hero section */
+body.dark-mode .public-rules-hero {
+    background:
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(151, 112, 178, 0.16),
+            transparent 38%
+        ),
+        radial-gradient(
+            circle at 85% 80%,
+            rgba(174, 133, 190, 0.1),
+            transparent 35%
+        );
+}
+
+/* Rule cards */
+body.dark-mode .public-rule {
+    background: #241e29;
+    border-color: #493b50;
+    box-shadow: none;
+}
+
+body.dark-mode .public-rule h2 {
+    color: #f2edf5;
+}
+
+body.dark-mode .public-rule p {
+    color: #c2b7c9;
+}
+
+body.dark-mode .public-rule:hover {
+    border-color: #806494;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+/* Eyebrows and headings */
+body.dark-mode .public-rules-eyebrow {
+    color: #c6a9df;
+}
+
+body.dark-mode .public-rules-hero h1,
+body.dark-mode .public-rules-cta h2 {
+    color: #f7f1fa;
+}
+
+body.dark-mode .public-rules-hero > p:last-child,
+body.dark-mode .public-rules-cta > p {
+    color: #c2b7c9;
+}
+
+/* Bottom call-to-action */
+body.dark-mode .public-rules-cta {
+    background: #1e1823;
+    border-top: 1px solid #493b50;
+}
+
+/* Buttons */
+body.dark-mode .public-rules-actions .button-secondary {
+    color: #eee3f5;
+    border-color: #806494;
+    background: transparent;
+}
+
+body.dark-mode .public-rules-actions .button-secondary:hover {
+    background: rgba(198, 169, 223, 0.12);
+}
+
+/* Keyboard accessibility */
+body.dark-mode .public-rules-actions .button:focus-visible {
+    outline-color: #d9b9f4;
+}
