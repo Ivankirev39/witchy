@@ -1,17 +1,23 @@
-<?php
-require_once __DIR__ . "/config/db.php";
+x<?php
+require_once __DIR__ . "/models/DBConnector.php";
 
+$pdoConnector = new \DataAccess\DB\DBConnector();
+$pdo = $pdoConnector->connectToDB();
 
 $rules = [];
-$result = $conn->query("SELECT title, description FROM rule ORDER BY rule_id ASC");
-if ($result) {
-    $rules = $result->fetch_all(MYSQLI_ASSOC);
-}
+
+$stmt = $pdo->query(
+    "SELECT title, description
+     FROM rule
+     ORDER BY rule_id ASC"
+);
+
+$rules = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $pageTitle = "Rules";
 require_once __DIR__ . "/includes/user_header.php";
 ?>
-    
+
 <div class="rules-page">
     <div class="rules-header">
         <h1>Rules and Regulations</h1>
@@ -24,8 +30,21 @@ require_once __DIR__ . "/includes/user_header.php";
         <?php else: ?>
             <?php foreach ($rules as $index => $rule): ?>
                 <div class="rule-card">
-                    <h2 class="rule-title"><?= ($index + 1) . '. ' . htmlspecialchars($rule['title']) ?></h2>
-                    <p class="rule-description"><?= nl2br(htmlspecialchars($rule['description'])) ?></p>
+                    <h2 class="rule-title">
+                        <?= ($index + 1) . '. ' . htmlspecialchars(
+                            $rule['title'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>
+                    </h2>
+
+                    <p class="rule-description">
+                        <?= nl2br(htmlspecialchars(
+                            $rule['description'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        )) ?>
+                    </p>
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
