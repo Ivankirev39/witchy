@@ -5,10 +5,17 @@ if (isset($_SESSION["user_id"]) && ($_GET["preview"] ?? "") !== "1") {
     header("Location: feed.php");
     exit;
 }
+
 $pageTitle = "Witchy";
 $pageCss = "index.css";
-require_once __DIR__ . "/config/db.php";
+
+require_once __DIR__ . "/models/DBConnector.php";
+
+$pdoConnector = new \DataAccess\DB\DBConnector();
+$pdo = $pdoConnector->connectToDB();
+
 $recentPosts = [];
+
 $sql = "
     SELECT
         p.post_id,
@@ -41,21 +48,25 @@ $sql = "
     ORDER BY p.created_at DESC, p.post_id DESC
     LIMIT 6
 ";
-$result = $conn->query($sql);
-while ($post = $result->fetch_assoc()) {
-    $recentPosts[] = $post;
-}
+
+$stmt = $pdo->query($sql);
+$recentPosts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 require_once __DIR__ . "/includes/public-header.php";
 ?>
+
 <main>
     <!-- HERO -->
     <section class="landing-hero" id="about">
         <div class="landing-hero-content">
             <div class="landing-symbol" aria-hidden="true">✦</div>
+
             <h1>Explore what draws you in</h1>
+
             <p class="landing-tagline">
                 Share. Discover. Learn. Belong.
             </p>
+
             <p class="landing-intro">
                 Witchy is a visual community for exploring
                 witchcraft, spirituality, folklore and related
@@ -63,8 +74,9 @@ require_once __DIR__ . "/includes/public-header.php";
                 perspectives, and connect with people who share
                 your interests.
             </p>
+
             <div class="landing-hero-actions">
-                <?php if ($isLoggedIn): ?>
+                <?php if (isset($_SESSION["user_id"])): ?>
                     <a
                         href="#topics"
                         class="button button-primary button-large"
@@ -78,6 +90,7 @@ require_once __DIR__ . "/includes/public-header.php";
                     >
                         Join Witchy
                     </a>
+
                     <a
                         href="#topics"
                         class="button button-secondary button-large"
@@ -87,6 +100,7 @@ require_once __DIR__ . "/includes/public-header.php";
                 <?php endif; ?>
             </div>
         </div>
+
         <div class="landing-hero-visual">
             <img
                 src="images/witchy-hero.png"
@@ -96,14 +110,18 @@ require_once __DIR__ . "/includes/public-header.php";
         </div>
     </section>
 
-
-    
     <!-- FOUR CORE PARTS -->
-    <section class="core-actions" aria-label="What you can do on Witchy">
-
+    <section
+        class="core-actions"
+        aria-label="What you can do on Witchy"
+    >
         <!-- SHARE -->
         <article class="core-action">
-            <img src="images/share.png" alt="" class="core-action-image">
+            <img
+                src="images/share.png"
+                alt=""
+                class="core-action-image"
+            >
 
             <div class="core-action-content">
                 <div class="core-action-icon" aria-hidden="true">◇</div>
@@ -114,7 +132,11 @@ require_once __DIR__ . "/includes/public-header.php";
 
         <!-- CONNECT -->
         <article class="core-action">
-            <img src="images/connect.png" alt="" class="core-action-image">
+            <img
+                src="images/connect.png"
+                alt=""
+                class="core-action-image"
+            >
 
             <div class="core-action-content">
                 <div class="core-action-icon" aria-hidden="true">◎</div>
@@ -125,7 +147,11 @@ require_once __DIR__ . "/includes/public-header.php";
 
         <!-- SAVE -->
         <article class="core-action">
-            <img src="images/save.png" alt="" class="core-action-image">
+            <img
+                src="images/save.png"
+                alt=""
+                class="core-action-image"
+            >
 
             <div class="core-action-content">
                 <div class="core-action-icon" aria-hidden="true">♡</div>
@@ -136,7 +162,11 @@ require_once __DIR__ . "/includes/public-header.php";
 
         <!-- EXPLORE -->
         <article class="core-action">
-            <img src="images/explore.png" alt="" class="core-action-image">
+            <img
+                src="images/explore.png"
+                alt=""
+                class="core-action-image"
+            >
 
             <div class="core-action-content">
                 <div class="core-action-icon" aria-hidden="true">✦</div>
@@ -144,9 +174,7 @@ require_once __DIR__ . "/includes/public-header.php";
                 <p>Topics that interest you</p>
             </div>
         </article>
-
     </section>
-
 
     <!-- TOPICS -->
     <section
@@ -155,13 +183,9 @@ require_once __DIR__ . "/includes/public-header.php";
     >
         <div class="section-heading">
             <div>
-                <p class="section-eyebrow">
-                    Discover
-                </p>
+                <p class="section-eyebrow">Discover</p>
 
-                <h2>
-                    What can you explore?
-                </h2>
+                <h2>What can you explore?</h2>
 
                 <p class="section-description">
                     Follow your curiosity through topics,
@@ -172,7 +196,6 @@ require_once __DIR__ . "/includes/public-header.php";
         </div>
 
         <div class="topic-grid">
-
             <a href="public-explore.php?topic=Spells" class="topic-card">
                 <div class="topic-card-visual" aria-hidden="true">✦</div>
                 <span>Spells</span>
@@ -217,18 +240,19 @@ require_once __DIR__ . "/includes/public-header.php";
                 <div class="topic-card-visual" aria-hidden="true">◎</div>
                 <span>Others</span>
             </a>
-
         </div>
     </section>
 
-    
-
     <!-- LATEST COMMUNITY POSTS -->
-    <section class="landing-section latest-posts-section" id="latest-posts">
+    <section
+        class="landing-section latest-posts-section"
+        id="latest-posts"
+    >
         <div class="section-heading">
             <div>
                 <p class="section-eyebrow">Community</p>
                 <h2>Latest from the Community</h2>
+
                 <p class="section-description">
                     Discover what others have been sharing on Witchy.
                 </p>
@@ -237,24 +261,21 @@ require_once __DIR__ . "/includes/public-header.php";
 
         <?php if (!empty($recentPosts)): ?>
             <div class="latest-posts-grid">
-
                 <?php foreach ($recentPosts as $post): ?>
                     <?php
                     $postUrl = "post.php?id=" . (int) $post["post_id"];
                     $mediaFile = $post["media_file"] ?? "";
                     $mediaType = $post["media_type"] ?? "";
+
                     $mediaPath = $mediaFile !== ""
                         ? "uploads/posts/" . rawurlencode(basename($mediaFile))
                         : "";
                     ?>
 
                     <article class="latest-post-card">
-
                         <div class="latest-post-image">
-
                             <?php if ($mediaType === "image" && $mediaPath !== ""): ?>
-
-                                <a href="<?= $postUrl ?>">
+                                <a href="<?= htmlspecialchars($postUrl, ENT_QUOTES, "UTF-8") ?>">
                                     <img
                                         src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
                                         alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
@@ -263,23 +284,28 @@ require_once __DIR__ . "/includes/public-header.php";
                                 </a>
 
                             <?php elseif ($mediaType === "video" && $mediaPath !== ""): ?>
-
                                 <video controls playsinline preload="metadata">
-                                    <source src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>">
+                                    <source
+                                        src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
+                                    >
                                     Your browser does not support video playback.
                                 </video>
 
                             <?php else: ?>
-
-                                <a href="<?= $postUrl ?>" class="latest-post-placeholder latest-post-text-preview">
+                                <a
+                                    href="<?= htmlspecialchars($postUrl, ENT_QUOTES, "UTF-8") ?>"
+                                    class="latest-post-placeholder latest-post-text-preview"
+                                >
                                     <span aria-hidden="true">✦</span>
 
                                     <p>
                                         <?php
                                         $preview = trim($post["description"] ?? "");
+
                                         if ($preview === "") {
                                             $preview = "Explore this post on Witchy";
                                         }
+
                                         echo htmlspecialchars(
                                             mb_strimwidth($preview, 0, 220, "..."),
                                             ENT_QUOTES,
@@ -288,7 +314,6 @@ require_once __DIR__ . "/includes/public-header.php";
                                         ?>
                                     </p>
                                 </a>
-
                             <?php endif; ?>
 
                             <?php if ((int) $post["media_count"] > 1): ?>
@@ -296,11 +321,9 @@ require_once __DIR__ . "/includes/public-header.php";
                                     +<?= (int) $post["media_count"] - 1 ?>
                                 </span>
                             <?php endif; ?>
-
                         </div>
 
                         <div class="latest-post-content">
-
                             <?php if (!empty($post["topic"])): ?>
                                 <span class="latest-post-topic">
                                     <?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
@@ -308,7 +331,7 @@ require_once __DIR__ . "/includes/public-header.php";
                             <?php endif; ?>
 
                             <h3>
-                                <a href="<?= $postUrl ?>">
+                                <a href="<?= htmlspecialchars($postUrl, ENT_QUOTES, "UTF-8") ?>">
                                     <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
                                 </a>
                             </h3>
@@ -316,40 +339,32 @@ require_once __DIR__ . "/includes/public-header.php";
                             <p class="latest-post-author">
                                 @<?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
                             </p>
-
                         </div>
                     </article>
-
                 <?php endforeach; ?>
-
             </div>
 
             <div class="latest-posts-footer">
-                <a href="public-explore.php" class="button button-secondary">
+                <a
+                    href="public-explore.php"
+                    class="button button-secondary"
+                >
                     Explore all posts →
                 </a>
             </div>
-
         <?php else: ?>
-
             <p class="latest-posts-empty">
                 No community posts yet. Check back soon!
             </p>
-
         <?php endif; ?>
     </section>
 
     <!-- EXPLORE / COMMUNITY -->
     <section class="landing-split-section">
-
         <article class="landing-info-card explore-card">
-            <p class="section-eyebrow">
-                Your pace
-            </p>
+            <p class="section-eyebrow">Your pace</p>
 
-            <h2>
-                Explore at your own pace
-            </h2>
+            <h2>Explore at your own pace</h2>
 
             <p>
                 Browse what interests you, save useful ideas,
@@ -357,26 +372,18 @@ require_once __DIR__ . "/includes/public-header.php";
                 conversation when you feel like it.
             </p>
 
-            <a
-                href="#topics"
-                class="text-link"
-            >
+            <a href="#topics" class="text-link">
                 Start exploring →
             </a>
         </article>
-
 
         <article
             class="landing-info-card community-card"
             id="community"
         >
-            <p class="section-eyebrow">
-                Community
-            </p>
+            <p class="section-eyebrow">Community</p>
 
-            <h2>
-                Built around curiosity and respect
-            </h2>
+            <h2>Built around curiosity and respect</h2>
 
             <p>
                 Different traditions, experiences and perspectives
@@ -386,21 +393,17 @@ require_once __DIR__ . "/includes/public-header.php";
             </p>
 
             <a
-                href="#"
+                href="rules.php"
                 class="button button-secondary"
             >
                 Read community rules
             </a>
         </article>
-
     </section>
-
 
     <!-- FINAL CTA -->
     <section class="landing-final-cta">
-        <h2>
-            Find your place in Witchy
-        </h2>
+        <h2>Find your place in Witchy</h2>
 
         <p>
             Explore what interests you,
@@ -409,23 +412,27 @@ require_once __DIR__ . "/includes/public-header.php";
         </p>
 
         <div class="landing-hero-actions">
-
-            <?php if ($isLoggedIn): ?>
-
-                <a href="#topics" class="button button-primary button-large">
+            <?php if (isset($_SESSION["user_id"])): ?>
+                <a
+                    href="#topics"
+                    class="button button-primary button-large"
+                >
                     Explore Witchy
                 </a>
-
             <?php else: ?>
-
-                <a href="register.php" class="button button-primary button-large">
+                <a
+                    href="register.php"
+                    class="button button-primary button-large"
+                >
                     Join Witchy
                 </a>
 
-                <a href="#topics" class="button button-secondary button-large">
+                <a
+                    href="#topics"
+                    class="button button-secondary button-large"
+                >
                     Explore first
                 </a>
-
             <?php endif; ?>
         </div>
     </section>

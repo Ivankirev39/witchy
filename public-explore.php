@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . "/includes/session.php";
-require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/models/DBConnector.php";
+
+$pdoConnector = new \DataAccess\DB\DBConnector();
+$pdo = $pdoConnector->connectToDB();
 
 $pageTitle = "Explore | Witchy";
 $pageCss = "public-explore.css";
@@ -28,7 +31,6 @@ $page = max(1, (int) ($_GET["page"] ?? 1));
 
 $conditions = [];
 $params = [];
-$types = "";
 
 if ($search !== "") {
     $conditions[] = "(
@@ -44,14 +46,11 @@ if ($search !== "") {
     $params[] = $searchTerm;
     $params[] = $searchTerm;
     $params[] = $searchTerm;
-
-    $types .= "ssss";
 }
 
 if ($topic !== "") {
     $conditions[] = "p.topic = ?";
     $params[] = $topic;
-    $types .= "s";
 }
 
 $whereSql = "";
@@ -59,30 +58,6 @@ $whereSql = "";
 if (!empty($conditions)) {
     $whereSql = " WHERE " . implode(" AND ", $conditions);
 }
-
-/*
- * Bind search and topic values safely.
- */
-$bindParameters = static function (
-    $statement,
-    string $types,
-    array &$params
-): void {
-    if ($types === "") {
-        return;
-    }
-
-    $arguments = [$types];
-
-    foreach ($params as $key => &$value) {
-        $arguments[] = &$value;
-    }
-
-    call_user_func_array(
-        [$statement, "bind_param"],
-        $arguments
-    );
-};
 
 /** Count matching posts for pagination. */
 $countSql = "
@@ -93,31 +68,10 @@ $countSql = "
     $whereSql
 ";
 
-$countStatement = $conn->prepare($countSql);
+$countStatement = $pdo->prepare($countSql);
+$countStatement->execute($params);
 
-if (!$countStatement) {
-    error_log($conn->error);
-    http_response_code(500);
-    exit("Something went wrong. Please try again later.");
-}
-
-$countParams = $params;
-$countTypes = $types;
-
-$bindParameters(
-    $countStatement,
-    $countTypes,
-    $countParams
-);
-
-$countStatement->execute();
-
-$countResult = $countStatement->get_result();
-$countRow = $countResult->fetch_assoc();
-
-$totalPosts = (int) ($countRow["total"] ?? 0);
-
-$countStatement->close();
+$totalPosts = (int) $countStatement->fetchColumn();
 
 $totalPages = max(
     1,
@@ -148,32 +102,10 @@ $sql = "
     LIMIT $postsPerPage OFFSET $offset
 ";
 
-$statement = $conn->prepare($sql);
+$statement = $pdo->prepare($sql);
+$statement->execute($params);
 
-if (!$statement) {
-    error_log($conn->error);
-    http_response_code(500);
-    exit("Something went wrong. Please try again later.");
-}
-
-$queryParams = $params;
-$queryTypes = $types;
-
-$bindParameters(
-    $statement,
-    $queryTypes,
-    $queryParams
-);
-
-$statement->execute();
-
-$result = $statement->get_result();
-
-while ($row = $result->fetch_assoc()) {
-    $posts[] = $row;
-}
-
-$statement->close();
+$posts = $statement->fetchAll(PDO::FETCH_ASSOC);
 
 require_once __DIR__ . "/includes/public-header.php";
 
@@ -189,11 +121,14 @@ function publicExploreUrl(array $overrides = []): string
         $parameters[$key] = $value;
     }
 
+    if (($parameters["sort"] ?? "newest") === "newest") {
+        unset($parameters["sort"]);
+    }
+
     $parameters = array_filter(
         $parameters,
         static fn($value) => $value !== ""
             && $value !== null
-            && !($value === "newest" && isset($parameters["sort"]))
     );
 
     return "public-explore.php?" . http_build_query($parameters);
@@ -267,8 +202,10 @@ function publicExploreUrl(array $overrides = []): string
     </form>
 
     <nav class="explore-topics" aria-label="Browse topics">
-        <a href="public-explore.php"
-           class="<?= $topic === "" ? "active" : "" ?>">
+        <a
+            href="public-explore.php"
+            class="<?= $topic === "" ? "active" : "" ?>"
+        >
             All
         </a>
 
@@ -366,7 +303,7 @@ function publicExploreUrl(array $overrides = []): string
 
                 <?php foreach ($posts as $post): ?>
                     <article class="explore-cards">
-                        
+
                         <div class="explore-cards-image">
                             <a
                                 href="post.php?id=<?= (int) $post["post_id"] ?>"
@@ -397,7 +334,6 @@ function publicExploreUrl(array $overrides = []): string
                             </a>
                         </div>
 
-
                         <div class="explore-cards-body">
                             <p class="explore-cards-author">
                                 @<?= htmlspecialchars(
@@ -424,7 +360,7 @@ function publicExploreUrl(array $overrides = []): string
                                     <?php
                                     $description = $post["description"];
 
-                                    echo htmlspecialchars(
+                                    $shortDescription =
                                         function_exists("mb_strimwidth")
                                             ? mb_strimwidth(
                                                 $description,
@@ -432,11 +368,18 @@ function publicExploreUrl(array $overrides = []): string
                                                 140,
                                                 "..."
                                             )
-                                            : substr(
-                                                $description,
-                                                0,
-                                                140
-                                            ),
+                                            : (
+                                                strlen($description) > 140
+                                                    ? substr(
+                                                        $description,
+                                                        0,
+                                                        137
+                                                    ) . "..."
+                                                    : $description
+                                            );
+
+                                    echo htmlspecialchars(
+                                        $shortDescription,
                                         ENT_QUOTES,
                                         "UTF-8"
                                     );
