@@ -226,3 +226,29 @@ html.dark-mode .notification-read-button span {
         gap: 12px;
     }
 }
+/* DARK MODE TEXT */
+html.dark-mode .notifications-page {
+    color: #e8dfea;
+}
+
+html.dark-mode .notifications-header h1,
+html.dark-mode .notifications-header p,
+html.dark-mode .notification-details p,
+html.dark-mode .notification-details strong,
+html.dark-mode .notifications-empty h2,
+html.dark-mode .notifications-empty p {
+    color: #e8dfea;
+}
+
+html.dark-mode .notification-details time {
+    color: #b9aebf;
+    opacity: 1;
+}
+
+html.dark-mode .notification-content {
+    color: #e8dfea;
+}
+
+html.dark-mode .notification-item.unread .notification-details p {
+    color: #f5edf7;
+}

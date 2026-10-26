@@ -677,3 +677,38 @@ html.dark-mode .topbar-profile {
 .user-topbar-actions .topbar-icon {
     text-decoration: none;
 }
+
+.topbar-notification-link {
+    position: relative;
+}
+
+.topbar-notification-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.topbar-notification-link {
+    position: relative;
+}
+
+.topbar-notification-link .notification-dot {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 9px;
+    height: 9px;
+    padding: 0;
+    display: block;
+    border-radius: 50%;
+    background-color: #c084cc;
+    border: 2px solid #18171d;
+    box-shadow: 0 0 6px rgba(192, 132, 204, 0.7);
+    z-index: 10;
+    pointer-events: none;
+}
+
+html:not(.dark-mode) .topbar-notification-link .notification-dot {
+    border-color: #fff;
+}

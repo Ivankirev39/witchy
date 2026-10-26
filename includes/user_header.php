@@ -4,12 +4,22 @@ require_once __DIR__ . "/csrf.php";
 require_once __DIR__ . "/../config/db.php";
 $currentPage = basename($_SERVER["PHP_SELF"]);
 $headerUser = null;
+$unreadNotificationCount = 0;
 if (isset($_SESSION["user_id"])) {
     $headerUserStmt = $conn->prepare("SELECT username, profile_image FROM users WHERE user_id = ?");
     $headerUserStmt->execute([(int) $_SESSION["user_id"]]);
     $headerUser = $headerUserStmt->fetch(PDO::FETCH_ASSOC);
+
+    $notificationStmt = $conn->prepare("
+        SELECT COUNT(*)
+        FROM notification
+        WHERE user_id = ? AND is_read = 0
+    ");
+    $notificationStmt->execute([(int) $_SESSION["user_id"]]);
+    $unreadNotificationCount = (int) $notificationStmt->fetchColumn();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -105,9 +115,14 @@ if (isset($_SESSION["user_id"])) {
                     <input type="search" name="search" placeholder="Search posts, users or topics..." aria-label="Search Witchy">
                 </form>
                 <div class="user-topbar-actions">
-                    <a href="/witchy/help.php" class="topbar-icon" aria-label="Help" title="Help">ⓘ</a>
                     <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
-                    <a href="/witchy/notifications.php" class="topbar-icon" aria-label="Notifications" title="Notifications">🕭</a>
+                    <a href="/witchy/help.php" class="topbar-icon" aria-label="Help" title="Help">ⓘ</a>
+                    <a href="/witchy/notifications.php" class="topbar-icon topbar-notification-link" aria-label="Notifications" title="Notifications">
+                        🕭
+                        <?php if ($unreadNotificationCount > 0): ?>
+                            <span class="notification-dot" aria-hidden="true"></span>
+                        <?php endif; ?>
+                    </a>
                     <a href="/witchy/liked.php" class="topbar-icon" aria-label="Liked posts" title="Liked posts">♡</a>
                     <a href="/witchy/profile.php" class="topbar-profile" aria-label="Profile" title="Profile">
                        <img
