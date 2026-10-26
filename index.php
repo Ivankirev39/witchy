@@ -52,13 +52,10 @@ require_once __DIR__ . "/includes/public-header.php";
     <section class="landing-hero" id="about">
         <div class="landing-hero-content">
             <div class="landing-symbol" aria-hidden="true">✦</div>
-
             <h1>Explore what draws you in</h1>
-
             <p class="landing-tagline">
                 Share. Discover. Learn. Belong.
             </p>
-
             <p class="landing-intro">
                 Witchy is a visual community for exploring
                 witchcraft, spirituality, folklore and related
@@ -87,11 +84,9 @@ require_once __DIR__ . "/includes/public-header.php";
                     >
                         Explore
                     </a>
-
                 <?php endif; ?>
             </div>
         </div>
-
         <div class="landing-hero-visual">
             <img
                 src="images/witchy-hero.png"
@@ -403,11 +398,6 @@ require_once __DIR__ . "/includes/public-header.php";
 
     <!-- FINAL CTA -->
     <section class="landing-final-cta">
-
-        <div class="cta-decoration" aria-hidden="true">
-            ☾
-        </div>
-
         <h2>
             Find your place in Witchy
         </h2>

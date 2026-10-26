@@ -11,7 +11,6 @@
    remain in style.css.
    ======================================== */
 
-
 /* ========================================
    1. LANDING HERO
    ======================================== */
@@ -165,7 +164,7 @@
 }
 
 .core-action-icon {
-    min-height: 50px;
+    min-height: 45px;
     margin-bottom: 12px;
     color: #ffffff;
     font-size: 38px;
@@ -174,14 +173,14 @@
 .core-action h2 {
     margin: 0;
     color: #ffffff;
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 600;
 }
 
 .core-action p {
     margin: 8px 0 0;
     color: #ffffff;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.5;
 }
 

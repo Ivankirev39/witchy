@@ -673,3 +673,7 @@ html.dark-mode .topbar-profile {
         margin-bottom: 16px;
     }
 }
+
+.user-topbar-actions .topbar-icon {
+    text-decoration: none;
+}
