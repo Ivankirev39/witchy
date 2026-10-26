@@ -2,6 +2,7 @@
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/models/Comment.php";
+require_once __DIR__ . "/includes/notifications.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
@@ -134,6 +135,18 @@ try {
     throw $e;
 }
 
+if ($commentId) {
+    $ownerStmt = $pdo->prepare("SELECT user_id FROM post WHERE post_id = ?");
+    $ownerStmt->execute([$post_id]);
+    $postOwnerId = $ownerStmt->fetchColumn();
+    if ($postOwnerId !== false && (int) $postOwnerId !== $user_id) {
+        try {
+            createNotification($pdo, (int) $postOwnerId, $user_id, "comment", $post_id);
+        } catch (PDOException $e) {
+            error_log("Comment notification failed: " . $e->getMessage());
+        }
+    }
+}
 $commentCount = $commentModel->getCommentCountByPostId($post_id);
 $username = $commentModel->getUsernameByUserId($user_id);
 

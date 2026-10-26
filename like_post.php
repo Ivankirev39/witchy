@@ -3,6 +3,7 @@ require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/models/Post.php";
+require_once __DIR__ . "/includes/notifications.php";
 
 // Only accept POST requests.
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -35,6 +36,15 @@ $likeData = $postModel->toggleLike($user_id, $post_id);
 
 $liked = $likeData["liked"];
 $likeCount = $likeData["like_count"];
+
+if ($liked) {
+    $ownerStmt = $pdo->prepare("SELECT user_id FROM post WHERE post_id = ?");
+    $ownerStmt->execute([$post_id]);
+    $postOwnerId = $ownerStmt->fetchColumn();
+    if ($postOwnerId !== false && (int) $postOwnerId !== $user_id) {
+        createNotification($pdo, (int) $postOwnerId, $user_id, "like", $post_id);
+    }
+}
 
 if (
     isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
