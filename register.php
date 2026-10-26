@@ -22,7 +22,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         http_response_code(403);
         exit("Invalid request.");
     }
-
     $website = trim($_POST["website"] ?? "");
 
     if ($website !== "") {
@@ -34,13 +33,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = trim($_POST["email"] ?? "");
     $password = $_POST["password"] ?? "";
     $confirmPassword = $_POST["confirm_password"] ?? "";
-
     $formStarted =
         $_SESSION["register_form_started"] ?? 0;
-
     $secondsTaken =
         time() - $formStarted;
-
 
     if (
         $formStarted === 0 ||
@@ -112,30 +108,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             LIMIT 1
         ";
 
-        $stmt =
-            $conn->prepare($sql);
+        try {
+            $stmt = $conn->prepare($sql);
+            $stmt->execute([$username, $email]);
 
-        if (!$stmt) {
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            error_log($conn->error);
-
-            $error =
-                "Something went wrong. Please try again.";
-
-        } else {
-
-            $stmt->bind_param(
-                "ss",
-                $username,
-                $email
-            );
-
-            $stmt->execute();
-
-            $result =
-                $stmt->get_result();
-
-            if ($result->num_rows > 0) {
+            if ($user) {
 
                 $error =
                     "Username or email is already in use.";
@@ -169,52 +148,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             (?, ?, ?, ?)
                     ";
 
-                    $stmt =
-                        $conn->prepare($sql);
+                    $stmt = $conn->prepare($sql);
 
-                    if (!$stmt) {
+                    $stmt->execute([
+                        $username,
+                        $email,
+                        $hashedPassword,
+                        $rank
+                    ]);
 
-                        error_log($conn->error);
+                    unset(
+                        $_SESSION[
+                            "register_form_started"
+                        ]
+                    );
 
-                        $error =
-                            "Something went wrong. Please try again.";
+                    header(
+                        "Location: login.php?registered=1"
+                    );
 
-                    } else {
-
-                        $stmt->bind_param(
-                            "ssss",
-                            $username,
-                            $email,
-                            $hashedPassword,
-                            $rank
-                        );
-
-                        if ($stmt->execute()) {
-
-                            unset(
-                                $_SESSION[
-                                    "register_form_started"
-                                ]
-                            );
-
-                            header(
-                                "Location: login.php?registered=1"
-                            );
-
-                            exit;
-
-                        } else {
-
-                            error_log(
-                                $stmt->error
-                            );
-
-                            $error =
-                                "Something went wrong. Please try again.";
-                        }
-                    }
+                    exit;
                 }
             }
+
+        } catch (PDOException $e) {
+
+            error_log($e->getMessage());
+
+            $error =
+                "Something went wrong. Please try again.";
         }
     }
 }
@@ -226,21 +188,17 @@ require_once __DIR__
 ?>
 
 <main class="auth-page">
-
     <section class="auth-brand">
         <div class="brand-content">
-
             <div
                 class="brand-symbol"
                 aria-hidden="true"
             >
                 ☾
             </div>
-
             <h1>
                 Find your place in Witchy
             </h1>
-
             <p>
                 Discover ideas, save inspiration,
                 share what you know, and explore
