@@ -2,14 +2,12 @@
 
 class Comment
 {
-    private mysqli $db;
-
-    public function __construct(mysqli $db)
+    private PDO $db;
+    public function __construct(PDO $db)
     {
         $this->db = $db;
     }
 
-    // Retrieve all comments belonging to a post
     public function getCommentsByPostId(int $postId): array
     {
         $sql = "
@@ -31,17 +29,11 @@ class Comment
         ";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("i", $postId);
-        $stmt->execute();
+        $stmt->execute([$postId]);
 
-        $comments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-
-        $stmt->close();
-
-        return $comments;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Create a comment and return its ID
     public function createComment(
         int $postId,
         int $userId,
@@ -61,81 +53,51 @@ class Comment
         ";
 
         $stmt = $this->db->prepare($sql);
-
-        $stmt->bind_param(
-            "iisss",
+        $stmt->execute([
             $userId,
             $postId,
             $comment,
             $mediaFile,
             $mediaType
-        );
+        ]);
 
-        $stmt->execute();
-        $commentId = $this->db->insert_id;
-
-        $stmt->close();
-
-        return $commentId;
+        return (int) $this->db->lastInsertId();
     }
 
-    // Count comments belonging to a post
     public function getCommentCountByPostId(int $postId): int
     {
-        $sql = "
-            SELECT COUNT(*) AS comment_count
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*)
             FROM comment
             WHERE post_id = ?
-        ";
+        ");
+        $stmt->execute([$postId]);
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("i", $postId);
-        $stmt->execute();
-
-        $result = $stmt->get_result()->fetch_assoc();
-
-        $stmt->close();
-
-        return (int) $result["comment_count"];
+        return (int) $stmt->fetchColumn();
     }
 
-    // Retrieve a user's username
     public function getUsernameByUserId(int $userId): ?string
     {
-        $sql = "
+        $stmt = $this->db->prepare("
             SELECT username
             FROM users
             WHERE user_id = ?
-        ";
+        ");
+        $stmt->execute([$userId]);
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
+        $username = $stmt->fetchColumn();
 
-        $result = $stmt->get_result()->fetch_assoc();
-
-        $stmt->close();
-
-        return $result["username"] ?? null;
+        return $username === false ? null : $username;
     }
 
-    // Delete a comment only if it belongs to the specified user
-    public function deleteComment(
-        int $commentId,
-        int $userId
-    ): bool {
-        $sql = "
+    public function deleteComment(int $commentId, int $userId): bool
+    {
+        $stmt = $this->db->prepare("
             DELETE FROM comment
             WHERE comment_id = ?
             AND user_id = ?
-        ";
+        ");
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ii", $commentId, $userId);
-        $success = $stmt->execute();
-
-        $stmt->close();
-
-        return $success;
+        return $stmt->execute([$commentId, $userId]);
     }
 }
