@@ -1,10 +1,14 @@
 <?php
 require_once __DIR__ . "/includes/session.php";
-require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/Comment.php";
 
-$commentModel = new Comment($conn);
+$pdoConnector = new \DataAccess\DB\DBConnector();
+$pdo = $pdoConnector->connectToDB();
+
+$commentModel = new Comment($pdo);
+
 $pageTitle = "Post | Witchy";
 $pageCss = "post.css";
 
@@ -14,7 +18,6 @@ $user_id = $isLoggedIn
     ? (int) $_SESSION["user_id"]
     : 0
 ;
-
 
 $backUrl = $isLoggedIn
     ? "feed.php"
@@ -46,8 +49,9 @@ if ($post_id <= 0) {
     );
     exit;
 }
+
 // GET POST + AUTHOR + COUNTS
-$stmt = $conn->prepare("
+$stmt = $pdo->prepare("
     SELECT
         post.*,
         users.username,
@@ -84,38 +88,40 @@ $stmt = $conn->prepare("
     INNER JOIN users ON users.user_id = post.user_id
     WHERE post.post_id = ?
 ");
-$stmt->bind_param("iiii", $user_id, $user_id, $user_id, $post_id);
-$stmt->execute();
-$post = $stmt->get_result()->fetch_assoc();
+
+$stmt->execute([$user_id, $user_id, $user_id, $post_id]);
+$post = $stmt->fetch(PDO::FETCH_ASSOC);
+
 if (!$post) {
     header("Location: post_not_found.php");
     exit;
 }
+
 // GET POST MEDIA
-$mediaStmt = $conn->prepare("
+$mediaStmt = $pdo->prepare("
     SELECT media_id, file, media_type, sort_order
     FROM post_media
     WHERE post_id = ?
     ORDER BY sort_order ASC, media_id ASC
 ");
-$mediaStmt->bind_param("i", $post_id);
-$mediaStmt->execute();
-$mediaResult = $mediaStmt->get_result();
-$postMedia = [];
-while ($media = $mediaResult->fetch_assoc()) {
-    $postMedia[] = $media;
-}
+
+$mediaStmt->execute([$post_id]);
+$postMedia = $mediaStmt->fetchAll(PDO::FETCH_ASSOC);
 $mediaCount = count($postMedia);
+
 // GET COMMENTS + COMMENT AUTHORS
 $comments = $commentModel->getCommentsByPostId($post_id);
+
 if ($isLoggedIn) {
     require_once __DIR__ . "/includes/user_header.php";
 } else {
     require_once __DIR__ . "/includes/public-header.php";
 }
 ?>
+
 <section class="post-detail-page">
     <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, "UTF-8") ?>" class="post-detail-back">← Back</a>
+
     <div class="post-detail-layout <?= $mediaCount === 0 ? "text-only" : "" ?>">
         <?php if ($mediaCount > 0): ?>
             <div class="post-detail-media">
@@ -125,6 +131,7 @@ if ($isLoggedIn) {
                         $mediaFile = basename($media["file"]);
                         $mediaPath = "uploads/posts/" . rawurlencode($mediaFile);
                         ?>
+
                         <div class="post-detail-media-item">
                             <?php if ($media["media_type"] === "image"): ?>
                                 <img class="post-detail-image" src="<?= $mediaPath ?>" alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>" loading="lazy">
@@ -139,6 +146,7 @@ if ($isLoggedIn) {
                 </div>
             </div>
         <?php endif; ?>
+
         <article class="post-detail-content">
             <header class="post-detail-author-row">
                 <div class="post-detail-author">
@@ -158,6 +166,7 @@ if ($isLoggedIn) {
                         <?php endif; ?>
 
                     </a>
+
                     <div>
                         <strong>
                             <a
@@ -166,36 +175,44 @@ if ($isLoggedIn) {
                                 <?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
                             </a>
                         </strong>
+
                         <span class="post-detail-date"><?= htmlspecialchars(date("j M Y", strtotime($post["created_at"])), ENT_QUOTES, "UTF-8") ?></span>
                     </div>
                 </div>
+
                 <?php if (
                     $isLoggedIn &&
                     (int) $post["user_id"] !== $user_id
-                    ): ?>
+                ): ?>
                     <form action="follow_user.php" method="POST">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                         <input type="hidden" name="user_id" value="<?= (int) $post["user_id"] ?>">
                         <input type="hidden" name="return_post" value="<?= $post_id ?>">
+
                         <button type="submit" class="post-detail-follow <?= $post["user_follows"] ? "active" : "" ?>"><?= $post["user_follows"] ? "Following" : "Follow" ?></button>
                     </form>
                 <?php endif; ?>
             </header>
+
             <div class="post-detail-info">
                 <?php if ($mediaCount === 0 && !empty($post["topic"])): ?>
                     <div class="post-detail-topics text-only-topic">
                         <span>#<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?></span>
                     </div>
                 <?php endif; ?>
+
                 <h1><?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?></h1>
+
                 <?php if (!empty($post["description"])): ?>
                     <p class="post-detail-description"><?= nl2br(htmlspecialchars($post["description"], ENT_QUOTES, "UTF-8")) ?></p>
                 <?php endif; ?>
+
                 <?php if ($mediaCount > 0 && !empty($post["topic"])): ?>
                     <div class="post-detail-topics">
                         <span>#<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?></span>
                     </div>
                 <?php endif; ?>
+
                 <?php if (!empty($post["sources"])): ?>
                     <div class="post-detail-sources">
                         <strong>Sources</strong>
@@ -203,26 +220,25 @@ if ($isLoggedIn) {
                     </div>
                 <?php endif; ?>
             </div>
+
             <div class="post-detail-actions">
-            <?php if ($isLoggedIn): ?>
-                
-                <form action="like_post.php" method="POST" class="post-like-form">
-                    <input
-                        type="hidden"
-                        name="csrf_token"
-                        value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
-                    >
-                    <input type="hidden" name="post_id" value="<?= $post_id ?>">
+                <?php if ($isLoggedIn): ?>
+                    <form action="like_post.php" method="POST" class="post-like-form">
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                        >
+                        <input type="hidden" name="post_id" value="<?= $post_id ?>">
 
-                    <button
-                        type="submit"
-                        class="post-detail-action <?= $post["user_liked"] ? "active" : "" ?>"
-                    >
-                        <?= $post["user_liked"] ? "♥" : "♡" ?>
-                        <span><?= (int) $post["like_count"] ?></span>
-                    </button>
-                </form>
-
+                        <button
+                            type="submit"
+                            class="post-detail-action <?= $post["user_liked"] ? "active" : "" ?>"
+                        >
+                            <?= $post["user_liked"] ? "♥" : "♡" ?>
+                            <span><?= (int) $post["like_count"] ?></span>
+                        </button>
+                    </form>
                 <?php else: ?>
                     <a href="login.php" class="post-detail-action">
                         ♡ <span>Log in to like</span>
@@ -233,15 +249,17 @@ if ($isLoggedIn) {
                     ◯
                     <span><?= (int) $post["comment_count"] ?></span>
                 </div>
+
                 <?php if ($isLoggedIn): ?>
-                <form action="save_post.php" method="POST">
-                    <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                    <button type="submit" class="post-detail-action save-button <?= $post["user_saved"] ? "active" : "" ?>" aria-label="<?= $post["user_saved"] ? "Remove from saved" : "Save post" ?>" title="<?= $post["user_saved"] ? "Saved" : "Save" ?>">
-                        <svg class="save-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                            <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z" />
-                        </svg>
-                    </button>
-                </form>
+                    <form action="save_post.php" method="POST">
+                        <input type="hidden" name="post_id" value="<?= $post_id ?>">
+
+                        <button type="submit" class="post-detail-action save-button <?= $post["user_saved"] ? "active" : "" ?>" aria-label="<?= $post["user_saved"] ? "Remove from saved" : "Save post" ?>" title="<?= $post["user_saved"] ? "Saved" : "Save" ?>">
+                            <svg class="save-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z" />
+                            </svg>
+                        </button>
+                    </form>
                 <?php else: ?>
                     <a href="login.php" class="post-detail-action">
                         Log in to save
@@ -253,11 +271,11 @@ if ($isLoggedIn) {
                     $isLoggedIn &&
                     (int) $post["user_id"] === $user_id
                 ): ?>
-
                     <form
                         action="delete_post.php"
                         method="POST"
                         onsubmit="return confirm('Are you sure you want to delete this post?');">
+
                         <input
                             type="hidden"
                             name="post_id"
@@ -274,36 +292,41 @@ if ($isLoggedIn) {
                             <span>Delete</span>
                         </button>
                     </form>
-
                 <?php endif; ?>
             </div>
+
             <section class="post-detail-comments">
                 <h2>Comments</h2>
+
                 <div class="post-detail-comment-list">
                     <?php if (!empty($comments)): ?>
                         <?php foreach ($comments as $comment): ?>
                             <article class="post-detail-comment">
-                                <a href="profile.php?id=<?= (int) $comment["user_id"] ?>"
+                                <a
+                                    href="profile.php?id=<?= (int) $comment["user_id"] ?>"
                                     class="comment-avatar-link">
                                     <img
                                         class="comment-avatar"
                                         src="<?= htmlspecialchars(
-                                                    !empty($comment["profile_image"])
-                                                        ? $comment["profile_image"]
-                                                        : "images/default-profile.jpg",
-                                                    ENT_QUOTES,
-                                                    "UTF-8"
-                                                ) ?>"
+                                            !empty($comment["profile_image"])
+                                                ? $comment["profile_image"]
+                                                : "images/default-profile.jpg",
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        ) ?>"
                                         alt="<?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
                                 </a>
+
                                 <div class="comment-content">
                                     <div class="comment-meta">
-                                        <strong> <a
+                                        <strong>
+                                            <a
                                                 href="profile.php?id=<?= (int) $comment["user_id"] ?>"
                                                 class="comment-author-link">
                                                 <?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>
                                             </a>
                                         </strong>
+
                                         <span><?= htmlspecialchars(date("j M", strtotime($comment["created_at"])), ENT_QUOTES, "UTF-8") ?></span>
 
                                         <?php if (
@@ -330,12 +353,13 @@ if ($isLoggedIn) {
                         <p class="post-detail-no-comments">No comments yet. Be the first to comment.</p>
                     <?php endif; ?>
                 </div>
+
                 <?php if ($isLoggedIn): ?>
-                <form action="comment_post.php" method="POST" class="post-detail-comment-form">
-                    <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                    <input type="text" name="comment" placeholder="Add a comment..." maxlength="1000" required>
-                    <button type="submit" aria-label="Post comment">➤</button>
-                </form>
+                    <form action="comment_post.php" method="POST" class="post-detail-comment-form">
+                        <input type="hidden" name="post_id" value="<?= $post_id ?>">
+                        <input type="text" name="comment" placeholder="Add a comment..." maxlength="1000" required>
+                        <button type="submit" aria-label="Post comment">➤</button>
+                    </form>
                 <?php else: ?>
                     <p>
                         <a href="login.php">Log in</a> to join the conversation.
@@ -345,11 +369,13 @@ if ($isLoggedIn) {
         </article>
     </div>
 </section>
+
 <!-- IMAGE LIGHTBOX -->
 <div
     id="image-modal"
     class="image-modal"
     aria-hidden="true">
+
     <button
         type="button"
         class="image-modal-close"
@@ -366,10 +392,7 @@ if ($isLoggedIn) {
 
 <script src="assets/js/main.js"></script>
 
-
 <?php
-$mediaStmt->close();
-$stmt->close();
 if ($isLoggedIn) {
     require_once __DIR__ . "/includes/user_footer.php";
 } else {
