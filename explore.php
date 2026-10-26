@@ -1,6 +1,6 @@
 <?php
-
 require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/config/db.php";
 
 $pageTitle = "Explore | Witchy";
@@ -14,7 +14,10 @@ $sort = $_GET["sort"] ?? "newest";
 $postsPerPage = 9;
 $page = max(1, (int) ($_GET["page"] ?? 1));
 $offset = ($page - 1) * $postsPerPage;
-
+// Establish a PDO database connection.
+$connector = new \DataAccess\DB\DBConnector();
+$pdo = $connector->connectToDB();
+// Build the base query.
 $sql = "
     SELECT
         p.post_id,
@@ -30,34 +33,39 @@ $sql = "
         ON u.user_id = p.user_id
 ";
 
+// Build conditions and their corresponding parameters.
 $conditions = [];
+$params = [];
 
 if ($search !== "") {
-    $searchTerm = "%" . $conn->real_escape_string($search) . "%";
-
     $conditions[] = "
         (
-            p.title LIKE '$searchTerm'
-            OR p.description LIKE '$searchTerm'
-            OR p.topic LIKE '$searchTerm'
-            OR u.username LIKE '$searchTerm'
+            p.title LIKE ?
+            OR p.description LIKE ?
+            OR p.topic LIKE ?
+            OR u.username LIKE ?
         )
     ";
+
+    $searchTerm = "%" . $search . "%";
+
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
+    $params[] = $searchTerm;
 }
 
 if ($topic !== "") {
-    $safeTopic = $conn->real_escape_string($topic);
-
-    $conditions[] = "p.topic = '$safeTopic'";
+    $conditions[] = "p.topic = ?";
+    $params[] = $topic;
 }
 
+// Apply the same filters to the main query.
 if (!empty($conditions)) {
     $sql .= " WHERE " . implode(" AND ", $conditions);
 }
 
-
-/*Counts all matching posts */
-
+// Count all posts matching the current filters.
 $countSql = "
     SELECT COUNT(*) AS total
     FROM post p
@@ -69,49 +77,55 @@ if (!empty($conditions)) {
     $countSql .= " WHERE " . implode(" AND ", $conditions);
 }
 
-$countResult = $conn->query($countSql);
+$countStmt = $pdo->prepare($countSql);
+$countStmt->execute($params);
 
-$totalPosts = 0;
+$totalPosts = (int) $countStmt->fetchColumn();
 
-if ($countResult) {
-    $countRow = $countResult->fetch_assoc();
-    $totalPosts = (int) $countRow["total"];
-}
+$totalPages = max(
+    1,
+    (int) ceil($totalPosts / $postsPerPage)
+);
 
-$totalPages = max(1, (int) ceil($totalPosts / $postsPerPage));
-
-
+// Keep the requested page within the valid range.
 if ($page > $totalPages) {
     $page = $totalPages;
 }
 
 $offset = ($page - 1) * $postsPerPage;
 
+// Choose a predefined sorting option.
+switch ($sort) {
+    case "oldest":
+        $orderBy = "p.created_at ASC";
+        break;
 
-/* Sorting */
+    case "title_asc":
+        $orderBy = "p.title ASC";
+        break;
 
-if ($sort === "oldest") {
-    $orderBy = "p.created_at ASC";
-} elseif ($sort === "title_asc") {
-    $orderBy = "p.title ASC";
-} elseif ($sort === "title_desc") {
-    $orderBy = "p.title DESC";
-} else {
-    $orderBy = "p.created_at DESC";
+    case "title_desc":
+        $orderBy = "p.title DESC";
+        break;
+
+    default:
+        $orderBy = "p.created_at DESC";
+        break;
 }
 
+// Add sorting and pagination to the main query.
+// These values are integers calculated by the application.
 $sql .= "
     ORDER BY $orderBy
     LIMIT $postsPerPage OFFSET $offset
 ";
 
-$result = $conn->query($sql);
+// Execute the query and retrieve the posts.
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $posts[] = $row;
-    }
-}
+$posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 
