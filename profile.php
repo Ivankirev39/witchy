@@ -3,26 +3,22 @@ require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
 
 $pageTitle = "Profile | Witchy";
-
 $user_id = (int) $_SESSION["user_id"];
 $profile_id = (int) ($_GET["id"] ?? $user_id);
-
 $is_own_profile = $profile_id === $user_id;
-
 $is_following = false;
 
+// CHECK FOLLOW STATUS
 if (!$is_own_profile) {
     $followCheck = $conn->prepare("
         SELECT 1
         FROM follow
         WHERE follower_id = ?
-          AND following_id = ?
+        AND following_id = ?
         LIMIT 1
     ");
-    $followCheck->bind_param("ii", $user_id, $profile_id);
-    $followCheck->execute();
-    $is_following = $followCheck->get_result()->num_rows > 0;
-    $followCheck->close();
+    $followCheck->execute([$user_id, $profile_id]);
+    $is_following = (bool) $followCheck->fetch(PDO::FETCH_ASSOC);
 }
 
 // GET PROFILE USER
@@ -31,9 +27,8 @@ $stmt = $conn->prepare("
     FROM users
     WHERE user_id = ?
 ");
-$stmt->bind_param("i", $profile_id);
-$stmt->execute();
-$user = $stmt->get_result()->fetch_assoc();
+$stmt->execute([$profile_id]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$user) {
     die("User not found.");
@@ -46,10 +41,9 @@ $postStmt = $conn->prepare("
     WHERE user_id = ?
     ORDER BY created_at DESC
 ");
-$postStmt->bind_param("i", $profile_id);
-$postStmt->execute();
-$posts = $postStmt->get_result();
-$post_count = $posts->num_rows;
+$postStmt->execute([$profile_id]);
+$posts = $postStmt->fetchAll(PDO::FETCH_ASSOC);
+$post_count = count($posts);
 
 // PREPARE MEDIA QUERY
 $mediaStmt = $conn->prepare("
@@ -65,9 +59,8 @@ $followerStmt = $conn->prepare("
     FROM follow
     WHERE following_id = ?
 ");
-$followerStmt->bind_param("i", $profile_id);
-$followerStmt->execute();
-$follower_count = $followerStmt->get_result()->fetch_assoc()["total"];
+$followerStmt->execute([$profile_id]);
+$follower_count = $followerStmt->fetch(PDO::FETCH_ASSOC)["total"];
 
 // FOLLOWING COUNT
 $followingStmt = $conn->prepare("
@@ -75,39 +68,30 @@ $followingStmt = $conn->prepare("
     FROM follow
     WHERE follower_id = ?
 ");
-$followingStmt->bind_param("i", $profile_id);
-$followingStmt->execute();
-$following_count = $followingStmt->get_result()->fetch_assoc()["total"];
+$followingStmt->execute([$profile_id]);
+$following_count = $followingStmt->fetch(PDO::FETCH_ASSOC)["total"];
 
 $pageCss = "profile.css";
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 <section class="profile-page">
     <div class="profile-cover">
-
         <?php if (!empty($user["cover_image"])): ?>
-
-            <img
-                src="<?= htmlspecialchars($user["cover_image"], ENT_QUOTES, "UTF-8") ?>"
-                alt="">
-
+            <img src="<?= htmlspecialchars($user["cover_image"], ENT_QUOTES, "UTF-8") ?>" alt="">
         <?php else: ?>
-
             <span>WITCHY</span>
-
         <?php endif; ?>
-
     </div>
     <section class="profile-header">
         <div class="profile-avatar">
             <img
                 src="<?= htmlspecialchars(
-                            !empty($user["profile_image"])
-                                ? $user["profile_image"]
-                                : "images/default-profile.jpg",
-                            ENT_QUOTES,
-                            "UTF-8"
-                        ) ?>"
+                    !empty($user["profile_image"])
+                        ? $user["profile_image"]
+                        : "images/default-profile.jpg",
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>"
                 alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
                 class="profile-avatar-image"
                 id="profile-avatar-image">
@@ -188,16 +172,11 @@ require_once __DIR__ . "/includes/user_header.php";
         </div>
         <?php if ($post_count > 0): ?>
             <div class="profile-post-grid">
-                <?php while ($post = $posts->fetch_assoc()): ?>
+                <?php foreach ($posts as $post): ?>
                     <?php
                     $postId = (int) $post["post_id"];
-                    $mediaStmt->bind_param("i", $postId);
-                    $mediaStmt->execute();
-                    $mediaResult = $mediaStmt->get_result();
-                    $postMedia = [];
-                    while ($media = $mediaResult->fetch_assoc()) {
-                        $postMedia[] = $media;
-                    }
+                    $mediaStmt->execute([$postId]);
+                    $postMedia = $mediaStmt->fetchAll(PDO::FETCH_ASSOC);
                     $mediaCount = count($postMedia);
                     $firstMedia = $mediaCount > 0 ? $postMedia[0] : null;
                     ?>
@@ -233,7 +212,7 @@ require_once __DIR__ . "/includes/user_header.php";
                             <strong><?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?></strong>
                         </div>
                     </a>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </div>
         <?php else: ?>
             <div class="profile-no-posts">
@@ -260,21 +239,14 @@ require_once __DIR__ . "/includes/user_header.php";
         aria-label="Close profile picture">
         &times;
     </button>
-
     <img
         id="profile-modal-image"
         class="profile-modal-image"
         src=""
         alt="">
 </div>
-
 <script src="assets/js/profile.js"></script>
 
 <?php
-$mediaStmt->close();
-$postStmt->close();
-$followerStmt->close();
-$followingStmt->close();
-$stmt->close();
 require_once __DIR__ . "/includes/user_footer.php";
 ?>
