@@ -2,9 +2,9 @@
 
 class Post
 {
-    private mysqli $db;
+    private PDO $db;
 
-    public function __construct(mysqli $db)
+    public function __construct(PDO $db)
     {
         $this->db = $db;
     }
@@ -50,11 +50,11 @@ class Post
         ";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("iii", $userId, $userId, $userId);
-        $stmt->execute();
+        $stmt->execute([$userId, $userId, $userId]);
 
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     public function getPostMedia(int $postId): array
     {
         $sql = "
@@ -65,41 +65,28 @@ class Post
         ";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("i", $postId);
-        $stmt->execute();
+        $stmt->execute([$postId]);
 
-        $media = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        $stmt->close();
-
-        return $media;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function toggleLike(int $userId, int $postId): array
     {
-        // Check whether this user has already liked the post.
         $stmt = $this->db->prepare("
             SELECT post_id
             FROM post_like
             WHERE user_id = ? AND post_id = ?
         ");
+        $stmt->execute([$userId, $postId]);
 
-        $stmt->bind_param("ii", $userId, $postId);
-        $stmt->execute();
+        $liked = $stmt->fetchColumn() !== false;
 
-        $result = $stmt->get_result();
-        $liked = $result->num_rows > 0;
-        $stmt->close();
-
-        // Remove the existing like, or create a new one.
         if ($liked) {
             $stmt = $this->db->prepare("
                 DELETE FROM post_like
                 WHERE user_id = ? AND post_id = ?
             ");
-
-            $stmt->bind_param("ii", $userId, $postId);
-            $stmt->execute();
-            $stmt->close();
+            $stmt->execute([$userId, $postId]);
 
             $liked = false;
         } else {
@@ -107,27 +94,19 @@ class Post
                 INSERT INTO post_like (user_id, post_id)
                 VALUES (?, ?)
             ");
-
-            $stmt->bind_param("ii", $userId, $postId);
-            $stmt->execute();
-            $stmt->close();
+            $stmt->execute([$userId, $postId]);
 
             $liked = true;
         }
 
-        // Get the updated like count.
         $stmt = $this->db->prepare("
-            SELECT COUNT(*) AS like_count
+            SELECT COUNT(*)
             FROM post_like
             WHERE post_id = ?
         ");
+        $stmt->execute([$postId]);
 
-        $stmt->bind_param("i", $postId);
-        $stmt->execute();
-
-        $row = $stmt->get_result()->fetch_assoc();
-        $likeCount = (int) $row["like_count"];
-        $stmt->close();
+        $likeCount = (int) $stmt->fetchColumn();
 
         return [
             "liked" => $liked,
