@@ -393,7 +393,7 @@ require_once __DIR__ . "/includes/public-header.php";
             </p>
 
             <a
-                href="rules.php"
+                href="public-rules.php"
                 class="button button-secondary"
             >
                 Read community rules

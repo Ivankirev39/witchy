@@ -1,0 +1,136 @@
+/* PUBLIC COMMUNITY RULES */
+
+.public-rules-page {
+    color: var(--text-color, #211c24);
+}
+
+.public-rules-hero {
+    padding: 5rem 1.5rem 3rem;
+    text-align: center;
+}
+
+.public-rules-eyebrow {
+    margin: 0 0 0.75rem;
+    color: var(--primary-color, #79628f);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.public-rules-hero h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    line-height: 1.15;
+}
+
+.public-rules-hero > p:last-child {
+    max-width: 650px;
+    margin: 0 auto;
+    color: var(--muted-text, #716b78);
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.public-rules-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: min(100% - 3rem, 900px);
+    margin: 0 auto;
+}
+
+.public-rule {
+    padding: 1.5rem 1.75rem;
+    border: 1px solid #ded2e3;
+    border-radius: 1rem;
+    background: var(--card-background, #fff);
+}
+
+.public-rule h2 {
+    margin: 0 0 0.65rem;
+    font-size: 1.3rem;
+    line-height: 1.4;
+}
+
+.public-rule p {
+    margin: 0;
+    color: var(--muted-text, #716b78);
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+.public-rules-cta {
+    margin-top: 4rem;
+    padding: 3.5rem 1.5rem;
+    background: rgba(121, 98, 143, 0.08);
+    text-align: center;
+}
+
+.public-rules-cta h2 {
+    margin: 0 0 0.75rem;
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+}
+
+.public-rules-cta > p {
+    max-width: 580px;
+    margin: 0 auto;
+    color: var(--muted-text, #716b78);
+    line-height: 1.8;
+}
+
+.public-rules-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+}
+
+.public-rules-actions .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.65rem;
+    text-decoration: none;
+}
+
+.public-rules-actions .button:focus-visible {
+    outline: 3px solid var(--primary-color, #79628f);
+    outline-offset: 3px;
+}
+
+@media (min-width: 760px) {
+    .public-rules-content {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+
+    .public-rules-hero {
+        padding-top: 5.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .public-rules-hero {
+        padding-top: 3.5rem;
+    }
+
+    .public-rules-content {
+        width: calc(100% - 2rem);
+    }
+
+    .public-rule {
+        padding: 1.25rem;
+    }
+
+    .public-rules-actions {
+        flex-direction: column;
+    }
+
+    .public-rules-actions .button {
+        width: 100%;
+    }
+}
