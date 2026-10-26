@@ -6,10 +6,8 @@ $currentPage = basename($_SERVER["PHP_SELF"]);
 $headerUser = null;
 if (isset($_SESSION["user_id"])) {
     $headerUserStmt = $conn->prepare("SELECT username, profile_image FROM users WHERE user_id = ?");
-    $headerUserStmt->bind_param("i", $_SESSION["user_id"]);
-    $headerUserStmt->execute();
-    $headerUser = $headerUserStmt->get_result()->fetch_assoc();
-    $headerUserStmt->close();
+    $headerUserStmt->execute([(int) $_SESSION["user_id"]]);
+    $headerUser = $headerUserStmt->fetch(PDO::FETCH_ASSOC);
 }
 ?>
 <!DOCTYPE html>
