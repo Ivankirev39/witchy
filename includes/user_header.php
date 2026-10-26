@@ -107,7 +107,7 @@ if (isset($_SESSION["user_id"])) {
                 <div class="user-topbar-actions">
                     <a href="/witchy/help.php" class="topbar-icon" aria-label="Help" title="Help">ⓘ</a>
                     <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
-                    <button type="button" class="topbar-icon" aria-label="Notifications" title="Notifications">🕭</button>
+                    <a href="/witchy/notifications.php" class="topbar-icon" aria-label="Notifications" title="Notifications">🕭</a>
                     <a href="/witchy/liked.php" class="topbar-icon" aria-label="Liked posts" title="Liked posts">♡</a>
                     <a href="/witchy/profile.php" class="topbar-profile" aria-label="Profile" title="Profile">
                        <img

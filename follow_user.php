@@ -2,6 +2,7 @@
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/includes/notifications.php";
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
     exit;
@@ -37,6 +38,9 @@ if ($action === "follow") {
         VALUES (?, ?)
     ");
     $followStmt->execute([$user_id, $target_id]);
+    if ($followStmt->rowCount() > 0) {
+        createNotification($conn, $target_id, $user_id, "follow");
+    }
 } elseif ($action === "unfollow") {
     $unfollowStmt = $conn->prepare("
         DELETE FROM follow

@@ -1,0 +1,26 @@
+
+@import url("./saved.css");
+.liked-card-link {
+    display: flex !important;
+    flex-direction: column;
+    height: 100%;
+}
+.liked-card .saved-card-body {
+    flex: 1;
+}
+.liked-card .saved-card-image video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 0.8;
+    object-fit: cover;
+}
+.liked-card .saved-card-unsave svg {
+    fill: currentColor;
+}
+.liked-card .saved-card-unsave:hover {
+    color: var(--brand-plum);
+}
+html.dark-mode .liked-card .saved-card-unsave:hover {
+    color: #c084cc;
+}
