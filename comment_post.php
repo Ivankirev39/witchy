@@ -1,8 +1,7 @@
 <?php
-
 require_once __DIR__ . "/includes/auth.php";
-require_once __DIR__ . "/config/db.php";
-require_once __DIR__ . "/classes/Comment.php";
+require_once __DIR__ . "/models/DBConnector.php";
+require_once __DIR__ . "/models/Comment.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
@@ -115,7 +114,9 @@ if ($hasMedia) {
 }
 
 // Database operations are handled by Comment.php
-$commentModel = new Comment($conn);
+$connector = new \DataAccess\DB\DBConnector();
+$pdo = $connector->connectToDB();
+$commentModel = new Comment($pdo);
 
 try {
     $commentId = $commentModel->createComment(
@@ -125,7 +126,7 @@ try {
         $mediaFile,
         $mediaType
     );
-} catch (mysqli_sql_exception $e) {
+} catch (PDOException $e) {
     if ($mediaFile !== null) {
         @unlink(__DIR__ . "/uploads/comments/" . $mediaFile);
     }
