@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . "/includes/auth.php";
-require_once __DIR__ . "/models/DBConnector.php";
+require_once __DIR__ . "/config/db.php";
+
+$pdo = $conn;
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
