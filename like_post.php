@@ -1,8 +1,7 @@
 <?php
-
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/includes/csrf.php";
-require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/models/Post.php";
 
 // Only accept POST requests.
@@ -26,7 +25,12 @@ if ($post_id <= 0) {
     exit("Invalid post ID.");
 }
 
-$postModel = new Post($conn);
+// Establish a PDO database connection.
+$connector = new \DataAccess\DB\DBConnector();
+$pdo = $connector->connectToDB();
+
+// Pass the PDO connection to the Post model.
+$postModel = new Post($pdo);
 $likeData = $postModel->toggleLike($user_id, $post_id);
 
 $liked = $likeData["liked"];
