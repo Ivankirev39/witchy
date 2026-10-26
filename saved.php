@@ -7,82 +7,64 @@ $pageCss = "saved.css";
 
 $user_id = (int) $_SESSION["user_id"];
 
-$savedPosts = [];
 $sort = $_GET["sort"] ?? "newest_saved";
 $topic = trim($_GET["topic"] ?? "");
 
 $sql = "
     SELECT
-    p.post_id,
-    p.user_id,
-    p.title,
-    p.description,
-    p.image,
-    p.topic,
-    p.created_at,
-    u.username
+        p.post_id,
+        p.user_id,
+        p.title,
+        p.description,
+        p.image,
+        p.topic,
+        p.created_at,
+        u.username
     FROM save s
-    INNER JOIN post p
-    ON p.post_id = s.post_id
-    INNER JOIN users u
-    ON u.user_id = p.user_id
+    INNER JOIN post p ON p.post_id = s.post_id
+    INNER JOIN users u ON u.user_id = p.user_id
     WHERE s.user_id = ?
-    ";
+";
+
+$params = [$user_id];
 
 if ($topic !== "") {
-    $safeTopic = $conn->real_escape_string($topic);
-    $sql .= " AND p.topic = '$safeTopic'";
+    $sql .= " AND p.topic = ?";
+    $params[] = $topic;
 }
 
 if ($sort === "oldest_saved") {
     $sql .= " ORDER BY s.created_at ASC";
-} 
-elseif ($sort === "newest_post") {
+} elseif ($sort === "newest_post") {
     $sql .= " ORDER BY p.created_at DESC";
-} 
-elseif ($sort === "oldest_post") {
+} elseif ($sort === "oldest_post") {
     $sql .= " ORDER BY p.created_at ASC";
-} 
-elseif ($sort === "title_asc") {
+} elseif ($sort === "title_asc") {
     $sql .= " ORDER BY p.title ASC";
-} 
-else {
+} else {
     $sql .= " ORDER BY s.created_at DESC";
 }
 
-
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-
-$result = $stmt->get_result();
-
-while ($row = $result->fetch_assoc()) {
-    $savedPosts[] = $row;
-}
+$stmt->execute($params);
+$savedPosts = $stmt->fetchAll();
 
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 
 <section class="saved-page">
-
     <header class="saved-header">
         <h1>Saved</h1>
         <p>
             <?php
             $savedCount = count($savedPosts);
-
-            if ($savedCount === 1) {
-                echo "1 saved post.";
-            } else {
-                echo $savedCount . " saved posts.";
-            }
+            echo $savedCount === 1 ? "1 saved post." : $savedCount . " saved posts.";
             ?>
         </p>
     </header>
 
     <nav class="saved-topics" aria-label="Saved post topics">
-        <a href="saved.php?sort=<?= urlencode($sort) ?>"class="<?= $topic === "" ? "active" : "" ?>">
+        <a href="saved.php?sort=<?= urlencode($sort) ?>" class="<?= $topic === "" ? "active" : "" ?>">
             All
         </a>
         <a href="saved.php?topic=Spells&sort=<?= urlencode($sort) ?>" class="<?= $topic === "Spells" ? "active" : "" ?>">
@@ -114,76 +96,57 @@ require_once __DIR__ . "/includes/user_header.php";
         </a>
     </nav>
 
-
-
     <div class="saved-sort">
         <label for="saved-sort">Sort by:</label>
-        <select
-            id="saved-sort"
-            onchange="window.location.href=this.value">
-
-            <option value="saved.php?sort=newest_saved" <?= $sort === "newest_saved" ? "selected" : "" ?>
-            >Recently saved
+        <select id="saved-sort" onchange="window.location.href=this.value">
+            <option value="saved.php?sort=newest_saved" <?= $sort === "newest_saved" ? "selected" : "" ?>>
+                Recently saved
             </option>
-
-            <option value="saved.php?sort=oldest_saved" <?= $sort === "oldest_saved" ? "selected" : "" ?>
-            >Oldest saved
+            <option value="saved.php?sort=oldest_saved" <?= $sort === "oldest_saved" ? "selected" : "" ?>>
+                Oldest saved
             </option>
-
-            <option value="saved.php?sort=newest_post" <?= $sort === "newest_post" ? "selected" : "" ?>
-            >Newest post
+            <option value="saved.php?sort=newest_post" <?= $sort === "newest_post" ? "selected" : "" ?>>
+                Newest post
             </option>
-
-            <option value="saved.php?sort=oldest_post" <?= $sort === "oldest_post" ? "selected" : "" ?>
-            >Oldest post
+            <option value="saved.php?sort=oldest_post" <?= $sort === "oldest_post" ? "selected" : "" ?>>
+                Oldest post
             </option>
-
-            <option value="saved.php?sort=title_asc" <?= $sort === "title_asc" ? "selected" : "" ?>
-            >Title A–Z
+            <option value="saved.php?sort=title_asc" <?= $sort === "title_asc" ? "selected" : "" ?>>
+                Title A–Z
             </option>
         </select>
     </div>
 
     <section class="saved-content">
-
         <?php if (empty($savedPosts)): ?>
             <div class="saved-empty">
                 <h2>No saved posts yet</h2>
-                <p>
-                    Posts you save will appear here.
-                </p>
+                <p>Posts you save will appear here.</p>
                 <a href="explore.php" class="saved-empty-button">
                     Explore posts
                 </a>
             </div>
-
-
         <?php else: ?>
-
             <div class="saved-grid">
                 <?php foreach ($savedPosts as $post): ?>
-
                     <article
-                            class="saved-card"
-                            role="link"
-                            tabindex="0"
-                            onclick="window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'"
-                            onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'; }"
-                        >
-
+                        class="saved-card"
+                        role="link"
+                        tabindex="0"
+                        onclick="window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'"
+                        onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'; }"
+                    >
                         <form action="save_post.php" method="POST" class="saved-card-unsave-form">
                             <input
                                 type="hidden"
                                 name="post_id"
                                 value="<?= (int) $post["post_id"] ?>"
                             >
-
                             <input
                                 type="hidden"
                                 name="redirect"
                                 value="saved.php"
                             >
-
                             <button
                                 type="submit"
                                 class="saved-card-unsave"
@@ -197,7 +160,6 @@ require_once __DIR__ . "/includes/user_header.php";
                             </button>
                         </form>
 
-
                         <div class="saved-card-image">
                             <?php if (!empty($post["image"])): ?>
                                 <img
@@ -206,12 +168,10 @@ require_once __DIR__ . "/includes/user_header.php";
                                     loading="lazy"
                                 >
                             <?php else: ?>
-
                                 <div class="saved-card-placeholder">
                                     <span>✦</span>
                                     No image
                                 </div>
-
                             <?php endif; ?>
                         </div>
 
@@ -224,20 +184,13 @@ require_once __DIR__ . "/includes/user_header.php";
                             </h2>
 
                             <?php if (!empty($post["description"])): ?>
-
                                 <p class="saved-card-description">
                                     <?= htmlspecialchars(
-                                        mb_strimwidth(
-                                            $post["description"],
-                                            0,
-                                            140,
-                                            "..."
-                                        ),
+                                        mb_strimwidth($post["description"], 0, 140, "..."),
                                         ENT_QUOTES,
                                         "UTF-8"
                                     ) ?>
                                 </p>
-
                             <?php endif; ?>
 
                             <?php if (!empty($post["topic"])): ?>
@@ -249,12 +202,9 @@ require_once __DIR__ . "/includes/user_header.php";
                                         <?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
                                     </a>
                                 </p>
-
                             <?php endif; ?>
-
                         </div>
                     </article>
-
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
@@ -262,8 +212,5 @@ require_once __DIR__ . "/includes/user_header.php";
 </section>
 
 <?php
-$stmt->close();
-
 require_once __DIR__ . "/includes/user_footer.php";
 ?>
-
