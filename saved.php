@@ -137,6 +137,7 @@ require_once __DIR__ . "/includes/user_header.php";
                         onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'; }"
                     >
                         <form action="save_post.php" method="POST" class="saved-card-unsave-form">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                             <input
                                 type="hidden"
                                 name="post_id"

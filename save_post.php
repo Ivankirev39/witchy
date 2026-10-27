@@ -1,12 +1,18 @@
 <?php
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/includes/csrf.php";
 
 $pdo = $conn;
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
     exit;
+}
+
+if (!csrf_valid($_POST["csrf_token"] ?? null)) {
+    http_response_code(403);
+    exit("Invalid request. Please refresh the page and try again.");
 }
 
 $user_id = (int) $_SESSION["user_id"];
