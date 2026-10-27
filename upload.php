@@ -61,6 +61,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($file["error"] !== UPLOAD_ERR_OK) {
             die("There was a problem uploading one of your files.");
         }
+        if (!is_uploaded_file($file["tmp_name"])) {
+            die("Invalid uploaded file.");
+        }
+        if (!is_int($file["size"]) || $file["size"] <= 0) {
+            die("One of your files is empty or invalid.");
+        }
         $totalMediaSize += $file["size"];
         if ($totalMediaSize > $maxTotalMediaSize) {
             die("Your media files are too large. Keep the total under 35 MB.");
