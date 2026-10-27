@@ -70,10 +70,27 @@ class Post
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function toggleLike(int $userId, int $postId): array
-    {
+
+public function toggleLike(int $userId, int $postId): array
+{
+    $this->db->beginTransaction();
+
+    try {
+        
         $stmt = $this->db->prepare("
             SELECT post_id
+            FROM post
+            WHERE post_id = ?
+            FOR UPDATE
+        ");
+        $stmt->execute([$postId]);
+
+        if ($stmt->fetchColumn() === false) {
+            throw new RuntimeException("Post not found.");
+        }
+  
+        $stmt = $this->db->prepare("
+            SELECT 1
             FROM post_like
             WHERE user_id = ? AND post_id = ?
         ");
@@ -87,7 +104,6 @@ class Post
                 WHERE user_id = ? AND post_id = ?
             ");
             $stmt->execute([$userId, $postId]);
-
             $liked = false;
         } else {
             $stmt = $this->db->prepare("
@@ -95,7 +111,6 @@ class Post
                 VALUES (?, ?)
             ");
             $stmt->execute([$userId, $postId]);
-
             $liked = true;
         }
 
@@ -108,9 +123,18 @@ class Post
 
         $likeCount = (int) $stmt->fetchColumn();
 
+        $this->db->commit();
+
         return [
             "liked" => $liked,
             "like_count" => $likeCount
         ];
-    }
+    } catch (Throwable $e) {
+        if ($this->db->inTransaction()) {
+            $this->db->rollBack();
+        }
+
+        throw $e;
+    };
+}
 }
