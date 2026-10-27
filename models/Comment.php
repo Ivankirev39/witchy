@@ -93,11 +93,13 @@ class Comment
     public function deleteComment(int $commentId, int $userId): bool
     {
         $stmt = $this->db->prepare("
-            DELETE FROM comment
-            WHERE comment_id = ?
-            AND user_id = ?
-        ");
+        DELETE FROM comment
+        WHERE comment_id = ?
+        AND user_id = ?
+    ");
 
-        return $stmt->execute([$commentId, $userId]);
+        $stmt->execute([$commentId, $userId]);
+
+        return $stmt->rowCount() > 0;
     }
 }
