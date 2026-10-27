@@ -250,6 +250,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     <!-- ADD COMMENT -->
                     <form action="comment_post.php" method="POST" enctype="multipart/form-data" class="comment-form">
                         <input type="hidden" name="post_id" value="<?= $postId ?>">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                         <input type="text" name="comment" placeholder="Write a comment..." maxlength="500" autocomplete="off">
                         <label class="comment-upload-button" title="Add image or GIF">
                             📷

@@ -362,6 +362,7 @@ if ($isLoggedIn) {
                     <form action="comment_post.php" method="POST" enctype="multipart/form-data" class="post-detail-comment-form">
                         <input type="hidden" name="post_id" value="<?= $post_id ?>">
                         <input type="hidden" name="return_to" value="post">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                         <input type="text" name="comment" placeholder="Add a comment..." maxlength="1000">
 
                         <label class="comment-upload-button" title="Add image or GIF">
