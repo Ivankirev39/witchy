@@ -3,6 +3,7 @@ require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/User.php";
+require_once __DIR__ . "/models/Follow.php";
 
 $pageTitle = "Profile | Witchy";
 $pageCss = "profile.css";
@@ -22,21 +23,17 @@ if (!$user) {
     exit("User not found.");
 }
 
-// Check follow status
+// Follow information
+$followModel = new Follow($conn);
+
 $is_following = false;
 
 if (!$is_own_profile) {
-    $followCheck = $conn->prepare("
-        SELECT 1
-        FROM follow
-        WHERE follower_id = ?
-        AND following_id = ?
-        LIMIT 1
-    ");
-
-    $followCheck->execute([$user_id, $profile_id]);
-    $is_following = (bool) $followCheck->fetchColumn();
+    $is_following = $followModel->isFollowing($user_id, $profile_id);
 }
+
+$follower_count = $followModel->countFollowers($profile_id);
+$following_count = $followModel->countFollowing($profile_id);
 
 // Get user's posts
 $postStmt = $conn->prepare("
@@ -57,26 +54,6 @@ $mediaStmt = $conn->prepare("
     WHERE post_id = ?
     ORDER BY sort_order ASC, media_id ASC
 ");
-
-// Count followers
-$followerStmt = $conn->prepare("
-    SELECT COUNT(*)
-    FROM follow
-    WHERE following_id = ?
-");
-
-$followerStmt->execute([$profile_id]);
-$follower_count = (int) $followerStmt->fetchColumn();
-
-// Count following
-$followingStmt = $conn->prepare("
-    SELECT COUNT(*)
-    FROM follow
-    WHERE follower_id = ?
-");
-
-$followingStmt->execute([$profile_id]);
-$following_count = (int) $followingStmt->fetchColumn();
 
 // Load page
 require_once __DIR__ . "/includes/user_header.php";
@@ -308,9 +285,11 @@ require_once __DIR__ . "/includes/user_header.php";
                             <?php endif; ?>
 
                             <?php if ($mediaCount > 1): ?>
+
                                 <span class="profile-media-count">
                                     <?= $mediaCount ?>
                                 </span>
+
                             <?php endif; ?>
 
                         <?php else: ?>
@@ -322,9 +301,11 @@ require_once __DIR__ . "/includes/user_header.php";
                                 </span>
 
                                 <?php if (!empty($post["topic"])): ?>
+
                                     <span class="profile-text-topic">
                                         #<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
                                     </span>
+
                                 <?php endif; ?>
 
                                 <?php if (!empty($post["description"])): ?>
@@ -387,6 +368,7 @@ require_once __DIR__ . "/includes/user_header.php";
 </section>
 
 <!-- Profile picture modal -->
+
 <div
     id="profile-image-modal"
     class="profile-image-modal"
