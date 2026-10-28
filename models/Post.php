@@ -135,6 +135,59 @@ public function toggleLike(int $userId, int $postId): array
         }
 
         throw $e;
-    };
+    }
+}
+
+public function toggleSave(int $userId, int $postId): bool
+{
+    $this->db->beginTransaction();
+
+    try {
+        $stmt = $this->db->prepare("
+            SELECT post_id
+            FROM post
+            WHERE post_id = ?
+            FOR UPDATE
+        ");
+        $stmt->execute([$postId]);
+
+        if ($stmt->fetchColumn() === false) {
+            throw new RuntimeException("Post not found.");
+        }
+
+        $stmt = $this->db->prepare("
+            SELECT 1
+            FROM save
+            WHERE user_id = ? AND post_id = ?
+        ");
+        $stmt->execute([$userId, $postId]);
+
+        if ($stmt->fetchColumn() !== false) {
+            $stmt = $this->db->prepare("
+                DELETE FROM save
+                WHERE user_id = ? AND post_id = ?
+            ");
+            $stmt->execute([$userId, $postId]);
+            $saved = false;
+        } else {
+            $stmt = $this->db->prepare("
+                INSERT INTO save (user_id, post_id)
+                VALUES (?, ?)
+            ");
+            $stmt->execute([$userId, $postId]);
+            $saved = true;
+        }
+
+        $this->db->commit();
+
+        return $saved;
+    } catch (Throwable $e) {
+        if ($this->db->inTransaction()) {
+            $this->db->rollBack();
+        }
+
+        throw $e;
+    }
 }
 }
+

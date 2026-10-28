@@ -36,7 +36,6 @@ require_once __DIR__ . "/includes/user_header.php";
         <?php foreach ($posts as $post): ?>
             <?php
             $postId = (int) $post["post_id"];
-            $postId = (int) $post["post_id"];
             $postMedia = $postModel->getPostMedia($postId);
             $mediaCount = count($postMedia);
             ?>
