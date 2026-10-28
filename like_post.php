@@ -38,11 +38,9 @@ $liked = $likeData["liked"];
 $likeCount = $likeData["like_count"];
 
 if ($liked) {
-    $ownerStmt = $pdo->prepare("SELECT user_id FROM post WHERE post_id = ?");
-    $ownerStmt->execute([$post_id]);
-    $postOwnerId = $ownerStmt->fetchColumn();
-    if ($postOwnerId !== false && (int) $postOwnerId !== $user_id) {
-        createNotification($pdo, (int) $postOwnerId, $user_id, "like", $post_id);
+    $postOwnerId = $postModel->getPostOwnerId($post_id);
+    if ($postOwnerId !== null && $postOwnerId !== $user_id) {
+        createNotification($pdo, $postOwnerId, $user_id, "like", $post_id);
     }
 }
 

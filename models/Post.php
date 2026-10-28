@@ -286,4 +286,17 @@ public function getPostById(int $postId, int $viewerId): ?array
 
     return $post === false ? null : $post;
 }
+public function getPostOwnerId(int $postId): ?int
+{
+    $stmt = $this->db->prepare("
+        SELECT user_id
+        FROM post
+        WHERE post_id = ?
+    ");
+    $stmt->execute([$postId]);
+
+    $ownerId = $stmt->fetchColumn();
+
+    return $ownerId === false ? null : (int) $ownerId;
+}
 }

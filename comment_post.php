@@ -4,6 +4,7 @@ require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/models/Comment.php";
 require_once __DIR__ . "/includes/notifications.php";
 require_once __DIR__ . "/includes/csrf.php";
+require_once __DIR__ . "/models/Post.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
@@ -18,6 +19,7 @@ if (!csrf_valid($_POST["csrf_token"] ?? null)) {
 $user_id = (int) $_SESSION["user_id"];
 $post_id = (int) ($_POST["post_id"] ?? 0);
 $commentText = trim($_POST["comment"] ?? "");
+
 
 $isAjax =
     isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
@@ -124,6 +126,7 @@ if ($hasMedia) {
 $connector = new \DataAccess\DB\DBConnector();
 $pdo = $connector->connectToDB();
 $commentModel = new Comment($pdo);
+$postModel = new Post($pdo);
 
 try {
     $commentId = $commentModel->createComment(
@@ -142,12 +145,17 @@ try {
 }
 
 if ($commentId) {
-    $ownerStmt = $pdo->prepare("SELECT user_id FROM post WHERE post_id = ?");
-    $ownerStmt->execute([$post_id]);
-    $postOwnerId = $ownerStmt->fetchColumn();
-    if ($postOwnerId !== false && (int) $postOwnerId !== $user_id) {
+    $postOwnerId = $postModel->getPostOwnerId($post_id);
+
+    if ($postOwnerId !== null && $postOwnerId !== $user_id) {
         try {
-            createNotification($pdo, (int) $postOwnerId, $user_id, "comment", $post_id);
+            createNotification(
+                $pdo,
+                $postOwnerId,
+                $user_id,
+                "comment",
+                $post_id
+            );
         } catch (PDOException $e) {
             error_log("Comment notification failed: " . $e->getMessage());
         }
