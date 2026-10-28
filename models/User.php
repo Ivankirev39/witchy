@@ -120,4 +120,22 @@ class User
             $userId
         ]);
     }
+
+
+    // Get information for public profiles
+    public function getPublicProfile(int $userId): ?array
+    {
+        $sql = "
+            SELECT username, rank, bio, profile_image, cover_image
+            FROM users
+            WHERE user_id = ?
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
+
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $user ?: null;
+    }
 }
