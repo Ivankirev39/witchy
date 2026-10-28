@@ -2,6 +2,7 @@
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/models/User.php";
 
 if (isset($_SESSION["user_id"])) {
     header("Location: feed.php");
@@ -23,18 +24,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($login === "" || $password === "") {
         $error = "Incorrect username/email or password.";
     } else {
-        $sql = "
-            SELECT user_id, username, password, rank
-            FROM users
-            WHERE email = ? OR username = ?
-            LIMIT 1
-        ";
-
-        try {
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$login, $login]);
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
-
+            try {
+            $userModel = new User($conn);
+            $user = $userModel->findByLogin($login);
+            
             if (
                 $user &&
                 password_verify($password, $user["password"])
