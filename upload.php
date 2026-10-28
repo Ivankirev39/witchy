@@ -2,10 +2,12 @@
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/includes/csrf.php";
+require_once __DIR__ . "/models/Post.php";
 
 $pdoConnector = new \DataAccess\DB\DBConnector();
 $pdo = $pdoConnector->connectToDB();
 $pageTitle = "Create a post | Witchy";
+$postModel = new Post($pdo);
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!csrf_valid($_POST["csrf_token"] ?? null)) {
@@ -86,45 +88,39 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ];
     }
     $movedFiles = [];
+    $mediaRecords = [];
+    
     try {
-        $pdo->beginTransaction();
-        $stmt = $pdo->prepare("
-            INSERT INTO post (user_id, title, description, topic, sources)
-            VALUES (?, ?, ?, ?, ?)
-        ");
-        $stmt->execute([$userId, $title, $description, $topic, $sources]);
-        $postId = (int) $pdo->lastInsertId();
-        if (!empty($validatedMedia)) {
-            $mediaStmt = $pdo->prepare("
-                INSERT INTO post_media (post_id, file, media_type, sort_order)
-                VALUES (?, ?, ?, ?)
-            ");
-            foreach ($validatedMedia as $index => $media) {
-                if (!move_uploaded_file($media["tmp_name"], $media["upload_path"])) {
-                    throw new Exception("Failed to save one of the uploaded files.");
-                }
-                $movedFiles[] = $media["upload_path"];
-                $sortOrder = $index + 1;
-                $mediaStmt->execute([
-                    $postId,
-                    $media["file_name"],
-                    $media["media_type"],
-                    $sortOrder
-                ]);
+        foreach ($validatedMedia as $media) {
+            if (!move_uploaded_file($media["tmp_name"], $media["upload_path"])) {
+                throw new RuntimeException("Failed to save one of the uploaded files.");
             }
+
+            $movedFiles[] = $media["upload_path"];
+            $mediaRecords[] = [
+                "file" => $media["file_name"],
+                "media_type" => $media["media_type"]
+            ];
         }
-        $pdo->commit();
+
+        $postModel->createPostWithMedia(
+            $userId,
+            $title,
+            $description,
+            $topic,
+            $sources,
+            $mediaRecords
+        );
+
         header("Location: feed.php");
         exit;
     } catch (Throwable $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
         foreach ($movedFiles as $movedFile) {
             if (file_exists($movedFile)) {
                 unlink($movedFile);
             }
         }
+
         error_log("Post creation failed: " . $e->getMessage());
         http_response_code(500);
         exit("Could not create the post. Please try again.");

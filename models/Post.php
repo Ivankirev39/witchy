@@ -189,5 +189,56 @@ public function toggleSave(int $userId, int $postId): bool
         throw $e;
     }
 }
-}
+public function createPostWithMedia(
+    int $userId,
+    string $title,
+    string $description,
+    string $topic,
+    string $sources,
+    array $mediaRecords
+): int {
+    $this->db->beginTransaction();
 
+    try {
+        $stmt = $this->db->prepare("
+            INSERT INTO post (user_id, title, description, topic, sources)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $userId,
+            $title,
+            $description,
+            $topic,
+            $sources
+        ]);
+
+        $postId = (int) $this->db->lastInsertId();
+
+        if ($mediaRecords !== []) {
+            $mediaStmt = $this->db->prepare("
+                INSERT INTO post_media (post_id, file, media_type, sort_order)
+                VALUES (?, ?, ?, ?)
+            ");
+
+            foreach ($mediaRecords as $index => $media) {
+                $mediaStmt->execute([
+                    $postId,
+                    $media["file"],
+                    $media["media_type"],
+                    $index + 1
+                ]);
+            }
+        }
+
+        $this->db->commit();
+
+        return $postId;
+    } catch (Throwable $e) {
+        if ($this->db->inTransaction()) {
+            $this->db->rollBack();
+        }
+
+        throw $e;
+    }
+}
+}
