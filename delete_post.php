@@ -1,10 +1,16 @@
 <?php
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/models/DBConnector.php";
+require_once __DIR__ . "/includes/csrf.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
     exit;
+}
+
+if (!csrf_valid($_POST["csrf_token"] ?? null)) {
+    http_response_code(403);
+    exit("Invalid security token. Please refresh the page and try again.");
 }
 
 $user_id = (int) $_SESSION["user_id"];
