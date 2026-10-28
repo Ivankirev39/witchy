@@ -2,9 +2,11 @@
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
+require_once __DIR__ . "/models/Post.php";
 $pageTitle = "Liked Posts | Witchy";
 $pageCss = "liked.css";
 $user_id = (int) $_SESSION["user_id"];
+$postModel = new Post($conn);
 $topics = ["Spells", "Altars", "Tarot", "Herbs", "Crystals", "Books", "Artwork", "Occult Studies", "Others"];
 $sortOptions = [
     "newest_post" => "Newest posts",
@@ -26,54 +28,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
     $post_id = (int) ($_POST["post_id"] ?? 0);
     if ($post_id > 0) {
-        $deleteStmt = $conn->prepare("
-            DELETE FROM post_like
-            WHERE user_id = ? AND post_id = ?
-        ");
-        $deleteStmt->execute([$user_id, $post_id]);
+        $postModel->removeLike($user_id, $post_id);
     }
     $params = http_build_query(["sort" => $sort, "topic" => $topic]);
     header("Location: liked.php?" . $params);
     exit;
 }
-$sql = "
-    SELECT
-        p.post_id,
-        p.title,
-        p.description,
-        p.topic,
-        p.image,
-        p.created_at,
-        u.username,
-        pm.file AS media_file,
-        pm.media_type
-    FROM post_like pl
-    INNER JOIN post p ON p.post_id = pl.post_id
-    INNER JOIN users u ON u.user_id = p.user_id
-    LEFT JOIN post_media pm ON pm.media_id = (
-        SELECT pm2.media_id
-        FROM post_media pm2
-        WHERE pm2.post_id = p.post_id
-        ORDER BY pm2.sort_order ASC, pm2.media_id ASC
-        LIMIT 1
-    )
-    WHERE pl.user_id = ?
-";
-$params = [$user_id];
-if ($topic !== "") {
-    $sql .= " AND p.topic = ?";
-    $params[] = $topic;
-}
-if ($sort === "oldest_post") {
-    $sql .= " ORDER BY p.created_at ASC";
-} elseif ($sort === "title_asc") {
-    $sql .= " ORDER BY p.title ASC";
-} else {
-    $sql .= " ORDER BY p.created_at DESC";
-}
-$stmt = $conn->prepare($sql);
-$stmt->execute($params);
-$likedPosts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$likedPosts = $postModel->getLikedPosts($user_id, $topic, $sort);
 $likedCount = count($likedPosts);
 require_once __DIR__ . "/includes/user_header.php";
 ?>
@@ -122,7 +83,7 @@ require_once __DIR__ . "/includes/user_header.php";
                             <input type="hidden" name="post_id" value="<?= $postId ?>">
                             <button type="submit" class="saved-card-unsave" aria-label="Unlike post" title="Unlike post">
                                 <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                                    <path d="M12 21s-7.5-4.35-10-9.3C-.3 7 2.4 3 6.6 3c2.3 0 4.1 1.3 5.4 3 1.3-1.7 3.1-3 5.4-3C21.6 3 24.3 7 22 11.7 19.5 16.65 12 21Z"/>
+                                    <path d="M12 21s-7.5-4.35-10-9.3C-.3 7 2.4 3 6.6 3c2.3 0 4.1 1.3 5.4 3 1.3-1.7 3.1-3 5.4-3C21.6 3 24.3 7 22 11.7 19.5 16.65 12 21Z" />
                                 </svg>
                             </button>
                         </form>

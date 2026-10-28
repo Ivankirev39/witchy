@@ -299,4 +299,64 @@ public function getPostOwnerId(int $postId): ?int
 
     return $ownerId === false ? null : (int) $ownerId;
 }
+public function getLikedPosts(
+    int $userId,
+    string $topic,
+    string $sort
+): array {
+    $orderByOptions = [
+        "newest_post" => "p.created_at DESC",
+        "oldest_post" => "p.created_at ASC",
+        "title_asc" => "p.title ASC"
+    ];
+
+    $orderBy = $orderByOptions[$sort] ?? $orderByOptions["newest_post"];
+
+    $sql = "
+        SELECT
+            p.post_id,
+            p.title,
+            p.description,
+            p.topic,
+            p.image,
+            p.created_at,
+            u.username,
+            pm.file AS media_file,
+            pm.media_type
+        FROM post_like pl
+        INNER JOIN post p ON p.post_id = pl.post_id
+        INNER JOIN users u ON u.user_id = p.user_id
+        LEFT JOIN post_media pm ON pm.media_id = (
+            SELECT pm2.media_id
+            FROM post_media pm2
+            WHERE pm2.post_id = p.post_id
+            ORDER BY pm2.sort_order ASC, pm2.media_id ASC
+            LIMIT 1
+        )
+        WHERE pl.user_id = ?
+    ";
+
+    $params = [$userId];
+
+    if ($topic !== "") {
+        $sql .= " AND p.topic = ?";
+        $params[] = $topic;
+    }
+
+    $sql .= " ORDER BY " . $orderBy;
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function removeLike(int $userId, int $postId): void
+{
+    $stmt = $this->db->prepare("
+        DELETE FROM post_like
+        WHERE user_id = ? AND post_id = ?
+    ");
+    $stmt->execute([$userId, $postId]);
+}
 }
