@@ -2,6 +2,7 @@
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/models/User.php";
 
 if (isset($_SESSION["user_id"])) {
     header("Location: feed.php");
@@ -22,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         http_response_code(403);
         exit("Invalid request.");
     }
+
     $website = trim($_POST["website"] ?? "");
 
     if ($website !== "") {
@@ -33,21 +35,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = trim($_POST["email"] ?? "");
     $password = $_POST["password"] ?? "";
     $confirmPassword = $_POST["confirm_password"] ?? "";
-    $formStarted =
-        $_SESSION["register_form_started"] ?? 0;
-    $secondsTaken =
-        time() - $formStarted;
 
-    if (
-        $formStarted === 0 ||
-        $secondsTaken < 3
-    ) {
+    $formStarted = $_SESSION["register_form_started"] ?? 0;
+    $secondsTaken = time() - $formStarted;
 
-        $error =
-            "Please wait a moment before creating your account, then try again.";
+    if ($formStarted === 0 || $secondsTaken < 3) {
 
-        $_SESSION["register_form_started"] =
-            time();
+        $error = "Please wait a moment before creating your account, then try again.";
+        $_SESSION["register_form_started"] = time();
 
     } elseif (
         $username === "" ||
@@ -56,135 +51,77 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $confirmPassword === ""
     ) {
 
-        $error =
-            "Please fill in all fields.";
+        $error = "Please fill in all fields.";
 
-    } elseif (
-        !preg_match(
-            '/^[A-Za-z0-9_]{3,50}$/',
-            $username
-        )
-    ) {
+    } elseif (!preg_match('/^[A-Za-z0-9_]{3,50}$/', $username)) {
 
-        $error =
-            "Username must be 3-50 characters and only contain letters, numbers or underscores.";
+        $error = "Username must be 3-50 characters and only contain letters, numbers or underscores.";
 
-    } elseif (
-        !filter_var(
-            $email,
-            FILTER_VALIDATE_EMAIL
-        )
-    ) {
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
-        $error =
-            "Please enter a valid email.";
+        $error = "Please enter a valid email.";
 
     } elseif (strlen($email) > 100) {
 
-        $error =
-            "Email is too long.";
+        $error = "Email is too long.";
 
     } elseif (strlen($password) < 8) {
 
-        $error =
-            "Password must be at least 8 characters.";
+        $error = "Password must be at least 8 characters.";
 
     } elseif (strlen($password) > 255) {
 
-        $error =
-            "Password is too long.";
+        $error = "Password is too long.";
 
     } elseif ($password !== $confirmPassword) {
 
-        $error =
-            "Passwords do not match.";
+        $error = "Passwords do not match.";
 
     } else {
 
-        $sql = "
-            SELECT user_id
-            FROM users
-            WHERE username = ? OR email = ?
-            LIMIT 1
-        ";
-
         try {
-            $stmt = $conn->prepare($sql);
-            $stmt->execute([$username, $email]);
+            $userModel = new User($conn);
 
-            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($userModel->checkUserExists($username, $email)) {
 
-            if ($user) {
-
-                $error =
-                    "Username or email is already in use.";
+                $error = "Username or email is already in use.";
 
             } else {
 
-                $hashedPassword =
-                    password_hash(
-                        $password,
-                        PASSWORD_DEFAULT
-                    );
+                $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
                 if ($hashedPassword === false) {
 
-                    $error =
-                        "Something went wrong. Please try again.";
+                    $error = "Something went wrong. Please try again.";
 
                 } else {
 
-                    $rank = "user";
+                    $userModel->createUser($username, $email, $hashedPassword);
 
-                    $sql = "
-                        INSERT INTO users
-                            (
-                                username,
-                                email,
-                                password,
-                                rank
-                            )
-                        VALUES
-                            (?, ?, ?, ?)
-                    ";
+                    unset($_SESSION["register_form_started"]);
 
-                    $stmt = $conn->prepare($sql);
-
-                    $stmt->execute([
-                        $username,
-                        $email,
-                        $hashedPassword,
-                        $rank
-                    ]);
-
-                    unset(
-                        $_SESSION[
-                            "register_form_started"
-                        ]
-                    );
-
-                    header(
-                        "Location: login.php?registered=1"
-                    );
-
+                    header("Location: login.php?registered=1");
                     exit;
                 }
             }
 
         } catch (PDOException $e) {
 
-            error_log($e->getMessage());
-
-            $error =
-                "Something went wrong. Please try again.";
+            if (
+                $e->getCode() === "23000" &&
+                (int) ($e->errorInfo[1] ?? 0) === 1062
+            ) {
+                $error = "Username or email is already in use.";
+            } else {
+                error_log($e->getMessage());
+                $error = "Something went wrong. Please try again.";
+            }
         }
     }
 }
 
 $pageTitle = "Register | Witchy";
-
-require_once __DIR__
-    . "/includes/public-header.php";
+require_once __DIR__ . "/includes/public-header.php";
 ?>
 
 <main class="auth-page">
