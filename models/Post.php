@@ -241,4 +241,49 @@ public function createPostWithMedia(
         throw $e;
     }
 }
+public function getPostById(int $postId, int $viewerId): ?array
+{
+    $stmt = $this->db->prepare("
+        SELECT
+            post.*,
+            users.username,
+            users.profile_image,
+            (
+                SELECT COUNT(*)
+                FROM post_like
+                WHERE post_like.post_id = post.post_id
+            ) AS like_count,
+            (
+                SELECT COUNT(*)
+                FROM comment
+                WHERE comment.post_id = post.post_id
+            ) AS comment_count,
+            EXISTS (
+                SELECT 1
+                FROM post_like
+                WHERE post_like.post_id = post.post_id
+                  AND post_like.user_id = ?
+            ) AS user_liked,
+            EXISTS (
+                SELECT 1
+                FROM save
+                WHERE save.post_id = post.post_id
+                  AND save.user_id = ?
+            ) AS user_saved,
+            EXISTS (
+                SELECT 1
+                FROM follow
+                WHERE follow.follower_id = ?
+                  AND follow.following_id = post.user_id
+            ) AS user_follows
+        FROM post
+        INNER JOIN users ON users.user_id = post.user_id
+        WHERE post.post_id = ?
+    ");
+
+    $stmt->execute([$viewerId, $viewerId, $viewerId, $postId]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $post === false ? null : $post;
+}
 }
