@@ -103,13 +103,21 @@ require_once __DIR__ . "/includes/user_header.php";
                     <?php endif; ?>
                 </div>
 
+
                 <?php if ($is_own_profile): ?>
 
-                    <a href="edit_profile.php" class="profile-edit-button">
-                        Edit Profile
-                    </a>
+                    <div class="profile-owner-actions">
+                        <a href="edit_profile.php" class="profile-edit-button">
+                            Edit Profile
+                        </a>
+
+                        <a href="settings.php" class="profile-settings-button">
+                            Account Settings
+                        </a>
+                    </div>
 
                 <?php else: ?>
+
 
                     <form
                         action="follow_user.php"

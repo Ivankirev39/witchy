@@ -625,3 +625,69 @@ html.dark-mode .profile-no-posts {
         font-size: 12px;
     }
 }
+
+
+/* Profile buttons */
+.profile-owner-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 180px;
+    flex-shrink: 0;
+}
+
+.profile-owner-actions .profile-edit-button,
+.profile-owner-actions .profile-settings-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    box-sizing: border-box;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.profile-owner-actions .profile-edit-button {
+    background: var(--accent, #C6A4CF);
+    color: #251b2a;
+    border: 1px solid transparent;
+}
+
+.profile-owner-actions .profile-settings-button {
+    background: transparent;
+    color: inherit;
+    border: 1px solid var(--accent, #C6A4CF);
+}
+
+.profile-owner-actions .profile-edit-button:hover {
+    background: #b58ebf;
+    transform: translateY(-2px);
+}
+
+.profile-owner-actions .profile-settings-button:hover {
+    background: rgba(198, 164, 207, 0.12);
+    transform: translateY(-2px);
+}
+
+.profile-owner-actions a:focus-visible {
+    outline: 2px solid var(--accent, #C6A4CF);
+    outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+    .profile-owner-actions {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .profile-owner-actions a {
+        transition: none;
+    }
+}
