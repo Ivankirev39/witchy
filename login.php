@@ -48,22 +48,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 $isBlocked = $limiter->isLimited($login, $ip);
 
-                error_log(
-                    "WITCHY LOGIN DEBUG: blocked=" .
-                    ($isBlocked ? "YES" : "NO") . PHP_EOL,
-                    3,
-                    __DIR__ . "/witchy_debug.log"
-                );
-
                 if ($isBlocked) {
                     $error = "Too many login attempts. Please try again in 15 minutes.";
                 } else {
                     $user = $userModel->findByLogin($login);
 
-                    if (
-                        $user &&
-                        password_verify($password, $user["password"])
-                    ) {
+                if (
+                    $user &&
+                    password_verify($password, $user["password"])
+                ) {
+                    // Check whether the account is banned
+                    if ($userModel->isBanned((int) $user["user_id"])) {
+                        $error = "This account is currently suspended.";
+                    } else {
+                        // Successful login
                         $limiter->clearAttempts($login, $ip);
 
                         session_regenerate_id(true);
@@ -75,12 +73,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         header("Location: feed.php");
                         exit;
                     }
-
+                } else {
+                    // Incorrect username or password
                     $limiter->recordFailure($login, $ip);
 
                     $error = "Incorrect username/email or password.";
                 }
-
+                }
             } catch (PDOException $e) {
                 error_log($e->getMessage());
                 $error = "Something went wrong. Please try again.";
@@ -120,6 +119,14 @@ require_once __DIR__ . "/includes/public-header.php";
                 <h2>Welcome back</h2>
                 <p>Log in to continue exploring.</p>
             </header>
+            
+            <?php if (($_GET["banned"] ?? "") === "1"): ?>
+                <div class="auth-message auth-error" role="alert">
+                    Your account has been suspended.
+                    Please contact support if you believe this is a mistake.
+                </div>
+            <?php endif; ?>
+
             <?php if (
                 isset($_GET["registered"]) &&
                 $_GET["registered"] === "1"

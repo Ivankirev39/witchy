@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/includes/csrf.php";
@@ -43,13 +42,19 @@ try {
         "comments" => __DIR__ . "/uploads/comments/"
     ];
 
+    
+    // Attempt to delete uploaded files after the database commit.
+    // Failed deletions remain in the queue for a later retry.
     foreach ($files as $type => $fileList) {
+        if (!isset($folders[$type])) {
+            continue;
+        }
         foreach ($fileList as $file) {
+
             if (!is_string($file) || $file === "") {
                 continue;
             }
 
-            // Only remove files inside the expected upload folder
             $filename = basename($file);
 
             if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $filename)) {
@@ -58,43 +63,79 @@ try {
 
             $path = $folders[$type] . $filename;
 
-            if (is_file($path) && !is_link($path)) {
-                if (!unlink($path)) {
-                    error_log("Could not remove uploaded file: " . $path);
+            // Missing files count as successfully cleaned up.
+            // Never follow or remove symbolic links.
+            $removed = false;
+
+            if (!file_exists($path) && !is_link($path)) {
+                $removed = true;
+            } elseif (is_file($path) && !is_link($path)) {
+                $removed = @unlink($path);
+            }
+
+            try {
+                if ($removed) {
+
+                    // File is gone: remove it from the queue.
+                    $stmt = $conn->prepare("
+                        DELETE FROM file_deletion_queue
+                        WHERE folder = ? AND filename = ?
+                    ");
+
+                    $stmt->execute([$type, $filename]);
+
+                } else {
+
+                    // File remains: record the failed attempt.
+                    $stmt = $conn->prepare("
+                        UPDATE file_deletion_queue
+                        SET attempts = attempts + 1,
+                            last_error = ?
+                        WHERE folder = ? AND filename = ?
+                    ");
+
+                    $stmt->execute([
+                        "Could not remove uploaded file.",
+                        $type,
+                        $filename
+                    ]);
+
+                    error_log(
+                        "File deletion queued for retry: " . $path
+                    );
                 }
+
+            } catch (Throwable $cleanupError) {
+
+                // The account is already deleted.
+                // Do not interrupt logout because cleanup failed.
+                error_log(
+                    "File cleanup database error: " .
+                    $cleanupError->getMessage()
+                );
             }
         }
     }
 
-    // Log out the deleted account
+
+
+    // Clear all authentication and session data
     $_SESSION = [];
 
-    if (ini_get("session.use_cookies")) {
-        $params = session_get_cookie_params();
-
-        setcookie(
-            session_name(),
-            "",
-            time() - 42000,
-            $params["path"],
-            $params["domain"],
-            $params["secure"],
-            $params["httponly"]
-        );
-    }
-
+    // Invalidate the old session ID and create a fresh one
+    if (!session_regenerate_id(true)) {
+        error_log("Failed to regenerate session after account deletion.");
 
         session_destroy();
-
-        // Start a new anonymous session for the goodbye message
-        session_start();
-        session_regenerate_id(true);
-
-        $_SESSION["account_deleted_message"] = true;
-
         header("Location: account_deleted.php");
         exit;
+    }
 
+    // Show the account deletion confirmation
+    $_SESSION["account_deleted_message"] = true;
+
+    header("Location: account_deleted.php");
+    exit;
 
 } catch (Throwable $e) {
     error_log($e->getMessage());

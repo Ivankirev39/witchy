@@ -170,15 +170,28 @@ class User
                 "comments" => []
             ];
 
-            // Images and videos from the user's posts
+
+            // Collect images and videos from the user's posts,
+            // including older images stored in post.image
             $stmt = $this->db->prepare("
-                SELECT post_media.file
-                FROM post_media
-                JOIN post ON post_media.post_id = post.post_id
-                WHERE post.user_id = ?
+                SELECT pm.file
+                FROM post_media pm
+                INNER JOIN post p ON p.post_id = pm.post_id
+                WHERE p.user_id = ?
+
+                UNION
+
+                SELECT p.image AS file
+                FROM post p
+                WHERE p.user_id = ?
+                  AND p.image IS NOT NULL
+                  AND p.image != ''
             ");
-            $stmt->execute([$userId]);
+
+            $stmt->execute([$userId, $userId]);
+
             $files["posts"] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
 
             // Comment images written by this user or attached to their posts
             $stmt = $this->db->prepare("
@@ -192,6 +205,32 @@ class User
             ");
             $stmt->execute([$userId, $userId]);
             $files["comments"] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // Queue uploaded files for deletion before removing the account.
+            // This happens inside the existing database transaction.
+            $queueStmt = $this->db->prepare("
+                INSERT INTO file_deletion_queue (folder, filename)
+                VALUES (?, ?)
+                ON DUPLICATE KEY UPDATE queue_id = queue_id
+            ");
+
+            foreach ($files as $folder => $fileList) {
+                foreach ($fileList as $file) {
+                    if (!is_string($file) || $file === "") {
+                        continue;
+                    }
+
+                    $filename = basename($file);
+
+                    // Only accept safe filenames
+                    if (!preg_match('/^[a-zA-Z0-9_.-]+$/', $filename)) {
+                        continue;
+                    }
+
+                    $queueStmt->execute([$folder, $filename]);
+                }
+            }
+
 
             // Remove notifications involving this account or its posts
             $stmt = $this->db->prepare("
@@ -233,5 +272,26 @@ class User
 
             throw $e;
         }
+    }  
+
+    // Check whether a user currently has an active ban
+    public function isBanned(int $userId): bool
+    {
+        $sql = "
+            SELECT 1
+            FROM ban
+            WHERE user_id = ?
+              AND banned_at <= NOW()
+              AND (
+                  expires_at IS NULL
+                  OR expires_at > NOW()
+              )
+            LIMIT 1
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
+
+        return $stmt->fetchColumn() !== false;
     }
-}   
+} 
