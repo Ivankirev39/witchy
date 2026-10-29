@@ -486,4 +486,122 @@ public function deletePost(int $postId, int $userId): ?array
         throw $e;
     }
 }
+
+public function searchExplorePosts(
+    string $search,
+    string $topic,
+    string $sort,
+    int $limit,
+    int $offset
+): array {
+    $orderByOptions = [
+        "newest" => "p.created_at DESC",
+        "oldest" => "p.created_at ASC",
+        "title_asc" => "p.title ASC",
+        "title_desc" => "p.title DESC"
+    ];
+
+    $orderBy = $orderByOptions[$sort] ?? $orderByOptions["newest"];
+
+    $sql = "
+        SELECT
+            p.post_id,
+            p.user_id,
+            p.title,
+            p.description,
+            p.topic,
+            p.created_at,
+            u.username,
+            pm.file AS media_file,
+            pm.media_type
+        FROM post p
+        INNER JOIN users u ON u.user_id = p.user_id
+        LEFT JOIN post_media pm ON pm.media_id = (
+            SELECT pm2.media_id
+            FROM post_media pm2
+            WHERE pm2.post_id = p.post_id
+            ORDER BY pm2.sort_order ASC, pm2.media_id ASC
+            LIMIT 1
+        )
+    ";
+
+    $conditions = [];
+    $params = [];
+
+    if ($search !== "") {
+        $conditions[] = "(
+            p.title LIKE ?
+            OR p.description LIKE ?
+            OR p.topic LIKE ?
+            OR u.username LIKE ?
+        )";
+
+        $term = "%" . $search . "%";
+        array_push($params, $term, $term, $term, $term);
+    }
+
+    if ($topic !== "") {
+        $conditions[] = "p.topic = ?";
+        $params[] = $topic;
+    }
+
+    if ($conditions !== []) {
+        $sql .= " WHERE " . implode(" AND ", $conditions);
+    }
+
+    $sql .= " ORDER BY " . $orderBy . " LIMIT ? OFFSET ?";
+
+    $stmt = $this->db->prepare($sql);
+
+    foreach ($params as $index => $value) {
+        $stmt->bindValue($index + 1, $value, PDO::PARAM_STR);
+    }
+
+    $stmt->bindValue(count($params) + 1, $limit, PDO::PARAM_INT);
+    $stmt->bindValue(count($params) + 2, $offset, PDO::PARAM_INT);
+
+    $stmt->execute();
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+public function countExplorePosts(string $search, string $topic): int
+{
+    $sql = "
+        SELECT COUNT(*)
+        FROM post p
+        INNER JOIN users u ON u.user_id = p.user_id
+    ";
+
+    $conditions = [];
+    $params = [];
+
+    if ($search !== "") {
+        $conditions[] = "(
+            p.title LIKE ?
+            OR p.description LIKE ?
+            OR p.topic LIKE ?
+            OR u.username LIKE ?
+        )";
+
+        $term = "%" . $search . "%";
+        array_push($params, $term, $term, $term, $term);
+    }
+
+    if ($topic !== "") {
+        $conditions[] = "p.topic = ?";
+        $params[] = $topic;
+    }
+
+    if ($conditions !== []) {
+        $sql .= " WHERE " . implode(" AND ", $conditions);
+    }
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute($params);
+
+    return (int) $stmt->fetchColumn();
+}
+
+
 }
