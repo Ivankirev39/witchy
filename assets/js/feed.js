@@ -1,7 +1,4 @@
-// =========================
 // VIDEO AUTOPLAY
-// =========================
-
 const feedVideos = document.querySelectorAll(".post-media-video");
 
 const observerOptions = {
@@ -46,11 +43,7 @@ feedVideos.forEach((video) => {
     videoObserver.observe(video);
 });
 
-
-// =========================
 // OPEN / CLOSE COMMENTS
-// =========================
-
 document.querySelectorAll(".comments-toggle").forEach((button) => {
     button.addEventListener("click", () => {
         const post = button.closest(".post-card");
@@ -60,11 +53,7 @@ document.querySelectorAll(".comments-toggle").forEach((button) => {
     });
 });
 
-
-// =========================
 // LIKE WITHOUT RELOAD
-// =========================
-
 document.querySelectorAll(".like-form").forEach((form) => {
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -114,11 +103,7 @@ document.querySelectorAll(".like-form").forEach((form) => {
     });
 });
 
-
-// =========================
 // SAVE WITHOUT RELOAD
-// =========================
-
 document.querySelectorAll(".save-form").forEach((form) => {
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -164,11 +149,7 @@ document.querySelectorAll(".save-form").forEach((form) => {
     });
 });
 
-
-// =========================
 // COMMENT WITHOUT RELOAD
-// =========================
-
 document.querySelectorAll(".comment-form").forEach((form) => {
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -244,11 +225,15 @@ document.querySelectorAll(".comment-form").forEach((form) => {
             returnTo.type = "hidden";
             returnTo.name = "return_to";
             returnTo.value = "feed";
+            const csrfToken = document.createElement("input");
+            csrfToken.type = "hidden";
+            csrfToken.name = "csrf_token";
+            csrfToken.value = form.querySelector('input[name="csrf_token"]').value;
             const deleteButton = document.createElement("button");
             deleteButton.type = "submit";
             deleteButton.className = "delete-comment-button";
             deleteButton.textContent = "Delete";
-            deleteForm.append(commentId, postId, returnTo, deleteButton);
+            deleteForm.append(commentId, postId, returnTo, csrfToken, deleteButton);
             content.appendChild(deleteForm);
             const date = document.createElement("small");
             date.textContent = data.created_at;
@@ -267,10 +252,7 @@ document.querySelectorAll(".comment-form").forEach((form) => {
     });
 });
 
-// =========================
 // DELETE COMMENT WITHOUT RELOAD
-// =========================
-
 document.addEventListener("submit", async (event) => {
     const form = event.target.closest(".delete-comment-form");
 
