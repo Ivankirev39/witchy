@@ -24,13 +24,21 @@ $sql = "
         p.user_id,
         p.title,
         p.description,
-        p.image,
         p.topic,
         p.created_at,
-        u.username
+        u.username,
+        pm.file AS media_file,
+        pm.media_type
     FROM post p
     INNER JOIN users u
         ON u.user_id = p.user_id
+    LEFT JOIN post_media pm ON pm.media_id = (
+        SELECT pm2.media_id
+        FROM post_media pm2
+        WHERE pm2.post_id = p.post_id
+        ORDER BY pm2.sort_order ASC, pm2.media_id ASC
+        LIMIT 1
+    )
 ";
 
 // Build conditions and their corresponding parameters.
@@ -201,8 +209,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
                 <option
                     value="<?php echo htmlspecialchars($url, ENT_QUOTES, "UTF-8"); ?>"
-                    <?php echo $sort === $value ? "selected" : ""; ?>
-                >
+                    <?php echo $sort === $value ? "selected" : ""; ?>>
                     <?php echo htmlspecialchars($label, ENT_QUOTES, "UTF-8"); ?>
                 </option>
 
@@ -241,26 +248,31 @@ require_once __DIR__ . "/includes/user_header.php";
                         role="link"
                         tabindex="0"
                         onclick="window.location.href='post.php?id=<?php echo (int) $post['post_id']; ?>'"
-                        onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?php echo (int) $post['post_id']; ?>'; }">                        
+                        onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?php echo (int) $post['post_id']; ?>'; }">
                         <div class="explore-cards-image">
                             <a href="post.php?id=<?php echo (int) $post['post_id']; ?>">
-                                <?php if (!empty($post['image'])): ?>
-                                    <img
-                                        src="uploads/posts/<?php echo rawurlencode(basename($post['image'])); ?>"
-                                        alt="<?php echo htmlspecialchars($post['title'], ENT_QUOTES, 'UTF-8'); ?>"
-                                        loading="lazy"
-                                    >
+                                <?php if (!empty($post['media_file'])): ?>
+                                    <?php $mediaPath = "uploads/posts/" . rawurlencode(basename($post['media_file'])); ?>
 
+                                    <?php if ($post['media_type'] === 'video'): ?>
+                                        <video muted playsinline preload="metadata">
+                                            <source src="<?php echo $mediaPath; ?>">
+                                        </video>
+                                    <?php else: ?>
+                                        <img
+                                            src="<?php echo $mediaPath; ?>"
+                                            alt="<?php echo htmlspecialchars($post['title'], ENT_QUOTES, 'UTF-8'); ?>"
+                                            loading="lazy">
+                                    <?php endif; ?>
                                 <?php else: ?>
                                     <div class="explore-cards-placeholder">
                                         <span>✦</span>
-                                        No image
+                                        No media
                                     </div>
-
                                 <?php endif; ?>
                             </a>
                         </div>
-
+                        
                         <div class="explore-cards-body">
                             <p class="explore-cards-author">
                                 @<?php echo htmlspecialchars($post['username']); ?>
@@ -305,8 +317,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
                                         <time
                                             class="explore-cards-date"
-                                            datetime="<?php echo htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8'); ?>"
-                                        >
+                                            datetime="<?php echo htmlspecialchars($post['created_at'], ENT_QUOTES, 'UTF-8'); ?>">
                                             <?php echo date("M j, Y", strtotime($post['created_at'])); ?>
                                         </time>
 
@@ -366,8 +377,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
                     <a
                         href="<?php echo htmlspecialchars($pageUrl, ENT_QUOTES, "UTF-8"); ?>"
-                        class="<?php echo $pageNumber === $page ? "active" : ""; ?>"
-                    >
+                        class="<?php echo $pageNumber === $page ? "active" : ""; ?>">
                         <?php echo $pageNumber; ?>
                     </a>
                 <?php endfor; ?>
