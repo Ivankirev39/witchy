@@ -89,17 +89,45 @@ class Comment
 
         return $username === false ? null : $username;
     }
-
-    public function deleteComment(int $commentId, int $userId): bool
+    
+    public function deleteComment(int $commentId, int $userId): ?array
     {
-        $stmt = $this->db->prepare("
-        DELETE FROM comment
-        WHERE comment_id = ?
-        AND user_id = ?
-    ");
+        $this->db->beginTransaction();
 
-        $stmt->execute([$commentId, $userId]);
+        try {
+            $stmt = $this->db->prepare("
+            SELECT media_file
+            FROM comment
+            WHERE comment_id = ? AND user_id = ?
+            FOR UPDATE
+        ");
+            $stmt->execute([$commentId, $userId]);
+            $comment = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        return $stmt->rowCount() > 0;
+            if ($comment === false) {
+                $this->db->rollBack();
+                return null;
+            }
+
+            $stmt = $this->db->prepare("
+            DELETE FROM comment
+            WHERE comment_id = ? AND user_id = ?
+        ");
+            $stmt->execute([$commentId, $userId]);
+
+            if ($stmt->rowCount() !== 1) {
+                throw new RuntimeException("Comment was not deleted.");
+            }
+
+            $this->db->commit();
+
+            return $comment;
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 }

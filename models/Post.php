@@ -359,4 +359,62 @@ public function removeLike(int $userId, int $postId): void
     ");
     $stmt->execute([$userId, $postId]);
 }
+public function deletePost(int $postId, int $userId): ?array
+{
+    $this->db->beginTransaction();
+
+    try {
+        $stmt = $this->db->prepare("
+            SELECT post_id
+            FROM post
+            WHERE post_id = ? AND user_id = ?
+            FOR UPDATE
+        ");
+        $stmt->execute([$postId, $userId]);
+
+        if ($stmt->fetchColumn() === false) {
+            $this->db->rollBack();
+            return null;
+        }
+
+        $stmt = $this->db->prepare("
+            SELECT file
+            FROM post_media
+            WHERE post_id = ?
+        ");
+        $stmt->execute([$postId]);
+        $postFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $stmt = $this->db->prepare("
+            SELECT media_file
+            FROM comment
+            WHERE post_id = ? AND media_file IS NOT NULL
+        ");
+        $stmt->execute([$postId]);
+        $commentFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $stmt = $this->db->prepare("
+            DELETE FROM post
+            WHERE post_id = ? AND user_id = ?
+        ");
+        $stmt->execute([$postId, $userId]);
+
+        if ($stmt->rowCount() !== 1) {
+            throw new RuntimeException("Post was not deleted.");
+        }
+
+        $this->db->commit();
+
+        return [
+            "posts" => $postFiles,
+            "comments" => $commentFiles
+        ];
+    } catch (Throwable $e) {
+        if ($this->db->inTransaction()) {
+            $this->db->rollBack();
+        }
+
+        throw $e;
+    }
+}
 }

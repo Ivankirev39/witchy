@@ -28,10 +28,20 @@ $pdo = $connector->connectToDB();
 // Use Comment.php for database operations
 $commentModel = new Comment($pdo);
 
-$deleted = $commentModel->deleteComment(
+$deletedComment = $commentModel->deleteComment(
     $comment_id,
     $user_id
 );
+$deleted = $deletedComment !== null;
+
+if ($deleted && !empty($deletedComment["media_file"])) {
+    $commentFile = __DIR__ . "/uploads/comments/"
+        . basename($deletedComment["media_file"]);
+
+    if (is_file($commentFile) && !unlink($commentFile)) {
+        error_log("Could not remove comment image: " . $commentFile);
+    }
+}
 // Get the updated comment count
 $commentCount = $commentModel->getCommentCountByPostId(
     $post_id
