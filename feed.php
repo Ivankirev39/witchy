@@ -14,7 +14,14 @@ $pdo = $pdoConnector->connectToDB();
 $postModel = new Post($pdo);
 $commentModel = new Comment($pdo);
 
-$posts = $postModel->getFeedPosts($user_id);
+$feedMode = ($_GET["feed"] ?? "for_you") === "following"
+    ? "following"
+    : "for_you";
+
+$posts = $postModel->getFeedPosts(
+    $user_id,
+    $feedMode === "following"
+);
 
 require_once __DIR__ . "/includes/user_header.php";
 ?>
@@ -28,9 +35,17 @@ require_once __DIR__ . "/includes/user_header.php";
     </header>
     <!-- FEED TABS -->
     <div class="feed-tabs">
-        <button class="feed-tab active">For you</button>
-        <button class="feed-tab">Following</button>
-    </div>
+    <a
+        href="feed.php?feed=for_you"
+        class="feed-tab <?= $feedMode === "for_you" ? "active" : "" ?>">
+        For you
+    </a>
+    <a
+        href="feed.php?feed=following"
+        class="feed-tab <?= $feedMode === "following" ? "active" : "" ?>">
+        Following
+    </a>
+</div>
     <!-- FEED -->
     <section class="feed-content">
         <?php foreach ($posts as $post): ?>
