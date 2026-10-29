@@ -11,7 +11,7 @@ $error = "";
 try {
     if ($search !== "") {
         $stmt = $conn->prepare("
-            SELECT user_id, username, email, rank, birthdate
+            SELECT user_id, username, rank
             FROM users
             WHERE username LIKE ? OR email LIKE ?
             ORDER BY user_id DESC
@@ -21,7 +21,7 @@ try {
         $stmt->execute([$term, $term]);
     } else {
         $stmt = $conn->query("
-            SELECT user_id, username, email, rank, birthdate
+            SELECT user_id, username, rank
             FROM users
             ORDER BY user_id DESC
         ");
@@ -72,22 +72,18 @@ require_once __DIR__ . "/includes/admin_header.php";
                     <tr>
                         <th>ID</th>
                         <th>Username</th>
-                        <th>Email</th>
                         <th>Role</th>
-                        <th>Birthdate</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (empty($users)): ?>
                         <tr>
-                            <td colspan="5">No users found.</td>
+                            <td colspan="3">No users found.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($users as $user): ?>
                             <tr>
-                                <td>
-                                    <?= (int) $user["user_id"] ?>
-                                </td>
+                                <td><?= (int) $user["user_id"] ?></td>
                                 <td>
                                     <?= htmlspecialchars(
                                         $user["username"] ?? "",
@@ -97,21 +93,7 @@ require_once __DIR__ . "/includes/admin_header.php";
                                 </td>
                                 <td>
                                     <?= htmlspecialchars(
-                                        $user["email"] ?? "",
-                                        ENT_QUOTES,
-                                        "UTF-8"
-                                    ) ?>
-                                </td>
-                                <td>
-                                    <?= htmlspecialchars(
                                         $user["rank"] ?? "user",
-                                        ENT_QUOTES,
-                                        "UTF-8"
-                                    ) ?>
-                                </td>
-                                <td>
-                                    <?= htmlspecialchars(
-                                        $user["birthdate"] ?? "",
                                         ENT_QUOTES,
                                         "UTF-8"
                                     ) ?>
