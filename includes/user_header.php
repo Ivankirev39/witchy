@@ -89,6 +89,9 @@ if (isset($_SESSION["user_id"])) {
                 <a href="/witchy/rules.php" class="<?= $currentPage === "rules.php" ? "active" : "" ?>">Rules</a>
                 <a href="/witchy/saved.php" class="<?= $currentPage === "saved.php" ? "active" : "" ?>">Saved</a>
                 <a href="/witchy/profile.php" class="<?= $currentPage === "profile.php" ? "active" : "" ?>">Profile</a>
+                <?php if (($_SESSION["rank"] ?? "") === "admin"): ?>
+                    <a href="/witchy/admin/index.php">Admin Dashboard</a>
+                <?php endif; ?>
             </nav>
             <a href="/witchy/upload.php" class="create-post-button <?= $currentPage === "upload.php" ? "active" : "" ?>">
                 <span class="create-post-icon">+</span>

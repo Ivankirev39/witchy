@@ -1,0 +1,243 @@
+/* Admin - Content Page */
+
+.admin-content-page {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.admin-content-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-content-heading h2 {
+    margin: 0;
+    color: #302638;
+    font-size: 1.8rem;
+}
+
+.admin-content-heading p {
+    margin: 0;
+    color: #817587;
+}
+
+/* Tabs */
+
+.admin-content-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 6px;
+    width: fit-content;
+    max-width: 100%;
+    background: #eee8f3;
+    border-radius: 12px;
+}
+
+.admin-content-tabs a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 9px;
+    color: #68447f;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.admin-content-tabs a:hover {
+    background: #e3d9ec;
+}
+
+.admin-content-tabs a.active {
+    background: #8660a2;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(48, 38, 56, 0.12);
+}
+
+/* Search */
+
+.admin-content-search {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    padding: 18px;
+    background: #ffffff;
+    border: 1px solid #e9e0ef;
+    border-radius: 14px;
+}
+
+.admin-content-search input {
+    flex: 1;
+    min-width: 220px;
+    padding: 11px 14px;
+    border: 1px solid #e9e0ef;
+    border-radius: 9px;
+    font: inherit;
+    color: #302638;
+}
+
+.admin-content-search input:focus {
+    outline: 2px solid #c8afd9;
+    border-color: #8660a2;
+}
+
+.admin-content-search button {
+    padding: 11px 20px;
+    border: none;
+    border-radius: 9px;
+    background: #8660a2;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-content-search button:hover {
+    background: #68447f;
+}
+
+.admin-content-search a {
+    color: #68447f;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* Content panel */
+
+.admin-content-panel {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e9e0ef;
+    border-radius: 14px;
+}
+
+.admin-content-panel-header {
+    padding: 20px 22px;
+    border-bottom: 1px solid #e9e0ef;
+}
+
+.admin-content-panel-header h3 {
+    margin: 0;
+    color: #302638;
+    font-size: 1.1rem;
+}
+
+.admin-content-panel-header p {
+    margin: 5px 0 0;
+    color: #817587;
+    font-size: 0.9rem;
+}
+
+/* Table */
+
+.admin-content-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.admin-content-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.admin-content-table th {
+    padding: 13px 16px;
+    background: #faf8fc;
+    color: #817587;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.admin-content-table td {
+    padding: 15px 16px;
+    border-top: 1px solid #f0eaf3;
+    color: #403548;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.admin-content-table tbody tr:hover {
+    background: #fcfaff;
+}
+
+.admin-content-table td:first-child {
+    color: #817587;
+    font-weight: 600;
+}
+
+/* Status labels */
+
+.admin-content-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #f0eaf5;
+    color: #68447f;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.admin-content-status.hot {
+    background: #fff0e8;
+    color: #a75b35;
+}
+
+.admin-content-status.pinned {
+    background: #e9e4f7;
+    color: #624a91;
+}
+
+/* Empty and error states */
+
+.admin-content-empty {
+    padding: 38px 20px;
+    color: #817587;
+    text-align: center;
+}
+
+.admin-content-error {
+    padding: 14px 16px;
+    border: 1px solid #e9cbd0;
+    border-radius: 10px;
+    background: #fff4f5;
+    color: #a94455;
+}
+
+/* Responsive */
+
+@media (max-width: 650px) {
+    .admin-content-tabs {
+        width: 100%;
+    }
+
+    .admin-content-tabs a {
+        flex: 1;
+        padding: 10px 12px;
+    }
+
+    .admin-content-search {
+        align-items: stretch;
+    }
+
+    .admin-content-search input {
+        min-width: 100%;
+    }
+
+    .admin-content-search button {
+        flex: 1;
+    }
+
+    .admin-content-heading h2 {
+        font-size: 1.5rem;
+    }
+}

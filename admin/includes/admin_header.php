@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/../../includes/csrf.php";
 $pageTitle = $pageTitle ?? "Admin | Witchy";
 ?>
 
@@ -30,12 +31,17 @@ $pageTitle = $pageTitle ?? "Admin | Witchy";
         <nav class="admin-nav" aria-label="Admin navigation">
             <a href="/witchy/admin/index.php">Dashboard</a>
             <a href="/witchy/admin/users.php">Users</a>
-            <a href="/witchy/admin/posts.php">Posts</a>
+            <a href="/witchy/admin/content.php">Content</a>
             <a href="/witchy/admin/rules.php">Rules</a>
-            <a href="/witchy/admin/site_settings.php">Settings</a>
-            <a href="/witchy/admin/styling.php">Styling</a>
-            <a href="/witchy/admin/contact.php">Support</a>
-            <a href="/witchy/admin/logout.php">Log out</a>
+            <a href="/witchy/feed.php">Back to Witchy</a>
+            <form method="POST" action="/witchy/admin/logout.php" class="admin-logout-form">
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                >
+                <button type="submit" class="admin-logout-button">Log out</button>
+            </form>
         </nav>
     </div>
 </header>
