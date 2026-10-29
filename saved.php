@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/models/Post.php";
 
 $pageTitle = "Saved | Witchy";
 $pageCss = "saved.css";
@@ -10,52 +11,8 @@ $user_id = (int) $_SESSION["user_id"];
 $sort = $_GET["sort"] ?? "newest_saved";
 $topic = trim($_GET["topic"] ?? "");
 
-$sql = "
-    SELECT
-        p.post_id,
-        p.user_id,
-        p.title,
-        p.description,
-        p.topic,
-        p.created_at,
-        u.username,
-        pm.file AS media_file,
-        pm.media_type
-    FROM save s
-    INNER JOIN post p ON p.post_id = s.post_id
-    INNER JOIN users u ON u.user_id = p.user_id
-    LEFT JOIN post_media pm ON pm.media_id = (
-        SELECT pm2.media_id
-        FROM post_media pm2
-        WHERE pm2.post_id = p.post_id
-        ORDER BY pm2.sort_order ASC, pm2.media_id ASC
-        LIMIT 1
-    )
-    WHERE s.user_id = ?
-";
-
-$params = [$user_id];
-
-if ($topic !== "") {
-    $sql .= " AND p.topic = ?";
-    $params[] = $topic;
-}
-
-if ($sort === "oldest_saved") {
-    $sql .= " ORDER BY s.created_at ASC";
-} elseif ($sort === "newest_post") {
-    $sql .= " ORDER BY p.created_at DESC";
-} elseif ($sort === "oldest_post") {
-    $sql .= " ORDER BY p.created_at ASC";
-} elseif ($sort === "title_asc") {
-    $sql .= " ORDER BY p.title ASC";
-} else {
-    $sql .= " ORDER BY s.created_at DESC";
-}
-
-$stmt = $conn->prepare($sql);
-$stmt->execute($params);
-$savedPosts = $stmt->fetchAll();
+$postModel = new Post($conn);
+$savedPosts = $postModel->getSavedPosts($user_id, $topic, $sort);
 
 require_once __DIR__ . "/includes/user_header.php";
 ?>
