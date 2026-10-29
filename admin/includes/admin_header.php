@@ -9,6 +9,16 @@ $pageTitle = $pageTitle ?? "Admin | Witchy";
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, "UTF-8") ?></title>
     <link rel="stylesheet" href="/witchy/admin/css/admin.css">
+        <?php if (!empty($pageCss)): ?>
+        <link
+            rel="stylesheet"
+            href="/witchy/admin/css/<?= htmlspecialchars(
+                $pageCss,
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>"
+        >
+    <?php endif; ?>
 </head>
 <body>
 <header class="admin-header">
