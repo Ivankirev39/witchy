@@ -3,53 +3,93 @@ require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/models/User.php";
+require_once __DIR__ . "/models/LoginRateLimiter.php";
 
 if (isset($_SESSION["user_id"])) {
     header("Location: feed.php");
     exit;
 }
 
+
 $error = "";
 $login = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
     if (!csrf_valid($_POST["csrf_token"] ?? null)) {
         http_response_code(403);
         exit("Invalid request.");
     }
 
-    $login = trim($_POST["login"] ?? "");
+    $rawLogin = $_POST["login"] ?? "";
     $password = $_POST["password"] ?? "";
 
-    if ($login === "" || $password === "") {
-        $error = "Incorrect username/email or password.";
+    if (
+        !is_string($rawLogin) ||
+        !is_string($password)
+    ) {
+        $error = "Invalid login request.";
     } else {
-            try {
-            $userModel = new User($conn);
-            $user = $userModel->findByLogin($login);
-            
-            if (
-                $user &&
-                password_verify($password, $user["password"])
-            ) {
-                session_regenerate_id(true);
+        $login = trim($rawLogin);
 
-                $_SESSION["user_id"] = $user["user_id"];
-                $_SESSION["username"] = $user["username"];
-                $_SESSION["rank"] = $user["rank"];
-
-                header("Location: feed.php");
-                exit;
-            }
-
+        if (
+            $login === "" ||
+            $password === "" ||
+            strlen($login) > 100 ||
+            strlen($password) > 255
+        ) {
             $error = "Incorrect username/email or password.";
+        } else {
+            try {
+                $userModel = new User($conn);
+                $limiter = new LoginRateLimiter($conn);
 
-        } catch (PDOException $e) {
-            error_log($e->getMessage());
-            $error = "Something went wrong. Please try again.";
+                $ip = $_SERVER["REMOTE_ADDR"] ?? "";
+
+                $isBlocked = $limiter->isLimited($login, $ip);
+
+                error_log(
+                    "WITCHY LOGIN DEBUG: blocked=" .
+                    ($isBlocked ? "YES" : "NO") . PHP_EOL,
+                    3,
+                    __DIR__ . "/witchy_debug.log"
+                );
+
+                if ($isBlocked) {
+                    $error = "Too many login attempts. Please try again in 15 minutes.";
+                } else {
+                    $user = $userModel->findByLogin($login);
+
+                    if (
+                        $user &&
+                        password_verify($password, $user["password"])
+                    ) {
+                        $limiter->clearAttempts($login, $ip);
+
+                        session_regenerate_id(true);
+
+                        $_SESSION["user_id"] = (int) $user["user_id"];
+                        $_SESSION["username"] = $user["username"];
+                        $_SESSION["rank"] = $user["rank"];
+
+                        header("Location: feed.php");
+                        exit;
+                    }
+
+                    $limiter->recordFailure($login, $ip);
+
+                    $error = "Incorrect username/email or password.";
+                }
+
+            } catch (PDOException $e) {
+                error_log($e->getMessage());
+                $error = "Something went wrong. Please try again.";
+            }
         }
     }
 }
+
+
 
 $pageTitle = "Log in | Witchy";
 require_once __DIR__ . "/includes/public-header.php";

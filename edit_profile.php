@@ -149,24 +149,72 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
 
             try {
-                $userModel->updateProfile(
-                    $user_id,
-                    $username,
-                    $birthdate,
-                    $bio,
-                    $profile_image,
-                    $cover_image
-                );
+                $updated = $userModel->updateProfile(
+                $user_id,
+                $username,
+                $birthdate,
+                $bio,
+                $profile_image,
+                $cover_image
+            );
+
+            if (!$updated) {
+                throw new RuntimeException("Profile update failed.");
+            }
+
+                // Remove old profile images only after a successful update
+                $previousImages = [
+                    "profile_image" => $user["profile_image"] ?? null,
+                    "cover_image" => $user["cover_image"] ?? null
+                ];
+
+                $currentImages = [
+                    "profile_image" => $profile_image,
+                    "cover_image" => $cover_image
+                ];
+
+                foreach ($previousImages as $field => $oldFile) {
+                    $newFile = $currentImages[$field];
+
+                    // No previous image or the image has not changed
+                    if (empty($oldFile) || $oldFile === $newFile) {
+                        continue;
+                    }
+
+                    // Accept only the expected stored profile-image path
+                    $expectedPrefix = $field === "profile_image"
+                        ? "profile"
+                        : "cover";
+
+                    $pattern = '~^uploads/profiles/' .
+                        $expectedPrefix . '_' .
+                        $user_id .
+                        '_[a-f0-9]{16}\.(?:jpg|png|webp)$~';
+
+                    if (!preg_match($pattern, $oldFile)) {
+                        error_log("Unexpected old profile image path.");
+                        continue;
+                    }
+
+                    $oldPath = __DIR__ . "/" . $oldFile;
+
+                    if (is_file($oldPath) && !is_link($oldPath)) {
+                        if (!unlink($oldPath)) {
+                            error_log("Could not delete old profile image.");
+                        }
+                    }
+                }
 
                 $_SESSION["username"] = $username;
 
                 header("Location: profile.php?updated=1");
                 exit;
 
-            } catch (PDOException $e) {
+            } catch (Throwable $e) {
                 error_log($e->getMessage());
 
                 if (
+                    $e instanceof PDOException &&
                     $e->getCode() === "23000" &&
                     (int) ($e->errorInfo[1] ?? 0) === 1062
                 ) {
