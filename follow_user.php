@@ -57,32 +57,6 @@ if ($action === "follow") {
     exit("Invalid action.");
 }
 
-
-    // Check the actual follow status after the action
-    $followingNow = $followModel->isFollowing(
-        $user_id,
-        $target_id
-    );
-
-    $expectedFollowing = $action === "follow";
-
-    if ($followingNow !== $expectedFollowing) {
-        http_response_code(500);
-
-        if (($_SERVER["HTTP_X_REQUESTED_WITH"] ?? "") === "XMLHttpRequest") {
-            header("Content-Type: application/json; charset=UTF-8");
-
-            echo json_encode([
-                "success" => false,
-                "error" => "Could not update follow status."
-            ]);
-        } else {
-            echo "Could not update follow status.";
-        }
-
-        exit;
-    }
-
     // Check the actual follow status after the action
     $followingNow = $followModel->isFollowing(
         $user_id,
