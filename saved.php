@@ -16,13 +16,21 @@ $sql = "
         p.user_id,
         p.title,
         p.description,
-        p.image,
         p.topic,
         p.created_at,
-        u.username
+        u.username,
+        pm.file AS media_file,
+        pm.media_type
     FROM save s
     INNER JOIN post p ON p.post_id = s.post_id
     INNER JOIN users u ON u.user_id = p.user_id
+    LEFT JOIN post_media pm ON pm.media_id = (
+        SELECT pm2.media_id
+        FROM post_media pm2
+        WHERE pm2.post_id = p.post_id
+        ORDER BY pm2.sort_order ASC, pm2.media_id ASC
+        LIMIT 1
+    )
     WHERE s.user_id = ?
 ";
 
@@ -134,44 +142,52 @@ require_once __DIR__ . "/includes/user_header.php";
                         role="link"
                         tabindex="0"
                         onclick="window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'"
-                        onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'; }"
-                    >
+                        onkeydown="if (event.key === 'Enter' || event.key === ' ') { window.location.href='post.php?id=<?= (int) $post["post_id"] ?>'; }">
                         <form action="save_post.php" method="POST" class="saved-card-unsave-form">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                             <input
                                 type="hidden"
                                 name="post_id"
-                                value="<?= (int) $post["post_id"] ?>"
-                            >
+                                value="<?= (int) $post["post_id"] ?>">
                             <input
                                 type="hidden"
                                 name="redirect"
-                                value="saved.php"
-                            >
+                                value="saved.php">
                             <button
                                 type="submit"
                                 class="saved-card-unsave"
                                 aria-label="Remove from saved"
                                 title="Remove from saved"
-                                onclick="event.stopPropagation();"
-                            >
+                                onclick="event.stopPropagation();">
                                 <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                                     <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z" />
                                 </svg>
                             </button>
                         </form>
-
                         <div class="saved-card-image">
-                            <?php if (!empty($post["image"])): ?>
-                                <img
-                                    src="uploads/posts/<?= rawurlencode(basename($post["image"])) ?>"
-                                    alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
-                                    loading="lazy"
-                                >
+                            <?php if (!empty($post["media_file"])): ?>
+                                <?php $mediaPath = "uploads/posts/" . rawurlencode(basename($post["media_file"])); ?>
+
+                                <?php if ($post["media_type"] === "video"): ?>
+                                    <video
+                                        class="saved-card-media"
+                                        muted
+                                        playsinline
+                                        preload="metadata"
+                                        onclick="event.stopPropagation();">
+                                        <source src="<?= $mediaPath ?>">
+                                    </video>
+                                <?php else: ?>
+                                    <img
+                                        class="saved-card-media"
+                                        src="<?= $mediaPath ?>"
+                                        alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
+                                        loading="lazy">
+                                <?php endif; ?>
                             <?php else: ?>
                                 <div class="saved-card-placeholder">
                                     <span>✦</span>
-                                    No image
+                                    No media
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -198,8 +214,7 @@ require_once __DIR__ . "/includes/user_header.php";
                                 <p class="saved-card-topic">
                                     <a
                                         href="explore.php?topic=<?= urlencode($post["topic"]) ?>"
-                                        onclick="event.stopPropagation();"
-                                    >
+                                        onclick="event.stopPropagation();">
                                         <?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
                                     </a>
                                 </p>

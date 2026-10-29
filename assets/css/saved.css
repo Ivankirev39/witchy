@@ -64,9 +64,15 @@
     object-fit: cover;
     transition: transform 0.2s ease;
 }
-
 .saved-card:hover .saved-card-image img {
     transform: scale(1.02);
+}
+.saved-card-image video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
 }
 
 .saved-card-placeholder {
