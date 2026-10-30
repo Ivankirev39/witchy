@@ -34,6 +34,7 @@ if ($hasNextPage) {
 
 $postIds = array_column($posts, "post_id");
 $postMediaByPost = $postModel->getPostMediaForPosts($postIds);
+$commentsByPost = $commentModel->getCommentsForPosts($postIds, 5);
 
 require_once __DIR__ . "/includes/user_header.php";
 ?>
@@ -228,7 +229,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 <div class="comments-area" hidden>
                     <div class="post-comments">
                         <?php
-                        $postComments = $commentModel->getCommentsByPostId($postId);
+                        $postComments = $commentsByPost[$postId] ?? [];
                         ?>
                         <?php foreach ($postComments as $comment): ?>
                             <div class="comment">

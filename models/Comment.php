@@ -96,7 +96,7 @@ class Comment
 
         return $username === false ? null : $username;
     }
-    
+
     public function deleteComment(int $commentId, int $userId): ?array
     {
         $this->db->beginTransaction();
@@ -136,5 +136,61 @@ class Comment
 
             throw $e;
         }
+    }
+    public function getCommentsForPosts(array $postIds, int $perPost = 5): array
+    {
+        $postIds = array_values(array_filter(
+            array_map("intval", $postIds),
+            static fn(int $postId): bool => $postId > 0
+        ));
+
+        if ($postIds === []) {
+            return [];
+        }
+
+        $perPost = max(1, min($perPost, 50));
+        $placeholders = implode(",", array_fill(0, count($postIds), "?"));
+
+        $sql = "
+        SELECT
+            comment_id,
+            post_id,
+            user_id,
+            comment,
+            media_file,
+            media_type,
+            created_at,
+            username
+        FROM (
+            SELECT
+                v.comment_id,
+                v.post_id,
+                v.user_id,
+                v.comment,
+                v.media_file,
+                v.media_type,
+                v.created_at,
+                v.author_username AS username,
+                ROW_NUMBER() OVER (
+                    PARTITION BY v.post_id
+                    ORDER BY v.created_at ASC, v.comment_id ASC
+                ) AS comment_rank
+            FROM v_latest_comments v
+            WHERE v.post_id IN ($placeholders)
+        ) ranked_comments
+        WHERE comment_rank <= ?
+        ORDER BY post_id ASC, created_at ASC, comment_id ASC
+    ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([...$postIds, $perPost]);
+
+        $commentsByPost = [];
+
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $comment) {
+            $commentsByPost[(int) $comment["post_id"]][] = $comment;
+        }
+
+        return $commentsByPost;
     }
 }
