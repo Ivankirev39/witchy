@@ -52,6 +52,20 @@ $sql = "
 $stmt = $pdo->query($sql);
 $recentPosts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$latestComments = $pdo->query("
+    SELECT
+        comment_id,
+        post_id,
+        post_title,
+        author_username,
+        comment,
+        created_at,
+        media_file
+    FROM v_latest_comments
+    ORDER BY created_at DESC, comment_id DESC
+    LIMIT 5
+")->fetchAll(PDO::FETCH_ASSOC);
+
 require_once __DIR__ . "/includes/public-header.php";
 ?>
 
