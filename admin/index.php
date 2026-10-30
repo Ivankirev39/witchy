@@ -75,7 +75,7 @@ try {
             LEFT JOIN users u ON c.user_id = u.user_id
         ) AS activity
         ORDER BY created_at DESC
-        LIMIT 10
+        LIMIT 5
     ");
 
     $recentActivity = $activityQuery->fetchAll(PDO::FETCH_ASSOC);

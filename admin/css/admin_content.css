@@ -1,11 +1,7 @@
-/* =====================================================
-   WITCHY ADMIN — CONTENT MANAGEMENT & POST REVIEW
-===================================================== */
+/* ADMIN — CONTENT MANAGEMENT & POST REVIEW */
 
 
-/* =====================================================
-   1. CONTENT MANAGEMENT PAGE
-===================================================== */
+/* 1. CONTENT MANAGEMENT PAGE */
 
 .admin-content-page {
     display: flex;
@@ -31,9 +27,7 @@
 }
 
 
-/* =====================================================
-   2. CONTENT TABS
-===================================================== */
+/* 2. CONTENT TABS */
 
 .admin-content-tabs {
     display: flex;
@@ -68,9 +62,7 @@
 }
 
 
-/* =====================================================
-   3. SEARCH FORM
-===================================================== */
+/* 3. SEARCH FORM */
 
 .admin-content-search {
     display: flex;
@@ -121,9 +113,7 @@
 }
 
 
-/* =====================================================
-   4. CONTENT PANELS
-===================================================== */
+/* 4. CONTENT PANELS */
 
 .admin-content-panel {
     overflow: hidden;
@@ -150,9 +140,7 @@
 }
 
 
-/* =====================================================
-   5. CONTENT TABLES
-===================================================== */
+/* 5. CONTENT TABLES */
 
 .admin-content-table-wrapper {
     width: 100%;
@@ -198,8 +186,6 @@
     background: #fcfaff;
 }
 
-/* Keep action buttons and their cells aligned */
-
 .admin-content-table td form {
     display: flex;
     align-items: center;
@@ -212,9 +198,7 @@
 }
 
 
-/* =====================================================
-   6. CLICKABLE POST ROWS
-===================================================== */
+/* 6. CLICKABLE POST ROWS */
 
 .admin-clickable-row {
     cursor: pointer;
@@ -231,9 +215,7 @@
 }
 
 
-/* =====================================================
-   7. POST STATUS LABELS
-===================================================== */
+/* 7. POST STATUS LABELS */
 
 .admin-content-status {
     display: inline-flex;
@@ -258,9 +240,7 @@
 }
 
 
-/* =====================================================
-   8. EMPTY AND ERROR STATES
-===================================================== */
+/*  8. EMPTY AND ERROR STATES  */
 
 .admin-content-empty {
     padding: 38px 20px;
@@ -277,9 +257,7 @@
 }
 
 
-/* =====================================================
-   9. POST REVIEW LAYOUT
-===================================================== */
+/*  9. POST REVIEW LAYOUT */
 
 .admin-review-layout {
     display: grid;
@@ -305,9 +283,7 @@
 }
 
 
-/* =====================================================
-   10. POST REVIEW — LEFT PANEL
-===================================================== */
+/* 10. POST REVIEW — LEFT PANEL */
 
 .admin-review-main .admin-content-panel {
     padding: 26px;
@@ -350,9 +326,7 @@
 }
 
 
-/* =====================================================
-   11. POST DESCRIPTION
-===================================================== */
+/*  11. POST DESCRIPTION */
 
 .admin-post-description {
     margin: 22px 0;
@@ -366,9 +340,7 @@
 }
 
 
-/* =====================================================
-   12. POST MEDIA
-===================================================== */
+/* 12. POST MEDIA */
 
 .admin-post-media {
     margin-top: 24px;
@@ -402,9 +374,7 @@
 }
 
 
-/* =====================================================
-   13. POST COMMENTS
-===================================================== */
+/* 13. POST COMMENTS */
 
 .admin-post-comment {
     margin-top: 14px;
@@ -468,9 +438,7 @@
 }
 
 
-/* =====================================================
-   14. MODERATION PANEL — RIGHT SIDE
-===================================================== */
+/* 14. MODERATION PANEL — RIGHT SIDE */
 
 .admin-moderation-panel {
     padding: 24px;
@@ -493,9 +461,7 @@
 }
 
 
-/* =====================================================
-   15. MODERATION AUTHOR INFORMATION
-===================================================== */
+/* 15. MODERATION AUTHOR INFORMATION*/
 
 .admin-moderation-author {
     display: flex;
@@ -541,9 +507,7 @@
 }
 
 
-/* =====================================================
-   16. MODERATION DANGER AREA
-===================================================== */
+/* 16. MODERATION DANGER AREA */
 
 .admin-moderation-danger {
     margin-top: 8px;
@@ -565,11 +529,7 @@
 }
 
 
-/* =====================================================
-   17. DELETE BUTTONS
-===================================================== */
-
-/* Default compact button — used in the comments table */
+/* 17. DELETE BUTTONS */
 
 .admin-delete-button {
     display: inline-flex;
@@ -598,18 +558,64 @@
     outline-offset: 3px;
 }
 
-/* Larger full-width button — used in post review */
-
 .admin-moderation-danger .admin-delete-button {
     width: 100%;
     padding: 12px 16px;
     font-size: 0.95rem;
 }
 
+/* Pagination */
 
-/* =====================================================
-   18. RESPONSIVE — TABLETS
-===================================================== */
+.admin-pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.admin-pagination-info {
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.admin-pagination-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.admin-pagination-links a,
+.admin-pagination-links span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+.admin-pagination-links a {
+    color: inherit;
+}
+
+.admin-pagination-links a:hover,
+.admin-pagination-links span.active {
+    background: #eee8f4;
+    border-color: #cbbbd9;
+}
+
+.admin-pagination-links span.active {
+    font-weight: 600;
+}
+
+
+
+/* 18. RESPONSIVE — TABLETS */
 
 @media (max-width: 850px) {
 
@@ -627,9 +633,7 @@
 }
 
 
-/* =====================================================
-   19. RESPONSIVE — MOBILE
-===================================================== */
+/* 19. RESPONSIVE — MOBILE */
 
 @media (max-width: 650px) {
 
@@ -660,9 +664,7 @@
 }
 
 
-/* =====================================================
-   20. RESPONSIVE — SMALL MOBILE
-===================================================== */
+/* 20. RESPONSIVE — SMALL MOBILE */
 
 @media (max-width: 600px) {
 

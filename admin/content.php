@@ -14,13 +14,23 @@ if (!in_array($activeTab, ["posts", "comments"], true)) {
 
 $search = trim($_GET["search"] ?? "");
 
+$perPage = 10;
+$currentPage = filter_input(INPUT_GET, "page", FILTER_VALIDATE_INT);
+
+if (!$currentPage || $currentPage < 1) {
+    $currentPage = 1;
+}
+
 $posts = [];
 $comments = [];
 $postCount = 0;
 $commentCount = 0;
+$resultCount = 0;
+$totalPages = 1;
 $errorMessage = "";
 
 try {
+    // Total counts for the tabs.
     $postCount = (int) $conn->query(
         "SELECT COUNT(*) FROM post"
     )->fetchColumn();
@@ -30,6 +40,43 @@ try {
     )->fetchColumn();
 
     if ($activeTab === "posts") {
+
+        $whereSql = "";
+
+        if ($search !== "") {
+            $whereSql = "
+                WHERE p.title LIKE :search_title
+                OR p.topic LIKE :search_topic
+                OR u.username LIKE :search_user
+            ";
+        }
+
+        // Count matching posts.
+        $countSql = "
+            SELECT COUNT(*)
+            FROM post p
+            LEFT JOIN users u ON p.user_id = u.user_id
+            $whereSql
+        ";
+
+        $countStmt = $conn->prepare($countSql);
+
+        if ($search !== "") {
+            $searchTerm = "%" . $search . "%";
+
+            $countStmt->bindValue(":search_title", $searchTerm);
+            $countStmt->bindValue(":search_topic", $searchTerm);
+            $countStmt->bindValue(":search_user", $searchTerm);
+        }
+
+        $countStmt->execute();
+        $resultCount = (int) $countStmt->fetchColumn();
+
+        $totalPages = max(1, (int) ceil($resultCount / $perPage));
+        $currentPage = min($currentPage, $totalPages);
+        $offset = ($currentPage - 1) * $perPage;
+
+        // Load the current page of posts.
         $sql = "
             SELECT
                 p.post_id,
@@ -41,17 +88,10 @@ try {
                 u.username
             FROM post p
             LEFT JOIN users u ON p.user_id = u.user_id
+            $whereSql
+            ORDER BY p.created_at DESC
+            LIMIT :limit OFFSET :offset
         ";
-
-        if ($search !== "") {
-            $sql .= "
-                WHERE p.title LIKE :search_title
-                OR p.topic LIKE :search_topic
-                OR u.username LIKE :search_user
-            ";
-        }
-
-        $sql .= " ORDER BY p.created_at DESC";
 
         $stmt = $conn->prepare($sql);
 
@@ -63,10 +103,51 @@ try {
             $stmt->bindValue(":search_user", $searchTerm);
         }
 
+        $stmt->bindValue(":limit", $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+
         $stmt->execute();
         $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     } else {
+
+        $whereSql = "";
+
+        if ($search !== "") {
+            $whereSql = "
+                WHERE c.comment LIKE :search_comment
+                OR u.username LIKE :search_user
+                OR p.title LIKE :search_post
+            ";
+        }
+
+        // Count matching comments.
+        $countSql = "
+            SELECT COUNT(*)
+            FROM comment c
+            LEFT JOIN users u ON c.user_id = u.user_id
+            LEFT JOIN post p ON c.post_id = p.post_id
+            $whereSql
+        ";
+
+        $countStmt = $conn->prepare($countSql);
+
+        if ($search !== "") {
+            $searchTerm = "%" . $search . "%";
+
+            $countStmt->bindValue(":search_comment", $searchTerm);
+            $countStmt->bindValue(":search_user", $searchTerm);
+            $countStmt->bindValue(":search_post", $searchTerm);
+        }
+
+        $countStmt->execute();
+        $resultCount = (int) $countStmt->fetchColumn();
+
+        $totalPages = max(1, (int) ceil($resultCount / $perPage));
+        $currentPage = min($currentPage, $totalPages);
+        $offset = ($currentPage - 1) * $perPage;
+
+        // Load the current page of comments.
         $sql = "
             SELECT
                 c.comment_id,
@@ -80,17 +161,10 @@ try {
             FROM comment c
             LEFT JOIN users u ON c.user_id = u.user_id
             LEFT JOIN post p ON c.post_id = p.post_id
+            $whereSql
+            ORDER BY c.created_at DESC
+            LIMIT :limit OFFSET :offset
         ";
-
-        if ($search !== "") {
-            $sql .= "
-                WHERE c.comment LIKE :search_comment
-                OR u.username LIKE :search_user
-                OR p.title LIKE :search_post
-            ";
-        }
-
-        $sql .= " ORDER BY c.created_at DESC";
 
         $stmt = $conn->prepare($sql);
 
@@ -102,6 +176,9 @@ try {
             $stmt->bindValue(":search_post", $searchTerm);
         }
 
+        $stmt->bindValue(":limit", $perPage, PDO::PARAM_INT);
+        $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+
         $stmt->execute();
         $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -110,6 +187,12 @@ try {
     error_log($e->getMessage());
     $errorMessage = "Content could not be loaded. Please try again.";
 }
+
+// Preserve the selected tab and search when changing pages.
+$paginationBase = "content.php?" . http_build_query([
+    "tab" => $activeTab,
+    "search" => $search
+]);
 
 require_once __DIR__ . "/includes/admin_header.php";
 ?>
@@ -223,9 +306,7 @@ require_once __DIR__ . "/includes/admin_header.php";
                                     data-href="view_post.php?id=<?= (int) $post["post_id"] ?>"
                                 >
 
-                                    <td>
-                                        <?= (int) $post["post_id"] ?>
-                                    </td>
+                                    <td><?= (int) $post["post_id"] ?></td>
 
                                     <td>
                                         <?= htmlspecialchars(
@@ -252,27 +333,19 @@ require_once __DIR__ . "/includes/admin_header.php";
                                     </td>
 
                                     <td>
-
                                         <?php if ($post["is_sticky"]): ?>
-
                                             <span class="admin-content-status pinned">
                                                 Pinned
                                             </span>
-
                                         <?php elseif ($post["is_hot"]): ?>
-
                                             <span class="admin-content-status hot">
                                                 Hot
                                             </span>
-
                                         <?php else: ?>
-
                                             <span class="admin-content-status">
                                                 Normal
                                             </span>
-
                                         <?php endif; ?>
-
                                     </td>
 
                                     <td>
@@ -317,28 +390,24 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             <?php else: ?>
 
-                
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Comment</th>
-                            <th>Author</th>
-                            <th>Related post</th>
-                            <th>Created</th>
-                        </tr>
-                    </thead>
+                <div class="admin-table-wrapper">
 
-                    <tbody>
-                        <?php if (empty($comments)): ?>
+                    <table class="admin-table">
+
+                        <thead>
                             <tr>
-                                <td colspan="5" class="admin-content-empty">
-                                    No comments found.
-                                </td>
+                                <th>ID</th>
+                                <th>Comment</th>
+                                <th>Author</th>
+                                <th>Related post</th>
+                                <th>Created</th>
                             </tr>
-                        <?php else: ?>
+                        </thead>
+
+                        <tbody>
+
                             <?php foreach ($comments as $comment): ?>
+
                                 <tr
                                     class="admin-clickable-row"
                                     tabindex="0"
@@ -346,11 +415,12 @@ require_once __DIR__ . "/includes/admin_header.php";
                                     data-href="view_comment.php?id=<?= (int) $comment["comment_id"] ?>"
                                     aria-label="Review comment <?= (int) $comment["comment_id"] ?>"
                                 >
+
                                     <td><?= (int) $comment["comment_id"] ?></td>
 
                                     <td>
                                         <?= htmlspecialchars(
-                                            mb_strimwidth($comment["comment"], 0, 90, "..."),
+                                            mb_strimwidth($comment["comment"] ?? "", 0, 90, "..."),
                                             ENT_QUOTES,
                                             "UTF-8"
                                         ) ?>
@@ -366,7 +436,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                                     <td>
                                         <?= htmlspecialchars(
-                                            $comment["title"] ?? "Unavailable",
+                                            $comment["post_title"] ?? "Unavailable",
                                             ENT_QUOTES,
                                             "UTF-8"
                                         ) ?>
@@ -374,21 +444,86 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                                     <td>
                                         <?= htmlspecialchars(
-                                            $comment["created_at"],
+                                            $comment["created_at"] ?? "",
                                             ENT_QUOTES,
                                             "UTF-8"
                                         ) ?>
                                     </td>
+
                                 </tr>
+
                             <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             <?php endif; ?>
 
         </section>
+
+    <?php endif; ?>
+
+
+    <?php if ($errorMessage === "" && $resultCount > 0 && $totalPages > 1): ?>
+
+        <nav class="admin-pagination" aria-label="Content pages">
+
+            <span class="admin-pagination-info">
+                Page <?= $currentPage ?> of <?= $totalPages ?>
+                · <?= $resultCount ?> results
+            </span>
+
+            <div class="admin-pagination-links">
+
+                <?php if ($currentPage > 1): ?>
+                    <a href="<?= htmlspecialchars(
+                        $paginationBase . "&page=" . ($currentPage - 1),
+                        ENT_QUOTES,
+                        "UTF-8"
+                    ) ?>">
+                        Previous
+                    </a>
+                <?php endif; ?>
+
+                <?php
+                $startPage = max(1, $currentPage - 2);
+                $endPage = min($totalPages, $currentPage + 2);
+                ?>
+
+                <?php for ($page = $startPage; $page <= $endPage; $page++): ?>
+
+                    <?php if ($page === $currentPage): ?>
+                        <span class="active" aria-current="page">
+                            <?= $page ?>
+                        </span>
+                    <?php else: ?>
+                        <a href="<?= htmlspecialchars(
+                            $paginationBase . "&page=" . $page,
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>">
+                            <?= $page ?>
+                        </a>
+                    <?php endif; ?>
+
+                <?php endfor; ?>
+
+                <?php if ($currentPage < $totalPages): ?>
+                    <a href="<?= htmlspecialchars(
+                        $paginationBase . "&page=" . ($currentPage + 1),
+                        ENT_QUOTES,
+                        "UTF-8"
+                    ) ?>">
+                        Next
+                    </a>
+                <?php endif; ?>
+
+            </div>
+
+        </nav>
 
     <?php endif; ?>
 
