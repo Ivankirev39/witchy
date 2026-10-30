@@ -815,3 +815,27 @@ html.dark-mode .save-button.active:hover {
     font-size: 32px;
     cursor: pointer;
 }
+
+.load-more-comments-button {
+    display: block;
+    margin: 12px auto 16px;
+    padding: 9px 20px;
+    border: 1px solid var(--accent, #C6A4CF);
+    border-radius: 24px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.load-more-comments-button:hover {
+    background: var(--accent, #C6A4CF);
+    color: #222;
+}
+
+.load-more-comments-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}

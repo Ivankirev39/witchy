@@ -25,7 +25,7 @@ $posts = $postModel->getFeedPosts(
 
 require_once __DIR__ . "/includes/user_header.php";
 ?>
-<section class="feed-page">
+<section class="feed-page" data-user-id="<?= (int) $user_id ?>">
     <!-- FEED HEADER -->
     <header class="feed-header">
         <div>
@@ -262,8 +262,21 @@ require_once __DIR__ . "/includes/user_header.php";
                                 </div>
                                 <small><?= htmlspecialchars($comment["created_at"], ENT_QUOTES, "UTF-8") ?></small>
                             </div>
+
                         <?php endforeach; ?>
                     </div>
+
+                    <?php if ((int) $post["comment_count"] > count($postComments)): ?>
+                        <button
+                            type="button"
+                            class="load-more-comments-button"
+                            data-post-id="<?= $postId ?>"
+                            data-offset="<?= count($postComments) ?>"
+                        >
+                            Show more comments
+                        </button>
+                    <?php endif; ?>
+
                     <!-- ADD COMMENT -->
                     <form action="comment_post.php" method="POST" enctype="multipart/form-data" class="comment-form">
                         <input type="hidden" name="post_id" value="<?= $postId ?>">
