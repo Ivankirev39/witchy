@@ -1,7 +1,4 @@
-
 /* Admin - Community Rules */
-
-
 /* Page Container */
 
 .admin-rules-page {
@@ -18,7 +15,6 @@
 .admin-rules-page *::after {
     box-sizing: border-box;
 }
-
 
 /* Header */
 
@@ -412,6 +408,114 @@
     color: #817587;
     font-size: 0.83rem;
     line-height: 1.75;
+}
+
+
+/* Rule management */
+.rules-management-section {
+    margin: 30px 0;
+}
+
+.rules-management-form,
+.rules-edit-panel {
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #e8e0ed;
+    border-radius: 14px;
+}
+
+.rules-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.rules-form-group label {
+    font-weight: 600;
+}
+
+.rules-form-group input,
+.rules-form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d9d0e0;
+    border-radius: 8px;
+    font: inherit;
+    box-sizing: border-box;
+}
+
+.rules-form-group textarea {
+    resize: vertical;
+}
+
+.rules-add-button,
+.rules-save-button,
+.rules-edit-button,
+.rules-delete-button,
+.rules-cancel-button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.rules-add-button,
+.rules-save-button {
+    background: #593c68;
+    color: #fff;
+}
+
+.rules-card-actions,
+.rules-edit-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.rules-edit-button {
+    background: #eee8f4;
+    color: #493455;
+}
+
+.rules-delete-button {
+    background: #f8e8e8;
+    color: #982f3b;
+}
+
+.rules-cancel-button {
+    background: #eee;
+    color: #444;
+}
+
+.rules-edit-panel {
+    margin-top: 18px;
+}
+
+.rules-edit-panel[hidden] {
+    display: none;
+}
+
+.rules-message-success {
+    padding: 14px 18px;
+    margin: 16px 0;
+    background: #e8f4eb;
+    border: 1px solid #c8e2ce;
+    border-radius: 8px;
+    color: #245b32;
+}
+
+.rules-message-error {
+    padding: 14px 18px;
+    margin: 16px 0;
+    background: #f8e8e8;
+    border: 1px solid #edcaca;
+    border-radius: 8px;
+    color: #982f3b;
 }
 
 

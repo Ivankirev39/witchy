@@ -1,18 +1,25 @@
 <?php
 require_once __DIR__ . "/models/DBConnector.php";
 
-$pdoConnector = new \DataAccess\DB\DBConnector();
-$pdo = $pdoConnector->connectToDB();
-
 $rules = [];
+$rulesError = false;
 
-$stmt = $pdo->query(
-    "SELECT title, description
-     FROM rule
-     ORDER BY rule_id ASC"
-);
+try {
+    $pdoConnector = new \DataAccess\DB\DBConnector();
+    $pdo = $pdoConnector->connectToDB();
 
-$rules = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmt = $pdo->query(
+        "SELECT title, description
+         FROM rule
+         ORDER BY rule_id ASC"
+    );
+
+    $rules = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (PDOException $e) {
+    error_log($e->getMessage());
+    $rulesError = true;
+}
 
 $pageTitle = "Rules";
 require_once __DIR__ . "/includes/user_header.php";
@@ -25,11 +32,25 @@ require_once __DIR__ . "/includes/user_header.php";
     </div>
 
     <div class="rules-list">
-        <?php if (empty($rules)): ?>
-            <p class="rules-empty">No rules have been added yet.</p>
+
+        <?php if ($rulesError): ?>
+
+            <p class="rules-empty">
+                Rules could not be loaded. Please try again later.
+            </p>
+
+        <?php elseif (empty($rules)): ?>
+
+            <p class="rules-empty">
+                No rules have been added yet.
+            </p>
+
         <?php else: ?>
+
             <?php foreach ($rules as $index => $rule): ?>
+
                 <div class="rule-card">
+
                     <h2 class="rule-title">
                         <?= ($index + 1) . '. ' . htmlspecialchars(
                             $rule['title'],
@@ -45,9 +66,13 @@ require_once __DIR__ . "/includes/user_header.php";
                             'UTF-8'
                         )) ?>
                     </p>
+
                 </div>
+
             <?php endforeach; ?>
+
         <?php endif; ?>
+
     </div>
 </div>
 
