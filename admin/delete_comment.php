@@ -3,45 +3,52 @@ require_once __DIR__ . "/includes/admin_auth.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../includes/csrf.php";
 
-
-/*1. Validate request method */
+/* 1. Validate request method */
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: content.php?tab=comments");
     exit;
 }
 
-/*  2. Validate CSRF token */
+/* 2. Validate CSRF token */
 
 if (!csrf_valid($_POST["csrf_token"] ?? null)) {
     http_response_code(403);
     exit("Invalid security token. Please refresh the page and try again.");
 }
 
-/* 3. Validate comment ID */
+/* 3. Validate IDs and return destination */
 
-$commentId = filter_input(
-    INPUT_POST,
-    "comment_id",
-    FILTER_VALIDATE_INT
-);
+$commentId = filter_input(INPUT_POST, "comment_id", FILTER_VALIDATE_INT);
 
-$returnPostId = filter_input(
-    INPUT_POST,
-    "return_post_id",
-    FILTER_VALIDATE_INT
-);
+$returnPostId = filter_input(INPUT_POST, "return_post_id", FILTER_VALIDATE_INT);
 
 $returnPostId = ($returnPostId && $returnPostId > 0)
-    ? $returnPostId
+    ? (int) $returnPostId
     : null;
 
+$returnFrom = $_POST["return_from"] ?? "";
+
+$returnUserId = filter_input(
+    INPUT_POST,
+    "return_user_id",
+    FILTER_VALIDATE_INT
+);
+
+$returnUserId = (
+    $returnFrom === "user" &&
+    $returnUserId &&
+    $returnUserId > 0
+) ? (int) $returnUserId : null;
+
+if ($returnUserId === null) {
+    $returnFrom = "";
+}
 
 if (!$commentId || $commentId < 1) {
     header("Location: content.php?tab=comments&status=invalid");
     exit;
 }
-
 
 /* 4. Delete comment safely */
 
@@ -65,7 +72,6 @@ try {
 
     $comment = $stmt->fetch(PDO::FETCH_ASSOC);
 
-
     if (!$comment) {
         $conn->rollBack();
 
@@ -73,12 +79,17 @@ try {
         exit;
     }
 
-    /* Check whether the requested return page matches the post that actually owns this comment */
+    /*
+     * Only return to a post review if the submitted post ID
+     * actually matches the comment's post.
+     */
 
     $redirectToPost = (
         $returnPostId !== null &&
         (int) $comment["post_id"] === $returnPostId
     );
+
+    /* Queue the attachment for cleanup when safe */
 
     if (!empty($comment["media_file"])) {
 
@@ -92,7 +103,6 @@ try {
                 "Invalid comment attachment filename."
             );
         }
-
 
         /* Check whether another comment uses this file */
 
@@ -110,7 +120,6 @@ try {
 
         $otherReferences = (int) $referenceStmt->fetchColumn();
 
-
         if ($otherReferences === 0) {
 
             $queueCheck = $conn->prepare("
@@ -126,7 +135,6 @@ try {
             ]);
 
             $alreadyQueued = (int) $queueCheck->fetchColumn();
-
 
             if ($alreadyQueued === 0) {
 
@@ -155,6 +163,8 @@ try {
         }
     }
 
+    /* Delete the comment */
+
     $deleteStmt = $conn->prepare("
         DELETE FROM comment
         WHERE comment_id = :comment_id
@@ -170,22 +180,41 @@ try {
         );
     }
 
+    /* Commit the deletion and queue entry together */
+
     $conn->commit();
 
-    /* Return to the correct review page */
+    /* 5. Return to the correct page */
 
+    // A comment deleted from a post review returns to that post review.
     if ($redirectToPost) {
-        header(
-            "Location: view_post.php?id=" .
+
+        $redirectUrl = "view_post.php?id=" .
             (int) $comment["post_id"] .
+            "&comment_status=deleted";
+
+        if ($returnFrom === "user" && $returnUserId !== null) {
+            $redirectUrl .=
+                "&from=user&return_user_id=" . $returnUserId;
+        }
+
+        header("Location: " . $redirectUrl);
+        exit;
+    }
+
+    // A comment deleted directly from a user's profile returns there.
+    if ($returnFrom === "user" && $returnUserId !== null) {
+        header(
+            "Location: view_user.php?id=" .
+            (int) $returnUserId .
             "&comment_status=deleted"
         );
         exit;
     }
 
+    // Otherwise return to the Content comments tab.
     header("Location: content.php?tab=comments&status=deleted");
     exit;
-
 
 } catch (Throwable $e) {
 
@@ -197,11 +226,27 @@ try {
         "Admin comment deletion failed: " . $e->getMessage()
     );
 
+    /* Return to the original review page with an error */
 
     if ($returnPostId !== null) {
-        header(
-            "Location: view_post.php?id=" .
+
+        $redirectUrl = "view_post.php?id=" .
             $returnPostId .
+            "&comment_status=error";
+
+        if ($returnFrom === "user" && $returnUserId !== null) {
+            $redirectUrl .=
+                "&from=user&return_user_id=" . $returnUserId;
+        }
+
+        header("Location: " . $redirectUrl);
+        exit;
+    }
+
+    if ($returnFrom === "user" && $returnUserId !== null) {
+        header(
+            "Location: view_user.php?id=" .
+            (int) $returnUserId .
             "&comment_status=error"
         );
         exit;

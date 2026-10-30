@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . "/includes/admin_auth.php";
 require_once __DIR__ . "/../config/db.php";
@@ -12,6 +11,20 @@ $commentId = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
 $comment = null;
 $errorMessage = "";
 $statusMessage = "";
+
+// Remember where this page was opened from.
+$returnFrom = $_GET["from"] ?? "";
+$returnUserId = filter_input(INPUT_GET, "return_user_id", FILTER_VALIDATE_INT);
+
+$returnUrl = "/witchy/admin/content.php?tab=comments";
+
+if ($returnFrom === "user" && $returnUserId && $returnUserId > 0) {
+    $returnUserId = (int) $returnUserId;
+    $returnUrl = "/witchy/admin/view_user.php?id=" . $returnUserId;
+} else {
+    $returnFrom = "";
+    $returnUserId = null;
+}
 
 if (($_GET["status"] ?? "") === "deleted") {
     $statusMessage = "The comment was successfully deleted.";
@@ -69,8 +82,8 @@ require_once __DIR__ . "/includes/admin_header.php";
     </header>
 
     <p>
-        <a href="/witchy/admin/content.php?tab=comments">
-            &larr; Back to comments
+        <a href="<?= htmlspecialchars($returnUrl, ENT_QUOTES, "UTF-8") ?>">
+            &larr; Back
         </a>
     </p>
 
@@ -90,9 +103,9 @@ require_once __DIR__ . "/includes/admin_header.php";
 
         <div class="admin-review-layout">
 
-            <!-- Main comment review -->
             <div class="admin-review-main">
 
+                <!-- Main comment review -->
                 <section class="admin-content-panel">
 
                     <header class="admin-content-panel-header">
@@ -168,7 +181,6 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                 </section>
 
-
                 <!-- Related post -->
                 <section class="admin-content-panel">
 
@@ -193,8 +205,18 @@ require_once __DIR__ . "/includes/admin_header.php";
                             <?= (int) $comment["post_id"] ?>
                         </p>
 
+                        <?php
+                        $relatedPostUrl = "/witchy/admin/view_post.php?id="
+                            . (int) $comment["post_id"];
+
+                        if ($returnFrom === "user" && $returnUserId !== null) {
+                            $relatedPostUrl .=
+                                "&from=user&return_user_id=" . $returnUserId;
+                        }
+                        ?>
+
                         <p>
-                            <a href="/witchy/admin/view_post.php?id=<?= (int) $comment["post_id"] ?>">
+                            <a href="<?= htmlspecialchars($relatedPostUrl, ENT_QUOTES, "UTF-8") ?>">
                                 Review related post &rarr;
                             </a>
                         </p>
@@ -210,7 +232,6 @@ require_once __DIR__ . "/includes/admin_header.php";
                 </section>
 
             </div>
-
 
             <!-- Moderation sidebar -->
             <aside class="admin-review-sidebar">
@@ -278,6 +299,18 @@ require_once __DIR__ . "/includes/admin_header.php";
                                 type="hidden"
                                 name="comment_id"
                                 value="<?= (int) $comment["comment_id"] ?>"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="return_from"
+                                value="<?= htmlspecialchars($returnFrom, ENT_QUOTES, "UTF-8") ?>"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="return_user_id"
+                                value="<?= $returnUserId !== null ? (int) $returnUserId : "" ?>"
                             >
 
                             <button

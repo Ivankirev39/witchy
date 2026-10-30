@@ -14,6 +14,20 @@ $comments = [];
 $errorMessage = "";
 $statusMessage = "";
 
+// Remember where the review page was opened from.
+$returnFrom = $_GET["from"] ?? "";
+$returnUserId = filter_input(INPUT_GET, "return_user_id", FILTER_VALIDATE_INT);
+
+$returnUrl = "/witchy/admin/content.php?tab=posts";
+
+if ($returnFrom === "user" && $returnUserId && $returnUserId > 0) {
+    $returnUserId = (int) $returnUserId;
+    $returnUrl = "/witchy/admin/view_user.php?id=" . $returnUserId;
+} else {
+    $returnFrom = "";
+    $returnUserId = null;
+}
+
 if (($_GET["status"] ?? "") === "error") {
     $statusMessage = "The post could not be deleted. Please try again.";
 } elseif (($_GET["comment_status"] ?? "") === "deleted") {
@@ -97,8 +111,8 @@ require_once __DIR__ . "/includes/admin_header.php";
     </header>
 
     <p>
-        <a href="/witchy/admin/content.php?tab=posts">
-            &larr; Back to content management
+        <a href="<?= htmlspecialchars($returnUrl, ENT_QUOTES, "UTF-8") ?>">
+            &larr; Back
         </a>
     </p>
 
@@ -118,7 +132,6 @@ require_once __DIR__ . "/includes/admin_header.php";
 
         <div class="admin-review-layout">
 
-            <!-- Main review content -->
             <div class="admin-review-main">
 
                 <!-- Post details -->
@@ -215,7 +228,6 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                 </section>
 
-
                 <!-- Comment moderation -->
                 <section class="admin-content-panel">
 
@@ -268,7 +280,6 @@ require_once __DIR__ . "/includes/admin_header.php";
                                     </p>
                                 <?php endif; ?>
 
-                                <!-- Individual comment deletion -->
                                 <div class="admin-comment-actions">
 
                                     <form
@@ -295,6 +306,18 @@ require_once __DIR__ . "/includes/admin_header.php";
                                             value="<?= (int) $post["post_id"] ?>"
                                         >
 
+                                        <input
+                                            type="hidden"
+                                            name="return_from"
+                                            value="<?= htmlspecialchars($returnFrom, ENT_QUOTES, "UTF-8") ?>"
+                                        >
+
+                                        <input
+                                            type="hidden"
+                                            name="return_user_id"
+                                            value="<?= $returnUserId !== null ? (int) $returnUserId : "" ?>"
+                                        >
+
                                         <button
                                             type="submit"
                                             class="admin-delete-button"
@@ -316,8 +339,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             </div>
 
-
-            <!-- Right-hand moderation panel -->
+            <!-- Moderation sidebar -->
             <aside class="admin-review-sidebar">
 
                 <section class="admin-content-panel admin-moderation-panel">
@@ -381,6 +403,18 @@ require_once __DIR__ . "/includes/admin_header.php";
                                 type="hidden"
                                 name="post_id"
                                 value="<?= (int) $post["post_id"] ?>"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="return_from"
+                                value="<?= htmlspecialchars($returnFrom, ENT_QUOTES, "UTF-8") ?>"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="return_user_id"
+                                value="<?= $returnUserId !== null ? (int) $returnUserId : "" ?>"
                             >
 
                             <button type="submit" class="admin-delete-button">
