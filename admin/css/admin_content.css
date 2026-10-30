@@ -1,4 +1,11 @@
-/* Admin - Content Page */
+/* =====================================================
+   WITCHY ADMIN — CONTENT MANAGEMENT & POST REVIEW
+===================================================== */
+
+
+/* =====================================================
+   1. CONTENT MANAGEMENT PAGE
+===================================================== */
 
 .admin-content-page {
     display: flex;
@@ -23,14 +30,17 @@
     color: #817587;
 }
 
-/* Tabs */
+
+/* =====================================================
+   2. CONTENT TABS
+===================================================== */
 
 .admin-content-tabs {
     display: flex;
     gap: 8px;
-    padding: 6px;
     width: fit-content;
     max-width: 100%;
+    padding: 6px;
     background: #eee8f3;
     border-radius: 12px;
 }
@@ -57,7 +67,10 @@
     box-shadow: 0 2px 6px rgba(48, 38, 56, 0.12);
 }
 
-/* Search */
+
+/* =====================================================
+   3. SEARCH FORM
+===================================================== */
 
 .admin-content-search {
     display: flex;
@@ -94,6 +107,7 @@
     font: inherit;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.2s ease;
 }
 
 .admin-content-search button:hover {
@@ -106,7 +120,10 @@
     text-decoration: none;
 }
 
-/* Content panel */
+
+/* =====================================================
+   4. CONTENT PANELS
+===================================================== */
 
 .admin-content-panel {
     overflow: hidden;
@@ -132,7 +149,10 @@
     font-size: 0.9rem;
 }
 
-/* Table */
+
+/* =====================================================
+   5. CONTENT TABLES
+===================================================== */
 
 .admin-content-table-wrapper {
     width: 100%;
@@ -145,8 +165,15 @@
     text-align: left;
 }
 
+.admin-content-table th,
+.admin-content-table td {
+    box-sizing: border-box;
+    padding: 14px 16px;
+    text-align: left;
+    vertical-align: middle;
+}
+
 .admin-content-table th {
-    padding: 13px 16px;
     background: #faf8fc;
     color: #817587;
     font-size: 0.78rem;
@@ -157,15 +184,9 @@
 }
 
 .admin-content-table td {
-    padding: 15px 16px;
     border-top: 1px solid #f0eaf3;
     color: #403548;
     font-size: 0.9rem;
-    vertical-align: middle;
-}
-
-.admin-content-table tbody tr:hover {
-    background: #fcfaff;
 }
 
 .admin-content-table td:first-child {
@@ -173,7 +194,46 @@
     font-weight: 600;
 }
 
-/* Status labels */
+.admin-content-table tbody tr:hover {
+    background: #fcfaff;
+}
+
+/* Keep action buttons and their cells aligned */
+
+.admin-content-table td form {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
+.admin-content-table th:last-child,
+.admin-content-table td:last-child {
+    white-space: nowrap;
+}
+
+
+/* =====================================================
+   6. CLICKABLE POST ROWS
+===================================================== */
+
+.admin-clickable-row {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.admin-clickable-row:hover {
+    background: #f2edf8 !important;
+}
+
+.admin-clickable-row:focus-visible {
+    outline: 2px solid #9b78c5;
+    outline-offset: -2px;
+}
+
+
+/* =====================================================
+   7. POST STATUS LABELS
+===================================================== */
 
 .admin-content-status {
     display: inline-flex;
@@ -197,7 +257,10 @@
     color: #624a91;
 }
 
-/* Empty and error states */
+
+/* =====================================================
+   8. EMPTY AND ERROR STATES
+===================================================== */
 
 .admin-content-empty {
     padding: 38px 20px;
@@ -213,9 +276,363 @@
     color: #a94455;
 }
 
-/* Responsive */
+
+/* =====================================================
+   9. POST REVIEW LAYOUT
+===================================================== */
+
+.admin-review-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 24px;
+    align-items: start;
+}
+
+.admin-review-main,
+.admin-review-sidebar {
+    min-width: 0;
+}
+
+.admin-review-main {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.admin-review-sidebar {
+    position: sticky;
+    top: 24px;
+}
+
+
+/* =====================================================
+   10. POST REVIEW — LEFT PANEL
+===================================================== */
+
+.admin-review-main .admin-content-panel {
+    padding: 26px;
+    background: #ffffff;
+    border: 1px solid #e9e0ef;
+    border-radius: 16px;
+    box-shadow: 0 5px 18px rgba(48, 38, 56, 0.06);
+}
+
+.admin-review-main .admin-content-panel-header {
+    margin: -26px -26px 20px;
+    padding: 20px 26px;
+    border-bottom: 1px solid #e9e0ef;
+    background: #faf8fc;
+}
+
+.admin-review-main .admin-content-panel-header h3 {
+    margin: 0 0 9px;
+    color: #302638;
+    font-size: 1.3rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.admin-review-main .admin-content-panel-header p {
+    margin: 0;
+    color: #817587;
+    font-size: 0.88rem;
+}
+
+.admin-review-main .admin-content-panel > p {
+    margin: 12px 0;
+    color: #594d61;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.admin-review-main .admin-content-panel > p strong {
+    color: #302638;
+}
+
+
+/* =====================================================
+   11. POST DESCRIPTION
+===================================================== */
+
+.admin-post-description {
+    margin: 22px 0;
+    padding: 18px;
+    border-left: 3px solid #a88bc1;
+    border-radius: 0 10px 10px 0;
+    background: #f7f3fa;
+    color: #493d51;
+    line-height: 1.75;
+    overflow-wrap: anywhere;
+}
+
+
+/* =====================================================
+   12. POST MEDIA
+===================================================== */
+
+.admin-post-media {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #eee7f2;
+}
+
+.admin-post-media h4,
+.admin-review-main .admin-content-panel h4 {
+    margin: 0 0 14px;
+    color: #68447f;
+    font-size: 1rem;
+}
+
+.admin-post-media img,
+.admin-post-media video {
+    display: block;
+    width: 100%;
+    max-height: 480px;
+    margin: 12px 0;
+    border: 1px solid #e9e0ef;
+    border-radius: 12px;
+    background: #f7f4f9;
+    object-fit: contain;
+}
+
+.admin-review-main .admin-content-panel > div > p {
+    color: #594d61;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+
+/* =====================================================
+   13. POST COMMENTS
+===================================================== */
+
+.admin-post-comment {
+    margin-top: 14px;
+    padding: 17px;
+    border: 1px solid #e9e0ef;
+    border-radius: 12px;
+    background: #faf8fc;
+}
+
+.admin-post-comment + .admin-post-comment {
+    margin-top: 12px;
+}
+
+.admin-post-comment p {
+    color: #594d61;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+
+.admin-post-comment p:first-child {
+    margin-top: 0;
+    color: #817587;
+    font-size: 0.85rem;
+}
+
+.admin-post-comment p:first-child strong {
+    color: #68447f;
+    font-size: 0.95rem;
+}
+
+.admin-post-comment p:last-child {
+    margin-bottom: 0;
+}
+
+.admin-post-comment strong {
+    color: #68447f;
+}
+
+/* Individual comment moderation actions */
+
+.admin-comment-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #e9e0ef;
+}
+
+.admin-comment-actions form {
+    margin: 0;
+}
+
+.admin-review-main .admin-content-empty {
+    padding: 24px 16px;
+    border: 1px dashed #d9cbe3;
+    border-radius: 10px;
+    background: #faf8fc;
+    color: #817587;
+    text-align: center;
+}
+
+
+/* =====================================================
+   14. MODERATION PANEL — RIGHT SIDE
+===================================================== */
+
+.admin-moderation-panel {
+    padding: 24px;
+    border: 1px solid rgba(190, 160, 220, 0.2);
+    border-radius: 16px;
+    background: linear-gradient(
+        145deg,
+        #422b4e,
+        #2b1f37
+    );
+    box-shadow: 0 8px 24px rgba(20, 10, 30, 0.2);
+}
+
+.admin-moderation-panel > h3 {
+    margin: 0 0 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(210, 185, 230, 0.2);
+    color: #eadcf5;
+    font-size: 1.2rem;
+}
+
+
+/* =====================================================
+   15. MODERATION AUTHOR INFORMATION
+===================================================== */
+
+.admin-moderation-author {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 14px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.admin-moderation-label {
+    color: #bba9ca;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.admin-moderation-author strong {
+    color: #f1e7f8;
+    font-size: 1.05rem;
+}
+
+.admin-moderation-author span:last-child {
+    color: #bba9ca;
+    font-size: 0.85rem;
+}
+
+.admin-moderation-details {
+    padding: 16px 4px;
+}
+
+.admin-moderation-details p {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 10px 0;
+    color: #d4c5df;
+    font-size: 0.9rem;
+}
+
+.admin-moderation-details strong {
+    color: #f0e5f7;
+}
+
+
+/* =====================================================
+   16. MODERATION DANGER AREA
+===================================================== */
+
+.admin-moderation-danger {
+    margin-top: 8px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(210, 185, 230, 0.2);
+}
+
+.admin-moderation-danger h4 {
+    margin: 0 0 10px;
+    color: #f0a5b4;
+    font-size: 1rem;
+}
+
+.admin-moderation-danger p {
+    margin: 0 0 18px;
+    color: #c8b8d2;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+
+/* =====================================================
+   17. DELETE BUTTONS
+===================================================== */
+
+/* Default compact button — used in the comments table */
+
+.admin-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    padding: 6px 11px;
+    border: 1px solid rgba(255, 170, 190, 0.25);
+    border-radius: 7px;
+    background: #87384f;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.admin-delete-button:hover {
+    background: #a34460;
+    transform: translateY(-1px);
+}
+
+.admin-delete-button:focus-visible {
+    outline: 3px solid #d9b9ed;
+    outline-offset: 3px;
+}
+
+/* Larger full-width button — used in post review */
+
+.admin-moderation-danger .admin-delete-button {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+}
+
+
+/* =====================================================
+   18. RESPONSIVE — TABLETS
+===================================================== */
+
+@media (max-width: 850px) {
+
+    .admin-review-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-review-sidebar {
+        position: static;
+    }
+
+    .admin-moderation-panel {
+        padding: 20px;
+    }
+}
+
+
+/* =====================================================
+   19. RESPONSIVE — MOBILE
+===================================================== */
 
 @media (max-width: 650px) {
+
     .admin-content-tabs {
         width: 100%;
     }
@@ -239,5 +656,46 @@
 
     .admin-content-heading h2 {
         font-size: 1.5rem;
+    }
+}
+
+
+/* =====================================================
+   20. RESPONSIVE — SMALL MOBILE
+===================================================== */
+
+@media (max-width: 600px) {
+
+    .admin-review-main .admin-content-panel {
+        padding: 18px;
+    }
+
+    .admin-review-main .admin-content-panel-header {
+        margin: -18px -18px 18px;
+        padding: 18px;
+    }
+
+    .admin-post-description {
+        padding: 14px;
+    }
+
+    .admin-post-comment {
+        padding: 14px;
+    }
+
+    .admin-post-media img,
+    .admin-post-media video {
+        max-height: 320px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .admin-review-layout {
+        gap: 16px;
+    }
+
+    .admin-moderation-panel {
+        padding: 16px;
     }
 }

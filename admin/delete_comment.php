@@ -1,0 +1,212 @@
+<?php
+require_once __DIR__ . "/includes/admin_auth.php";
+require_once __DIR__ . "/../config/db.php";
+require_once __DIR__ . "/../includes/csrf.php";
+
+
+/*1. Validate request method */
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    header("Location: content.php?tab=comments");
+    exit;
+}
+
+/*  2. Validate CSRF token */
+
+if (!csrf_valid($_POST["csrf_token"] ?? null)) {
+    http_response_code(403);
+    exit("Invalid security token. Please refresh the page and try again.");
+}
+
+/* 3. Validate comment ID */
+
+$commentId = filter_input(
+    INPUT_POST,
+    "comment_id",
+    FILTER_VALIDATE_INT
+);
+
+$returnPostId = filter_input(
+    INPUT_POST,
+    "return_post_id",
+    FILTER_VALIDATE_INT
+);
+
+$returnPostId = ($returnPostId && $returnPostId > 0)
+    ? $returnPostId
+    : null;
+
+
+if (!$commentId || $commentId < 1) {
+    header("Location: content.php?tab=comments&status=invalid");
+    exit;
+}
+
+
+/* 4. Delete comment safely */
+
+try {
+
+    $conn->beginTransaction();
+
+    $stmt = $conn->prepare("
+        SELECT
+            comment_id,
+            post_id,
+            media_file
+        FROM comment
+        WHERE comment_id = :comment_id
+        FOR UPDATE
+    ");
+
+    $stmt->execute([
+        ":comment_id" => $commentId
+    ]);
+
+    $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+    if (!$comment) {
+        $conn->rollBack();
+
+        header("Location: content.php?tab=comments&status=not_found");
+        exit;
+    }
+
+    /* Check whether the requested return page matches the post that actually owns this comment */
+
+    $redirectToPost = (
+        $returnPostId !== null &&
+        (int) $comment["post_id"] === $returnPostId
+    );
+
+    if (!empty($comment["media_file"])) {
+
+        $filename = basename($comment["media_file"]);
+
+        if (
+            $filename !== $comment["media_file"] ||
+            !preg_match('/\A[a-zA-Z0-9_.-]+\z/', $filename)
+        ) {
+            throw new RuntimeException(
+                "Invalid comment attachment filename."
+            );
+        }
+
+
+        /* Check whether another comment uses this file */
+
+        $referenceStmt = $conn->prepare("
+            SELECT COUNT(*)
+            FROM comment
+            WHERE media_file = :filename
+              AND comment_id != :comment_id
+        ");
+
+        $referenceStmt->execute([
+            ":filename" => $filename,
+            ":comment_id" => $commentId
+        ]);
+
+        $otherReferences = (int) $referenceStmt->fetchColumn();
+
+
+        if ($otherReferences === 0) {
+
+            $queueCheck = $conn->prepare("
+                SELECT COUNT(*)
+                FROM file_deletion_queue
+                WHERE folder = :folder
+                  AND filename = :filename
+            ");
+
+            $queueCheck->execute([
+                ":folder" => "comments",
+                ":filename" => $filename
+            ]);
+
+            $alreadyQueued = (int) $queueCheck->fetchColumn();
+
+
+            if ($alreadyQueued === 0) {
+
+                $queueStmt = $conn->prepare("
+                    INSERT INTO file_deletion_queue (
+                        folder,
+                        filename,
+                        queued_at,
+                        attempts,
+                        last_error
+                    )
+                    VALUES (
+                        :folder,
+                        :filename,
+                        NOW(),
+                        0,
+                        NULL
+                    )
+                ");
+
+                $queueStmt->execute([
+                    ":folder" => "comments",
+                    ":filename" => $filename
+                ]);
+            }
+        }
+    }
+
+    $deleteStmt = $conn->prepare("
+        DELETE FROM comment
+        WHERE comment_id = :comment_id
+    ");
+
+    $deleteStmt->execute([
+        ":comment_id" => $commentId
+    ]);
+
+    if ($deleteStmt->rowCount() !== 1) {
+        throw new RuntimeException(
+            "Comment could not be deleted."
+        );
+    }
+
+    $conn->commit();
+
+    /* Return to the correct review page */
+
+    if ($redirectToPost) {
+        header(
+            "Location: view_post.php?id=" .
+            (int) $comment["post_id"] .
+            "&comment_status=deleted"
+        );
+        exit;
+    }
+
+    header("Location: content.php?tab=comments&status=deleted");
+    exit;
+
+
+} catch (Throwable $e) {
+
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
+
+    error_log(
+        "Admin comment deletion failed: " . $e->getMessage()
+    );
+
+
+    if ($returnPostId !== null) {
+        header(
+            "Location: view_post.php?id=" .
+            $returnPostId .
+            "&comment_status=error"
+        );
+        exit;
+    }
+
+    header("Location: content.php?tab=comments&status=error");
+    exit;
+}

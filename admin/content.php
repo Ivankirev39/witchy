@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . "/includes/admin_auth.php";
 require_once __DIR__ . "/../config/db.php";
+require_once __DIR__ . "/../includes/csrf.php";
 
 $pageTitle = "Content Management | Witchy";
 $pageCss = "admin_content.css";
@@ -20,7 +21,6 @@ $commentCount = 0;
 $errorMessage = "";
 
 try {
-    // Load total counts for both tabs.
     $postCount = (int) $conn->query(
         "SELECT COUNT(*) FROM post"
     )->fetchColumn();
@@ -57,7 +57,7 @@ try {
 
         if ($search !== "") {
             $searchTerm = "%" . $search . "%";
-        
+
             $stmt->bindValue(":search_title", $searchTerm);
             $stmt->bindValue(":search_topic", $searchTerm);
             $stmt->bindValue(":search_user", $searchTerm);
@@ -96,7 +96,7 @@ try {
 
         if ($search !== "") {
             $searchTerm = "%" . $search . "%";
-        
+
             $stmt->bindValue(":search_comment", $searchTerm);
             $stmt->bindValue(":search_user", $searchTerm);
             $stmt->bindValue(":search_post", $searchTerm);
@@ -130,6 +130,7 @@ require_once __DIR__ . "/includes/admin_header.php";
     <?php endif; ?>
 
     <nav class="admin-content-tabs" aria-label="Content categories">
+
         <a
             href="content.php?tab=posts"
             class="<?= $activeTab === "posts" ? "active" : "" ?>"
@@ -145,6 +146,7 @@ require_once __DIR__ . "/includes/admin_header.php";
         >
             Comments (<?= $commentCount ?>)
         </a>
+
     </nav>
 
     <form method="GET" action="content.php" class="admin-content-search">
@@ -174,6 +176,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
     </form>
 
+
     <?php if ($activeTab === "posts"): ?>
 
         <section class="admin-content-panel">
@@ -194,7 +197,9 @@ require_once __DIR__ . "/includes/admin_header.php";
             <?php else: ?>
 
                 <div class="admin-content-table-wrapper">
+
                     <table class="admin-content-table">
+
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -207,8 +212,17 @@ require_once __DIR__ . "/includes/admin_header.php";
                         </thead>
 
                         <tbody>
+
                             <?php foreach ($posts as $post): ?>
-                                <tr>
+
+                                <tr
+                                    class="admin-clickable-row"
+                                    tabindex="0"
+                                    role="link"
+                                    aria-label="Review post: <?= htmlspecialchars($post["title"] ?? "Untitled", ENT_QUOTES, "UTF-8") ?>"
+                                    data-href="view_post.php?id=<?= (int) $post["post_id"] ?>"
+                                >
+
                                     <td>
                                         <?= (int) $post["post_id"] ?>
                                     </td>
@@ -238,19 +252,27 @@ require_once __DIR__ . "/includes/admin_header.php";
                                     </td>
 
                                     <td>
+
                                         <?php if ($post["is_sticky"]): ?>
+
                                             <span class="admin-content-status pinned">
                                                 Pinned
                                             </span>
+
                                         <?php elseif ($post["is_hot"]): ?>
+
                                             <span class="admin-content-status hot">
                                                 Hot
                                             </span>
+
                                         <?php else: ?>
+
                                             <span class="admin-content-status">
                                                 Normal
                                             </span>
+
                                         <?php endif; ?>
+
                                     </td>
 
                                     <td>
@@ -260,15 +282,21 @@ require_once __DIR__ . "/includes/admin_header.php";
                                             "UTF-8"
                                         ) ?>
                                     </td>
+
                                 </tr>
+
                             <?php endforeach; ?>
+
                         </tbody>
+
                     </table>
+
                 </div>
 
             <?php endif; ?>
 
         </section>
+
 
     <?php else: ?>
 
@@ -289,28 +317,40 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             <?php else: ?>
 
-                <div class="admin-content-table-wrapper">
-                    <table class="admin-content-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Comment</th>
-                                <th>Author</th>
-                                <th>Related post</th>
-                                <th>Created</th>
-                            </tr>
-                        </thead>
+                
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Comment</th>
+                            <th>Author</th>
+                            <th>Related post</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
 
-                        <tbody>
+                    <tbody>
+                        <?php if (empty($comments)): ?>
+                            <tr>
+                                <td colspan="5" class="admin-content-empty">
+                                    No comments found.
+                                </td>
+                            </tr>
+                        <?php else: ?>
                             <?php foreach ($comments as $comment): ?>
-                                <tr>
-                                    <td>
-                                        <?= (int) $comment["comment_id"] ?>
-                                    </td>
+                                <tr
+                                    class="admin-clickable-row"
+                                    tabindex="0"
+                                    role="link"
+                                    data-href="view_comment.php?id=<?= (int) $comment["comment_id"] ?>"
+                                    aria-label="Review comment <?= (int) $comment["comment_id"] ?>"
+                                >
+                                    <td><?= (int) $comment["comment_id"] ?></td>
 
                                     <td>
                                         <?= htmlspecialchars(
-                                            $comment["comment"] ?? "",
+                                            mb_strimwidth($comment["comment"], 0, 90, "..."),
                                             ENT_QUOTES,
                                             "UTF-8"
                                         ) ?>
@@ -326,7 +366,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                                     <td>
                                         <?= htmlspecialchars(
-                                            $comment["post_title"] ?? "Post unavailable",
+                                            $comment["title"] ?? "Unavailable",
                                             ENT_QUOTES,
                                             "UTF-8"
                                         ) ?>
@@ -334,20 +374,46 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                                     <td>
                                         <?= htmlspecialchars(
-                                            $comment["created_at"] ?? "",
+                                            $comment["created_at"],
                                             ENT_QUOTES,
                                             "UTF-8"
                                         ) ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
 
             <?php endif; ?>
+
         </section>
+
     <?php endif; ?>
+
 </section>
+
+
+<script>
+document.querySelectorAll(".admin-clickable-row").forEach(row => {
+
+    function openPost() {
+        window.location.href = row.dataset.href;
+    }
+
+    row.addEventListener("click", openPost);
+
+    row.addEventListener("keydown", event => {
+
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openPost();
+        }
+
+    });
+
+});
+</script>
 
 <?php require_once __DIR__ . "/includes/admin_footer.php"; ?>
