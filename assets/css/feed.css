@@ -500,7 +500,37 @@
 .delete-comment-button:active {
   transform: scale(0.96);
 }
-
+/* PAGINATION STLYING */
+.feed-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 36px;
+}
+.feed-pagination a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    min-height: 42px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    text-decoration: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.feed-pagination a:hover {
+    border-color: var(--accent);
+    background: var(--surface-hover, var(--surface));
+}
+.feed-pagination a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
 /* DARK MODE*/
 html.dark-mode .feed-page h1 {
     color: #f1e8dc;
@@ -602,6 +632,18 @@ html.dark-mode .delete-comment-button {
 html.dark-mode .delete-comment-button:hover {
     background: #c5a6ca;
 }
+html.dark-mode .feed-pagination a {
+    border-color: #343039;
+    background: #1f1d24;
+    color: #f1e8dc;
+}
+html.dark-mode .feed-pagination a:hover {
+    border-color: #806b84;
+    background: #292630;
+}
+html.dark-mode .feed-pagination a:focus-visible {
+    outline-color: #c5a6ca;
+}
 html.dark-mode .like-button.active,
 html.dark-mode .save-button.active {
     background: #493b4d;
@@ -688,6 +730,13 @@ html.dark-mode .save-button.active:hover {
     }
     .feed-page h1 {
         font-size: 30px;
+    }
+      .feed-pagination {
+        gap: 8px;
+    }
+    .feed-pagination a {
+        flex: 1;
+        max-width: 160px;
     }
     .post-card {
         border-radius: 12px;
