@@ -1,10 +1,14 @@
 <?php
 require_once __DIR__ . "/includes/session.php";
 
-if (isset($_SESSION["user_id"]) && ($_GET["preview"] ?? "") !== "1") {
+$isLandingPreview = ($_GET["preview"] ?? "") === "1";
+
+if (isset($_SESSION["user_id"]) && !$isLandingPreview) {
     header("Location: feed.php");
     exit;
 }
+
+$showVisitorButtons = !isset($_SESSION["user_id"]) || $isLandingPreview;
 
 $pageTitle = "Witchy";
 $pageCss = "index.css";
@@ -76,7 +80,7 @@ require_once __DIR__ . "/includes/public-header.php";
             </p>
 
             <div class="landing-hero-actions">
-                <?php if (isset($_SESSION["user_id"])): ?>
+                <?php if (!$showVisitorButtons): ?>
                     <a
                         href="#topics"
                         class="button button-primary button-large"
@@ -412,7 +416,7 @@ require_once __DIR__ . "/includes/public-header.php";
         </p>
 
         <div class="landing-hero-actions">
-            <?php if (isset($_SESSION["user_id"])): ?>
+            <?php if (!$showVisitorButtons): ?>
                 <a
                     href="#topics"
                     class="button button-primary button-large"

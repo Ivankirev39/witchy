@@ -73,7 +73,7 @@ if ($isLoggedIn) {
 }
 ?>
 
-<section class="post-detail-page">
+<section class="post-detail-page" data-user-id="<?= (int) $user_id ?>">
     <a href="<?= htmlspecialchars($backUrl, ENT_QUOTES, "UTF-8") ?>" class="post-detail-back">← Back</a>
 
     <div class="post-detail-layout <?= $mediaCount === 0 ? "text-only" : "" ?>">
@@ -308,12 +308,25 @@ if ($isLoggedIn) {
                                             <img class="post-comment-media" src="<?= htmlspecialchars($commentImage, ENT_QUOTES, "UTF-8") ?>" alt="Comment attachment" loading="lazy"> </a>
                                     <?php endif; ?>
                                 </div>
+
                             </article>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <p class="post-detail-no-comments">No comments yet. Be the first to comment.</p>
                     <?php endif; ?>
                 </div>
+                
+                    <?php if ((int) $post["comment_count"] > count($comments)): ?>
+                        <button
+                            type="button"
+                            class="load-more-comments-button"
+                            data-post-id="<?= (int) $post_id ?>"
+                            data-offset="<?= count($comments) ?>"
+                        >
+                            Show more comments
+                        </button>
+                    <?php endif; ?>
+
 
                 <?php if ($isLoggedIn): ?>
                     <form action="comment_post.php" method="POST" enctype="multipart/form-data" class="post-detail-comment-form">

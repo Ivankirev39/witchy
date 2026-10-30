@@ -8,31 +8,38 @@ class Comment
         $this->db = $db;
     }
 
-    public function getCommentsByPostId(int $postId): array
+    public function getCommentsByPostId(int $postId, int $limit = 5, int $offset = 0): array
     {
         $sql = "
             SELECT
-                comment.comment_id,
-                comment.post_id,
-                comment.user_id,
-                comment.comment,
-                comment.media_file,
-                comment.media_type,
-                comment.created_at,
-                users.username,
+                v.comment_id,
+                v.post_id,
+                v.user_id,
+                v.comment,
+                v.media_file,
+                v.media_type,
+                v.created_at,
+                v.author_username AS username,
                 users.profile_image
-            FROM comment
-            JOIN users
-                ON comment.user_id = users.user_id
-            WHERE comment.post_id = ?
-            ORDER BY comment.created_at ASC
+            FROM v_latest_comments v
+            INNER JOIN users
+                ON users.user_id = v.user_id
+            WHERE v.post_id = ?
+            ORDER BY v.created_at ASC, v.comment_id ASC
+            LIMIT ? OFFSET ?
         ";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([$postId]);
+
+        $stmt->bindValue(1, $postId, PDO::PARAM_INT);
+        $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+
+        $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
 
     public function createComment(
         int $postId,

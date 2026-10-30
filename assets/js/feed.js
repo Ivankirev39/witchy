@@ -427,3 +427,127 @@ document.querySelectorAll(".feed-follow-form").forEach((form) => {
         }
     });
 });
+
+
+// LOAD MORE COMMENTS — FEED
+document.querySelectorAll(".post-card .load-more-comments-button").forEach(button => {
+    button.addEventListener("click", async () => {
+        const post = button.closest(".post-card");
+        const commentsList = post.querySelector(".post-comments");
+
+        const postId = button.dataset.postId;
+        const offset = Number(button.dataset.offset);
+
+        button.disabled = true;
+        button.textContent = "Loading...";
+
+        try {
+            const response = await fetch(
+                `load_more_comments.php?post_id=${encodeURIComponent(postId)}&offset=${offset}`
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to load comments.");
+            }
+
+            const data = await response.json();
+
+            data.comments.forEach(comment => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "comment";
+
+                const username = document.createElement("strong");
+                const authorLink = document.createElement("a");
+                authorLink.href = `profile.php?id=${comment.user_id}`;
+                authorLink.className = "comment-author-link";
+                authorLink.textContent = comment.username;
+                username.appendChild(authorLink);
+
+                const content = document.createElement("div");
+                content.className = "feed-comment-content";
+
+                if (comment.comment) {
+                    const text = document.createElement("p");
+                    text.textContent = comment.comment;
+                    content.appendChild(text);
+                }
+
+                if (comment.media_file) {
+                    const imageLink = document.createElement("a");
+                    const image = document.createElement("img");
+
+                    const imageUrl = `uploads/comments/${encodeURIComponent(comment.media_file)}`;
+
+                    imageLink.href = imageUrl;
+                    imageLink.className = "comment-media-link";
+                    imageLink.setAttribute("aria-label", "Open comment image");
+
+                    image.src = imageUrl;
+                    image.className = "comment-media";
+                    image.alt = "Comment attachment";
+                    image.loading = "lazy";
+
+                    imageLink.appendChild(image);
+                    content.appendChild(imageLink);
+                }
+
+                // Delete button only for comments owned by current user
+                const currentUserId = Number(
+                    document.querySelector(".feed-page")?.dataset.userId
+                );
+
+                if (Number(comment.user_id) === currentUserId) {
+                    const form = document.createElement("form");
+                    form.action = "comment_delete.php";
+                    form.method = "POST";
+                    form.className = "delete-comment-form";
+
+                    const fields = {
+                        comment_id: comment.comment_id,
+                        post_id: postId,
+                        return_to: "feed",
+                        csrf_token: post.querySelector(
+                            '.comment-form input[name="csrf_token"]'
+                        ).value
+                    };
+
+                    Object.entries(fields).forEach(([name, value]) => {
+                        const input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = name;
+                        input.value = value;
+                        form.appendChild(input);
+                    });
+
+                    const deleteButton = document.createElement("button");
+                    deleteButton.type = "submit";
+                    deleteButton.className = "delete-comment-button";
+                    deleteButton.textContent = "Delete";
+
+                    form.appendChild(deleteButton);
+                    content.appendChild(form);
+                }
+
+                const date = document.createElement("small");
+                date.textContent = comment.created_at;
+
+                wrapper.append(username, content, date);
+                commentsList.appendChild(wrapper);
+            });
+
+            button.dataset.offset = offset + data.comments.length;
+
+            if (!data.hasMore) {
+                button.remove();
+            } else {
+                button.textContent = "Show more comments";
+                button.disabled = false;
+            }
+
+        } catch (error) {
+            console.error("Load more comments error:", error);
+            button.textContent = "Try again";
+            button.disabled = false;
+        }
+    });
+});

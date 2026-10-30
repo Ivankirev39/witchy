@@ -1,11 +1,12 @@
 -- ============================================================
--- WITCHY DATABASE - TEST INSTALLATION
+-- WITCHY DATABASE - INSTALLATION SCRIPT
 -- Web Programming & Databases Semester Project
 --
--- TEST DATABASE: witchy_schema_test2
+-- Creates the complete WITCHY database for a fresh installation.
+-- Includes tables, relationships, indexes, views,
+-- triggers and fictional sample data.
 --
--- This script is intended for a fresh, empty test database.
--- It does not delete or modify the existing witchy database.
+-- IMPORTANT: Do not run against an existing populated database.
 -- ============================================================
 
 
@@ -711,8 +712,3 @@ CROSS JOIN users b
 
 WHERE a.username = 'demo_learner'
 AND b.username = 'demo_practitioner';
-
-
--- ============================================================
--- END OF TEST INSTALLATION
--- ============================================================

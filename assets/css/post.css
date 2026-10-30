@@ -830,3 +830,28 @@ html.dark-mode .delete-comment-button:hover {
         height: 42px;
     }
 }
+
+
+.load-more-comments-button {
+    display: block;
+    margin: 18px auto 24px;
+    padding: 10px 22px;
+    border: 1px solid var(--accent, #C6A4CF);
+    border-radius: 24px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.load-more-comments-button:hover {
+    background: var(--accent, #C6A4CF);
+    color: #222;
+}
+
+.load-more-comments-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}

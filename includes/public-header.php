@@ -1,7 +1,7 @@
 <?php
 $pageTitle = $pageTitle ?? "Witchy";
 $currentPage = basename($_SERVER["PHP_SELF"]);
-$isLoggedIn = isset($_SESSION["user_id"]);
+$isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
 ?>
 
 <!DOCTYPE html>
@@ -80,7 +80,7 @@ $isLoggedIn = isset($_SESSION["user_id"]);
         class="site-nav"
         aria-label="Main navigation"
     >
-        <a href="/witchy/index.php#abot">
+        <a href="/witchy/index.php#about">
             About
         </a>
 
