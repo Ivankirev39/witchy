@@ -107,20 +107,17 @@ if ($isLoggedIn) {
                     <a
                         href="profile.php?id=<?= (int) $post["user_id"] ?>"
                         class="post-detail-avatar-link">
-
-                        <?php if (!empty($post["profile_image"])): ?>
-                            <img
-                                class="post-detail-avatar"
-                                src="<?= htmlspecialchars($post["profile_image"], ENT_QUOTES, "UTF-8") ?>"
-                                alt="">
-                        <?php else: ?>
-                            <div class="post-detail-avatar post-detail-avatar-fallback">
-                                <?= htmlspecialchars(strtoupper(substr($post["username"], 0, 1)), ENT_QUOTES, "UTF-8") ?>
-                            </div>
-                        <?php endif; ?>
-
+                        <img
+                            class="post-detail-avatar"
+                            src="<?= htmlspecialchars(
+                                        !empty($post["profile_image"])
+                                            ? $post["profile_image"]
+                                            : "images/default-profile.jpg",
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>"
+                            alt="<?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
                     </a>
-
                     <div>
                         <strong>
                             <a
@@ -316,17 +313,16 @@ if ($isLoggedIn) {
                         <p class="post-detail-no-comments">No comments yet. Be the first to comment.</p>
                     <?php endif; ?>
                 </div>
-                
-                    <?php if ((int) $post["comment_count"] > count($comments)): ?>
-                        <button
-                            type="button"
-                            class="load-more-comments-button"
-                            data-post-id="<?= (int) $post_id ?>"
-                            data-offset="<?= count($comments) ?>"
-                        >
-                            Show more comments
-                        </button>
-                    <?php endif; ?>
+
+                <?php if ((int) $post["comment_count"] > count($comments)): ?>
+                    <button
+                        type="button"
+                        class="load-more-comments-button"
+                        data-post-id="<?= (int) $post_id ?>"
+                        data-offset="<?= count($comments) ?>">
+                        Show more comments
+                    </button>
+                <?php endif; ?>
 
 
                 <?php if ($isLoggedIn): ?>
