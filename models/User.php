@@ -281,11 +281,12 @@ class User
             SELECT 1
             FROM ban
             WHERE user_id = ?
-              AND banned_at <= NOW()
-              AND (
-                  expires_at IS NULL
-                  OR expires_at > NOW()
-              )
+            AND revoked_at IS NULL
+            AND banned_at <= NOW()
+            AND (
+                expires_at IS NULL
+                OR expires_at > NOW()
+            )
             LIMIT 1
         ";
 

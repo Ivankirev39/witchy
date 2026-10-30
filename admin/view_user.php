@@ -12,6 +12,7 @@ $user = null;
 $posts = [];
 $comments = [];
 $activeBan = null;
+$banHistory = [];
 $errorMessage = "";
 $successMessage = "";
 
@@ -21,7 +22,7 @@ $status = $_GET["status"] ?? "";
 if ($status === "banned") {
     $successMessage = "The user has been successfully banned.";
 } elseif ($status === "unbanned") {
-    $successMessage = "The user has been successfully unbanned.";
+    $successMessage = "The ban has been successfully revoked.";
 }
 
 // Validate selected user
@@ -56,15 +57,19 @@ if (!$userId || $userId < 1) {
         if ($user && $_SERVER["REQUEST_METHOD"] === "POST") {
 
             if (!csrf_valid($_POST["csrf_token"] ?? "")) {
-                throw new RuntimeException("Invalid security token. Please refresh the page and try again.");
+                throw new RuntimeException(
+                    "Invalid security token. Please refresh the page and try again."
+                );
             }
 
-            // Never allow admins to ban themselves or other admins
+            // Never allow admins to be banned or moderated through this page
             if (
                 $user["rank"] === "admin"
                 || (int) $user["user_id"] === (int) $_SESSION["user_id"]
             ) {
-                throw new RuntimeException("Admin accounts cannot be banned.");
+                throw new RuntimeException(
+                    "Admin accounts cannot be moderated through this page."
+                );
             }
 
             $action = $_POST["action"] ?? "";
@@ -75,11 +80,15 @@ if (!$userId || $userId < 1) {
                 $expiryInput = trim($_POST["expires_at"] ?? "");
 
                 if ($reason === "") {
-                    throw new RuntimeException("Please provide a reason for the ban.");
+                    throw new RuntimeException(
+                        "Please provide a reason for the ban."
+                    );
                 }
 
                 if (strlen($reason) > 1000) {
-                    throw new RuntimeException("The ban reason cannot exceed 1000 characters.");
+                    throw new RuntimeException(
+                        "The ban reason cannot exceed 1000 characters."
+                    );
                 }
 
                 $expiresAt = null;
@@ -97,14 +106,22 @@ if (!$userId || $userId < 1) {
                     if (
                         !$expiryDate
                         || ($dateErrors !== false &&
-                            ($dateErrors["warning_count"] > 0 || $dateErrors["error_count"] > 0))
+                            (
+                                $dateErrors["warning_count"] > 0
+                                || $dateErrors["error_count"] > 0
+                            )
+                        )
                         || $expiryDate->format("Y-m-d\TH:i") !== $expiryInput
                     ) {
-                        throw new RuntimeException("Please enter a valid ban expiry date.");
+                        throw new RuntimeException(
+                            "Please enter a valid ban expiry date."
+                        );
                     }
 
                     if ($expiryDate->getTimestamp() <= time()) {
-                        throw new RuntimeException("The expiry date must be in the future.");
+                        throw new RuntimeException(
+                            "The expiry date must be in the future."
+                        );
                     }
 
                     $expiresAt = $expiryDate->format("Y-m-d H:i:s");
@@ -115,6 +132,7 @@ if (!$userId || $userId < 1) {
                     SELECT ban_id
                     FROM ban
                     WHERE user_id = :user_id
+                      AND revoked_at IS NULL
                       AND banned_at <= NOW()
                       AND (
                           expires_at IS NULL
@@ -126,19 +144,23 @@ if (!$userId || $userId < 1) {
                 $stmt->execute([":user_id" => $userId]);
 
                 if ($stmt->fetch()) {
-                    throw new RuntimeException("This user already has an active ban.");
+                    throw new RuntimeException(
+                        "This user already has an active ban."
+                    );
                 }
 
-                // Create ban
+                // Create ban and record the administrator
                 $stmt = $conn->prepare("
                     INSERT INTO ban (
                         user_id,
+                        banned_by,
                         reason,
                         banned_at,
                         expires_at
                     )
                     VALUES (
                         :user_id,
+                        :banned_by,
                         :reason,
                         NOW(),
                         :expires_at
@@ -147,11 +169,14 @@ if (!$userId || $userId < 1) {
 
                 $stmt->execute([
                     ":user_id" => $userId,
+                    ":banned_by" => $_SESSION["user_id"],
                     ":reason" => $reason,
                     ":expires_at" => $expiresAt
                 ]);
 
-                header("Location: view_user.php?id=" . $userId . "&status=banned");
+                header(
+                    "Location: view_user.php?id=" . $userId . "&status=banned"
+                );
                 exit;
 
             } elseif ($action === "unban") {
@@ -162,15 +187,36 @@ if (!$userId || $userId < 1) {
                     FILTER_VALIDATE_INT
                 );
 
+                $revocationReason = trim(
+                    $_POST["revocation_reason"] ?? ""
+                );
+
                 if (!$banId || $banId < 1) {
                     throw new RuntimeException("Invalid ban selected.");
                 }
 
-                // Remove only this user's active ban
+                if ($revocationReason === "") {
+                    throw new RuntimeException(
+                        "Please provide a reason for revoking this ban."
+                    );
+                }
+
+                if (strlen($revocationReason) > 1000) {
+                    throw new RuntimeException(
+                        "The revocation reason cannot exceed 1000 characters."
+                    );
+                }
+
+                // Revoke the ban without deleting its history
                 $stmt = $conn->prepare("
-                    DELETE FROM ban
+                    UPDATE ban
+                    SET
+                        revoked_at = NOW(),
+                        revoked_by = :revoked_by,
+                        revocation_reason = :revocation_reason
                     WHERE ban_id = :ban_id
                       AND user_id = :user_id
+                      AND revoked_at IS NULL
                       AND banned_at <= NOW()
                       AND (
                           expires_at IS NULL
@@ -179,15 +225,21 @@ if (!$userId || $userId < 1) {
                 ");
 
                 $stmt->execute([
+                    ":revoked_by" => $_SESSION["user_id"],
+                    ":revocation_reason" => $revocationReason,
                     ":ban_id" => $banId,
                     ":user_id" => $userId
                 ]);
 
                 if ($stmt->rowCount() !== 1) {
-                    throw new RuntimeException("The active ban could not be removed.");
+                    throw new RuntimeException(
+                        "The active ban could not be revoked."
+                    );
                 }
 
-                header("Location: view_user.php?id=" . $userId . "&status=unbanned");
+                header(
+                    "Location: view_user.php?id=" . $userId . "&status=unbanned"
+                );
                 exit;
 
             } else {
@@ -229,20 +281,54 @@ if (!$userId || $userId < 1) {
 
             // Check for an active ban
             $stmt = $conn->prepare("
-                SELECT ban_id, reason, banned_at, expires_at
-                FROM ban
-                WHERE user_id = :user_id
-                  AND banned_at <= NOW()
+                SELECT
+                    b.ban_id,
+                    b.reason,
+                    b.banned_at,
+                    b.expires_at,
+                    b.banned_by,
+                    admin.username AS banned_by_username
+                FROM ban b
+                LEFT JOIN users admin
+                    ON b.banned_by = admin.user_id
+                WHERE b.user_id = :user_id
+                  AND b.revoked_at IS NULL
+                  AND b.banned_at <= NOW()
                   AND (
-                      expires_at IS NULL
-                      OR expires_at > NOW()
+                      b.expires_at IS NULL
+                      OR b.expires_at > NOW()
                   )
-                ORDER BY banned_at DESC
+                ORDER BY b.banned_at DESC
                 LIMIT 1
             ");
 
             $stmt->execute([":user_id" => $userId]);
             $activeBan = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Load complete moderation history
+            $stmt = $conn->prepare("
+                SELECT
+                    b.ban_id,
+                    b.reason,
+                    b.banned_at,
+                    b.expires_at,
+                    b.banned_by,
+                    issuing_admin.username AS banned_by_username,
+                    b.revoked_at,
+                    b.revoked_by,
+                    revoking_admin.username AS revoked_by_username,
+                    b.revocation_reason
+                FROM ban b
+                LEFT JOIN users issuing_admin
+                    ON b.banned_by = issuing_admin.user_id
+                LEFT JOIN users revoking_admin
+                    ON b.revoked_by = revoking_admin.user_id
+                WHERE b.user_id = :user_id
+                ORDER BY b.banned_at DESC
+            ");
+
+            $stmt->execute([":user_id" => $userId]);
+            $banHistory = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
     } catch (RuntimeException $e) {
@@ -275,11 +361,9 @@ require_once __DIR__ . "/includes/admin_header.php";
     <?php endif; ?>
 
     <?php if ($errorMessage !== ""): ?>
-
         <div class="admin-content-error" role="alert">
             <?= htmlspecialchars($errorMessage, ENT_QUOTES, "UTF-8") ?>
         </div>
-
     <?php endif; ?>
 
     <?php if ($user): ?>
@@ -377,6 +461,7 @@ require_once __DIR__ . "/includes/admin_header.php";
                     </div>
 
                     <div class="admin-user-ban-details">
+
                         <p>
                             <strong>Reason:</strong>
                             <?= htmlspecialchars($activeBan["reason"], ENT_QUOTES, "UTF-8") ?>
@@ -391,27 +476,54 @@ require_once __DIR__ . "/includes/admin_header.php";
                             <strong>Expires:</strong>
                             <?= htmlspecialchars($activeBan["expires_at"] ?? "No expiry (permanent)", ENT_QUOTES, "UTF-8") ?>
                         </p>
+
+                        <p>
+                            <strong>Issued by:</strong>
+                            <?= htmlspecialchars($activeBan["banned_by_username"] ?? "Unknown / account deleted", ENT_QUOTES, "UTF-8") ?>
+                        </p>
+
                     </div>
 
-                    <form
-                        method="POST"
-                        action="view_user.php?id=<?= (int) $userId ?>"
-                        onsubmit="return confirm('Are you sure you want to unban this user?');"
-                        class="admin-ban-form"
-                    >
-                        <input
-                            type="hidden"
-                            name="csrf_token"
-                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                    <div class="admin-ban-create">
+
+                        <h4>Revoke this ban</h4>
+                        <p>Provide a reason for lifting the ban. The original ban record will be preserved.</p>
+
+                        <form
+                            method="POST"
+                            action="view_user.php?id=<?= (int) $userId ?>"
+                            onsubmit="return confirm('Are you sure you want to revoke this ban?');"
+                            class="admin-ban-form"
                         >
 
-                        <input type="hidden" name="action" value="unban">
-                        <input type="hidden" name="ban_id" value="<?= (int) $activeBan["ban_id"] ?>">
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                            >
 
-                        <button type="submit" class="admin-button-secondary">
-                            Unban user
-                        </button>
-                    </form>
+                            <input type="hidden" name="action" value="unban">
+                            <input type="hidden" name="ban_id" value="<?= (int) $activeBan["ban_id"] ?>">
+
+                            <div class="admin-ban-field">
+                                <label for="revocation-reason">Reason for revoking ban</label>
+                                <textarea
+                                    id="revocation-reason"
+                                    name="revocation_reason"
+                                    rows="3"
+                                    maxlength="1000"
+                                    required
+                                    placeholder="Explain why this ban is being lifted..."
+                                ></textarea>
+                            </div>
+
+                            <button type="submit" class="admin-button-secondary">
+                                Revoke ban
+                            </button>
+
+                        </form>
+
+                    </div>
 
                 <?php else: ?>
 
@@ -490,6 +602,94 @@ require_once __DIR__ . "/includes/admin_header.php";
                 <?php endif; ?>
 
             </div>
+        </section>
+
+        <!-- Moderation history -->
+        <section class="admin-content-panel">
+
+            <header class="admin-content-panel-header">
+                <h3>Moderation history</h3>
+                <p>Previous and current bans recorded for this account.</p>
+            </header>
+
+            <?php if (empty($banHistory)): ?>
+
+                <p class="admin-content-empty">
+                    No previous moderation actions found for this user.
+                </p>
+
+            <?php else: ?>
+
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Ban date</th>
+                                <th>Reason</th>
+                                <th>Issued by</th>
+                                <th>Expiry</th>
+                                <th>Status</th>
+                                <th>Revoked by</th>
+                                <th>Revocation reason</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <?php foreach ($banHistory as $ban): ?>
+
+                                <?php
+                                if ($ban["revoked_at"] !== null) {
+                                    $historyStatus = "Revoked";
+                                } elseif (
+                                    $ban["expires_at"] !== null
+                                    && strtotime($ban["expires_at"]) <= time()
+                                ) {
+                                    $historyStatus = "Expired";
+                                } else {
+                                    $historyStatus = "Active";
+                                }
+                                ?>
+
+                                <tr>
+                                    <td>
+                                        <?= htmlspecialchars($ban["banned_at"], ENT_QUOTES, "UTF-8") ?>
+                                    </td>
+
+                                    <td>
+                                        <?= nl2br(htmlspecialchars($ban["reason"], ENT_QUOTES, "UTF-8")) ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($ban["banned_by_username"] ?? "Unknown / account deleted", ENT_QUOTES, "UTF-8") ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($ban["expires_at"] ?? "Permanent", ENT_QUOTES, "UTF-8") ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($historyStatus, ENT_QUOTES, "UTF-8") ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($ban["revoked_by_username"] ?? ($ban["revoked_by"] !== null ? "Unknown / account deleted" : "—"), ENT_QUOTES, "UTF-8") ?>
+                                    </td>
+
+                                    <td>
+                                        <?= $ban["revocation_reason"] !== null
+                                            ? nl2br(htmlspecialchars($ban["revocation_reason"], ENT_QUOTES, "UTF-8"))
+                                            : "—"
+                                        ?>
+                                    </td>
+                                </tr>
+
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+
+            <?php endif; ?>
+
         </section>
 
         <!-- Recent posts -->
