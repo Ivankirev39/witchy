@@ -3,6 +3,9 @@
    ======================================== */
 
 .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
     width: 100%;
     min-height: 82px;
     display: grid;
@@ -13,6 +16,7 @@
     border-bottom: 1px solid var(--border);
     background: var(--surface-soft);
 }
+
 /* LIGHT MODE */
 .site-logo .logo-light {
     display: block;

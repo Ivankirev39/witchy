@@ -22,8 +22,8 @@
         <a href="index.php#about">About</a>
         <a href="index.php#topics">Explore</a>
         <a href="index.php#community">Community</a>
-        <a href="#">Help</a>
-        <a href="#">Contact</a>
+        <a href="help.php">Help</a>
+        <a href="contact.php">Contact</a>
         <a href="#">Privacy</a>
     </nav>
 
