@@ -32,6 +32,9 @@ if ($hasNextPage) {
     array_pop($posts);
 }
 
+$postIds = array_column($posts, "post_id");
+$postMediaByPost = $postModel->getPostMediaForPosts($postIds);
+
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 <section class="feed-page" data-user-id="<?= (int) $user_id ?>">
@@ -60,7 +63,7 @@ require_once __DIR__ . "/includes/user_header.php";
         <?php foreach ($posts as $post): ?>
             <?php
             $postId = (int) $post["post_id"];
-            $postMedia = $postModel->getPostMedia($postId);
+            $postMedia = $postMediaByPost[$postId] ?? [];
             $mediaCount = count($postMedia);
             ?>
             <article class="post-card" id="post-<?= $postId ?>">

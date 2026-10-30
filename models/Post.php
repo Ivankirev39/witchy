@@ -10,13 +10,12 @@ class Post
     }
 
 
-  public function getFeedPosts(
+    public function getFeedPosts(
         int $userId,
         bool $followingOnly = false,
         int $limit = 10,
         int $offset = 0
-    ): array
-    {
+    ): array {
         $sql = "
             SELECT
                 post.*,
@@ -71,7 +70,7 @@ class Post
             $params[] = $userId;
         }
 
-       $sql .= " ORDER BY post.created_at DESC";
+        $sql .= " ORDER BY post.created_at DESC";
 
         $limit = max(1, min($limit, 50));
         $offset = max(0, $offset);
@@ -106,7 +105,7 @@ class Post
         $this->db->beginTransaction();
 
         try {
-            
+
             $stmt = $this->db->prepare("
                 SELECT post_id
                 FROM post
@@ -118,7 +117,7 @@ class Post
             if ($stmt->fetchColumn() === false) {
                 throw new RuntimeException("Post not found.");
             }
-    
+
             $stmt = $this->db->prepare("
                 SELECT 1
                 FROM post_like
@@ -617,6 +616,33 @@ class Post
 
         return (int) $stmt->fetchColumn();
     }
+    public function getPostMediaForPosts(array $postIds): array
+    {
+        $postIds = array_values(array_filter(
+            array_map("intval", $postIds),
+            static fn(int $postId): bool => $postId > 0
+        ));
 
+        if ($postIds === []) {
+            return [];
+        }
 
+        $placeholders = implode(",", array_fill(0, count($postIds), "?"));
+
+        $stmt = $this->db->prepare("
+        SELECT post_id, media_id, file, media_type, sort_order
+        FROM post_media
+        WHERE post_id IN ($placeholders)
+        ORDER BY post_id ASC, sort_order ASC, media_id ASC
+    ");
+        $stmt->execute($postIds);
+
+        $mediaByPost = [];
+
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $media) {
+            $mediaByPost[(int) $media["post_id"]][] = $media;
+        }
+
+        return $mediaByPost;
+    }
 }
