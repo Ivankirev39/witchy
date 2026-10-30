@@ -475,6 +475,17 @@ button.post-detail-action:hover {
     color: var(--text-secondary);
     font-size: 13px;
 }
+.comment-icon {
+    width: 20px;
+    height: 20px;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+}
 /* DELETE */
 .delete-post-button {
     color: #d65b5b;

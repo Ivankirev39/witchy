@@ -195,7 +195,14 @@ if ($isLoggedIn) {
                 <?php endif; ?>
 
                 <div class="post-detail-action">
-                    ◯
+                    <svg
+                        class="comment-icon"
+                        viewBox="0 0 24 24"
+                        width="20"
+                        height="20"
+                        aria-hidden="true">
+                        <path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.99L3 20l.99-4.5A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 1 1 20 11.5Z" />
+                    </svg>
                     <span><?= (int) $post["comment_count"] ?></span>
                 </div>
 

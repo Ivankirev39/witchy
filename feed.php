@@ -48,17 +48,17 @@ require_once __DIR__ . "/includes/user_header.php";
     </header>
     <!-- FEED TABS -->
     <div class="feed-tabs">
-    <a
-        href="feed.php?feed=for_you"
-        class="feed-tab <?= $feedMode === "for_you" ? "active" : "" ?>">
-        For you
-    </a>
-    <a
-        href="feed.php?feed=following"
-        class="feed-tab <?= $feedMode === "following" ? "active" : "" ?>">
-        Following
-    </a>
-</div>
+        <a
+            href="feed.php?feed=for_you"
+            class="feed-tab <?= $feedMode === "for_you" ? "active" : "" ?>">
+            For you
+        </a>
+        <a
+            href="feed.php?feed=following"
+            class="feed-tab <?= $feedMode === "following" ? "active" : "" ?>">
+            Following
+        </a>
+    </div>
     <!-- FEED -->
     <section class="feed-content">
         <?php foreach ($posts as $post): ?>
@@ -161,13 +161,11 @@ require_once __DIR__ . "/includes/user_header.php";
                         <input
                             type="hidden"
                             name="csrf_token"
-                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
-                        >
+                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                         <input
                             type="hidden"
                             name="post_id"
-                            value="<?= $postId ?>"
-                        >
+                            value="<?= $postId ?>">
 
                         <button
                             type="submit"
@@ -178,8 +176,19 @@ require_once __DIR__ . "/includes/user_header.php";
                         </button>
                     </form>
                     <!-- COMMENTS -->
-                    <button type="button" class="post-action-button comments-toggle">
-                        💬 <span class="comment-count"><?= (int) $post["comment_count"] ?></span>
+                    <button
+                        type="button"
+                        class="post-action-button comments-toggle"
+                        aria-label="View comments">
+                        <svg
+                            class="comment-icon"
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            aria-hidden="true">
+                            <path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.99L3 20l.99-4.5A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 1 1 20 11.5Z" />
+                        </svg>
+                        <span class="comment-count"><?= (int) $post["comment_count"] ?></span>
                     </button>
                     <!-- SAVE -->
                     <form action="save_post.php" method="POST" class="save-form">
@@ -284,8 +293,7 @@ require_once __DIR__ . "/includes/user_header.php";
                             type="button"
                             class="load-more-comments-button"
                             data-post-id="<?= $postId ?>"
-                            data-offset="<?= count($postComments) ?>"
-                        >
+                            data-offset="<?= count($postComments) ?>">
                             Show more comments
                         </button>
                     <?php endif; ?>
@@ -308,27 +316,27 @@ require_once __DIR__ . "/includes/user_header.php";
                 </div>
             </article>
         <?php endforeach; ?>
-         <nav class="feed-pagination" aria-label="Feed pages">
+        <nav class="feed-pagination" aria-label="Feed pages">
             <?php if ($page > 1): ?>
                 <a href="<?= htmlspecialchars(
-                    "feed.php?" . http_build_query([
-                        "feed" => $feedMode,
-                        "page" => $page - 1
-                    ]),
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>">Previous</a>
+                                "feed.php?" . http_build_query([
+                                    "feed" => $feedMode,
+                                    "page" => $page - 1
+                                ]),
+                                ENT_QUOTES,
+                                "UTF-8"
+                            ) ?>">Previous</a>
             <?php endif; ?>
 
             <?php if ($hasNextPage): ?>
                 <a href="<?= htmlspecialchars(
-                    "feed.php?" . http_build_query([
-                        "feed" => $feedMode,
-                        "page" => $page + 1
-                    ]),
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>">Next</a>
+                                "feed.php?" . http_build_query([
+                                    "feed" => $feedMode,
+                                    "page" => $page + 1
+                                ]),
+                                ENT_QUOTES,
+                                "UTF-8"
+                            ) ?>">Next</a>
             <?php endif; ?>
         </nav>
 
