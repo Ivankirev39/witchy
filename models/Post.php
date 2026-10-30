@@ -10,7 +10,12 @@ class Post
     }
 
 
-    public function getFeedPosts(int $userId, bool $followingOnly = false): array
+  public function getFeedPosts(
+        int $userId,
+        bool $followingOnly = false,
+        int $limit = 10,
+        int $offset = 0
+    ): array
     {
         $sql = "
             SELECT
