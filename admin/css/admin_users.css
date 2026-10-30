@@ -513,6 +513,101 @@
     text-decoration: underline;
 }
 
+
+/* User moderation actions */
+
+.admin-content-success {
+    background: #e8f4e9;
+    color: #285b35;
+    border: 1px solid #b9d9bd;
+    padding: 14px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.admin-ban-create {
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid #e5dce9;
+}
+
+.admin-ban-create h4 {
+    margin: 0 0 8px;
+    color: #493052;
+}
+
+.admin-ban-create > p {
+    margin-bottom: 18px;
+    color: #756b79;
+}
+
+.admin-ban-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.admin-ban-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.admin-ban-field label {
+    font-weight: 600;
+    color: #493052;
+}
+
+.admin-ban-field textarea,
+.admin-ban-field input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d9cddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #302638;
+    font: inherit;
+}
+
+.admin-ban-field textarea {
+    resize: vertical;
+}
+
+.admin-ban-field textarea:focus,
+.admin-ban-field input:focus {
+    outline: 2px solid #a88bb5;
+    outline-offset: 2px;
+}
+
+.admin-ban-field small {
+    color: #756b79;
+}
+
+.admin-ban-button {
+    align-self: flex-start;
+    padding: 11px 22px;
+    border: none;
+    border-radius: 8px;
+    background: #8b3e58;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-ban-button:hover {
+    background: #713047;
+}
+
+.admin-ban-form .admin-button-secondary {
+    align-self: flex-start;
+    cursor: pointer;
+}
+
+.admin-user-ban-details {
+    margin-top: 15px;
+}
+
 /* Responsive profile layout */
 
 @media (max-width: 650px) {

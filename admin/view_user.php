@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . "/includes/admin_auth.php";
 require_once __DIR__ . "/../config/db.php";
+require_once __DIR__ . "/../includes/csrf.php";
 
 $pageTitle = "Review User | Witchy";
 $pageCss = "admin_users.css";
@@ -12,7 +13,18 @@ $posts = [];
 $comments = [];
 $activeBan = null;
 $errorMessage = "";
+$successMessage = "";
 
+// Messages after redirects
+$status = $_GET["status"] ?? "";
+
+if ($status === "banned") {
+    $successMessage = "The user has been successfully banned.";
+} elseif ($status === "unbanned") {
+    $successMessage = "The user has been successfully unbanned.";
+}
+
+// Validate selected user
 if (!$userId || $userId < 1) {
     $errorMessage = "Invalid user selected.";
 } else {
@@ -38,7 +50,153 @@ if (!$userId || $userId < 1) {
 
         if (!$user) {
             $errorMessage = "This user could not be found.";
-        } else {
+        }
+
+        // Handle moderation actions
+        if ($user && $_SERVER["REQUEST_METHOD"] === "POST") {
+
+            if (!csrf_valid($_POST["csrf_token"] ?? "")) {
+                throw new RuntimeException("Invalid security token. Please refresh the page and try again.");
+            }
+
+            // Never allow admins to ban themselves or other admins
+            if (
+                $user["rank"] === "admin"
+                || (int) $user["user_id"] === (int) $_SESSION["user_id"]
+            ) {
+                throw new RuntimeException("Admin accounts cannot be banned.");
+            }
+
+            $action = $_POST["action"] ?? "";
+
+            if ($action === "ban") {
+
+                $reason = trim($_POST["reason"] ?? "");
+                $expiryInput = trim($_POST["expires_at"] ?? "");
+
+                if ($reason === "") {
+                    throw new RuntimeException("Please provide a reason for the ban.");
+                }
+
+                if (strlen($reason) > 1000) {
+                    throw new RuntimeException("The ban reason cannot exceed 1000 characters.");
+                }
+
+                $expiresAt = null;
+
+                // Validate optional expiry date
+                if ($expiryInput !== "") {
+
+                    $expiryDate = DateTime::createFromFormat(
+                        "!Y-m-d\TH:i",
+                        $expiryInput
+                    );
+
+                    $dateErrors = DateTime::getLastErrors();
+
+                    if (
+                        !$expiryDate
+                        || ($dateErrors !== false &&
+                            ($dateErrors["warning_count"] > 0 || $dateErrors["error_count"] > 0))
+                        || $expiryDate->format("Y-m-d\TH:i") !== $expiryInput
+                    ) {
+                        throw new RuntimeException("Please enter a valid ban expiry date.");
+                    }
+
+                    if ($expiryDate->getTimestamp() <= time()) {
+                        throw new RuntimeException("The expiry date must be in the future.");
+                    }
+
+                    $expiresAt = $expiryDate->format("Y-m-d H:i:s");
+                }
+
+                // Check whether the user already has an active ban
+                $stmt = $conn->prepare("
+                    SELECT ban_id
+                    FROM ban
+                    WHERE user_id = :user_id
+                      AND banned_at <= NOW()
+                      AND (
+                          expires_at IS NULL
+                          OR expires_at > NOW()
+                      )
+                    LIMIT 1
+                ");
+
+                $stmt->execute([":user_id" => $userId]);
+
+                if ($stmt->fetch()) {
+                    throw new RuntimeException("This user already has an active ban.");
+                }
+
+                // Create ban
+                $stmt = $conn->prepare("
+                    INSERT INTO ban (
+                        user_id,
+                        reason,
+                        banned_at,
+                        expires_at
+                    )
+                    VALUES (
+                        :user_id,
+                        :reason,
+                        NOW(),
+                        :expires_at
+                    )
+                ");
+
+                $stmt->execute([
+                    ":user_id" => $userId,
+                    ":reason" => $reason,
+                    ":expires_at" => $expiresAt
+                ]);
+
+                header("Location: view_user.php?id=" . $userId . "&status=banned");
+                exit;
+
+            } elseif ($action === "unban") {
+
+                $banId = filter_input(
+                    INPUT_POST,
+                    "ban_id",
+                    FILTER_VALIDATE_INT
+                );
+
+                if (!$banId || $banId < 1) {
+                    throw new RuntimeException("Invalid ban selected.");
+                }
+
+                // Remove only this user's active ban
+                $stmt = $conn->prepare("
+                    DELETE FROM ban
+                    WHERE ban_id = :ban_id
+                      AND user_id = :user_id
+                      AND banned_at <= NOW()
+                      AND (
+                          expires_at IS NULL
+                          OR expires_at > NOW()
+                      )
+                ");
+
+                $stmt->execute([
+                    ":ban_id" => $banId,
+                    ":user_id" => $userId
+                ]);
+
+                if ($stmt->rowCount() !== 1) {
+                    throw new RuntimeException("The active ban could not be removed.");
+                }
+
+                header("Location: view_user.php?id=" . $userId . "&status=unbanned");
+                exit;
+
+            } else {
+                throw new RuntimeException("Invalid moderation action.");
+            }
+        }
+
+        if ($user) {
+
             // Load recent posts
             $stmt = $conn->prepare("
                 SELECT post_id, title, topic, created_at
@@ -74,7 +232,11 @@ if (!$userId || $userId < 1) {
                 SELECT ban_id, reason, banned_at, expires_at
                 FROM ban
                 WHERE user_id = :user_id
-                  AND (expires_at IS NULL OR expires_at > NOW())
+                  AND banned_at <= NOW()
+                  AND (
+                      expires_at IS NULL
+                      OR expires_at > NOW()
+                  )
                 ORDER BY banned_at DESC
                 LIMIT 1
             ");
@@ -82,6 +244,10 @@ if (!$userId || $userId < 1) {
             $stmt->execute([":user_id" => $userId]);
             $activeBan = $stmt->fetch(PDO::FETCH_ASSOC);
         }
+
+    } catch (RuntimeException $e) {
+        $errorMessage = $e->getMessage();
+
     } catch (PDOException $e) {
         error_log("Admin user review error: " . $e->getMessage());
         $errorMessage = "The user profile could not be loaded. Please try again.";
@@ -102,13 +268,21 @@ require_once __DIR__ . "/includes/admin_header.php";
         <a href="/witchy/admin/users.php">&larr; Back to users</a>
     </p>
 
+    <?php if ($successMessage !== ""): ?>
+        <div class="admin-content-success" role="status">
+            <?= htmlspecialchars($successMessage, ENT_QUOTES, "UTF-8") ?>
+        </div>
+    <?php endif; ?>
+
     <?php if ($errorMessage !== ""): ?>
 
         <div class="admin-content-error" role="alert">
             <?= htmlspecialchars($errorMessage, ENT_QUOTES, "UTF-8") ?>
         </div>
 
-    <?php elseif ($user): ?>
+    <?php endif; ?>
+
+    <?php if ($user): ?>
 
         <!-- Profile overview -->
         <section class="admin-content-panel admin-user-profile-card">
@@ -185,7 +359,7 @@ require_once __DIR__ . "/includes/admin_header.php";
             </div>
         </section>
 
-        <!-- Account status -->
+        <!-- Account status and moderation -->
         <section class="admin-content-panel admin-user-status-panel">
 
             <header class="admin-content-panel-header">
@@ -215,9 +389,29 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                         <p>
                             <strong>Expires:</strong>
-                            <?= htmlspecialchars($activeBan["expires_at"] ?? "No expiry", ENT_QUOTES, "UTF-8") ?>
+                            <?= htmlspecialchars($activeBan["expires_at"] ?? "No expiry (permanent)", ENT_QUOTES, "UTF-8") ?>
                         </p>
                     </div>
+
+                    <form
+                        method="POST"
+                        action="view_user.php?id=<?= (int) $userId ?>"
+                        onsubmit="return confirm('Are you sure you want to unban this user?');"
+                        class="admin-ban-form"
+                    >
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                        >
+
+                        <input type="hidden" name="action" value="unban">
+                        <input type="hidden" name="ban_id" value="<?= (int) $activeBan["ban_id"] ?>">
+
+                        <button type="submit" class="admin-button-secondary">
+                            Unban user
+                        </button>
+                    </form>
 
                 <?php else: ?>
 
@@ -229,6 +423,69 @@ require_once __DIR__ . "/includes/admin_header.php";
                     <p class="admin-user-status-note">
                         No active ban found for this account.
                     </p>
+
+                    <?php if ($user["rank"] !== "admin" && (int) $user["user_id"] !== (int) $_SESSION["user_id"]): ?>
+
+                        <div class="admin-ban-create">
+
+                            <h4>Ban this user</h4>
+                            <p>Provide a reason and choose whether the ban should be temporary or permanent.</p>
+
+                            <form
+                                method="POST"
+                                action="view_user.php?id=<?= (int) $userId ?>"
+                                class="admin-ban-form"
+                            >
+
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                                >
+
+                                <input type="hidden" name="action" value="ban">
+
+                                <div class="admin-ban-field">
+                                    <label for="ban-reason">Reason for ban</label>
+                                    <textarea
+                                        id="ban-reason"
+                                        name="reason"
+                                        rows="4"
+                                        maxlength="1000"
+                                        required
+                                        placeholder="Explain why this account is being banned..."
+                                    ></textarea>
+                                </div>
+
+                                <div class="admin-ban-field">
+                                    <label for="ban-expiry">Ban expiry (optional)</label>
+                                    <input
+                                        type="datetime-local"
+                                        id="ban-expiry"
+                                        name="expires_at"
+                                    >
+                                    <small>Leave empty for a permanent ban.</small>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    class="admin-ban-button"
+                                    onclick="return confirm('Are you sure you want to ban this user?');"
+                                >
+                                    Ban user
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    <?php else: ?>
+
+                        <p class="admin-user-status-note">
+                            Admin accounts cannot be banned through this page.
+                        </p>
+
+                    <?php endif; ?>
 
                 <?php endif; ?>
 
