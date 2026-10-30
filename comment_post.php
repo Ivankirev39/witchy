@@ -18,6 +18,9 @@ if (!csrf_valid($_POST["csrf_token"] ?? null)) {
 
 $user_id = (int) $_SESSION["user_id"];
 $post_id = (int) ($_POST["post_id"] ?? 0);
+$returnUrl = ($_POST["return_to"] ?? "") === "post"
+    ? "post.php?id=" . $post_id
+    : "feed.php#post-" . $post_id;
 $commentText = trim($_POST["comment"] ?? "");
 
 
@@ -41,7 +44,7 @@ if ($commentText === "" && !$hasMedia) {
         exit;
     }
 
-    header("Location: feed.php#post-" . $post_id);
+    header("Location: " . $returnUrl);
     exit;
 }
 
@@ -182,5 +185,5 @@ if ($isAjax) {
     exit;
 }
 
-header("Location: feed.php#post-" . $post_id);
+header("Location: " . $returnUrl);
 exit;

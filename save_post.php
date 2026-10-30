@@ -71,6 +71,8 @@ if ($isAjax) {
 
 if (($_POST["redirect"] ?? "") === "saved.php") {
     header("Location: saved.php");
+} elseif (($_POST["return_to"] ?? "") === "post") {
+    header("Location: post.php?id=" . $postId);
 } else {
     header("Location: feed.php#post-" . $postId);
 }
