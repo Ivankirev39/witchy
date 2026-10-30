@@ -18,10 +18,19 @@ $feedMode = ($_GET["feed"] ?? "for_you") === "following"
     ? "following"
     : "for_you";
 
+$pageSize = 10;
+$page = max(1, (int) ($_GET["page"] ?? 1));
 $posts = $postModel->getFeedPosts(
     $user_id,
-    $feedMode === "following"
+    $feedMode === "following",
+    $pageSize + 1,
+    ($page - 1) * $pageSize
 );
+$hasNextPage = count($posts) > $pageSize;
+
+if ($hasNextPage) {
+    array_pop($posts);
+}
 
 require_once __DIR__ . "/includes/user_header.php";
 ?>
@@ -282,6 +291,29 @@ require_once __DIR__ . "/includes/user_header.php";
                 </div>
             </article>
         <?php endforeach; ?>
+         <nav class="feed-pagination" aria-label="Feed pages">
+            <?php if ($page > 1): ?>
+                <a href="<?= htmlspecialchars(
+                    "feed.php?" . http_build_query([
+                        "feed" => $feedMode,
+                        "page" => $page - 1
+                    ]),
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>">Previous</a>
+            <?php endif; ?>
+
+            <?php if ($hasNextPage): ?>
+                <a href="<?= htmlspecialchars(
+                    "feed.php?" . http_build_query([
+                        "feed" => $feedMode,
+                        "page" => $page + 1
+                    ]),
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>">Next</a>
+            <?php endif; ?>
+        </nav>
 
     </section>
 </section>

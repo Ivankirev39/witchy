@@ -9,9 +9,9 @@ class Post
         $this->db = $db;
     }
 
-public function getFeedPosts(int $userId, bool $followingOnly = false): array
-{
-    $sql = "
+    public function getFeedPosts(int $userId, bool $followingOnly = false, int $limit = 10, int $offset = 0): array
+    {
+        $sql = "
         SELECT
             post.*,
             users.username AS author_username,
@@ -48,10 +48,10 @@ public function getFeedPosts(int $userId, bool $followingOnly = false): array
         JOIN users ON users.user_id = post.user_id
     ";
 
-    $params = [$userId, $userId, $userId];
+        $params = [$userId, $userId, $userId];
 
-    if ($followingOnly) {
-        $sql .= "
+        if ($followingOnly) {
+            $sql .= "
             WHERE EXISTS (
                 SELECT 1
                 FROM follow
@@ -59,16 +59,19 @@ public function getFeedPosts(int $userId, bool $followingOnly = false): array
                   AND follow.following_id = post.user_id
             )
         ";
-        $params[] = $userId;
+            $params[] = $userId;
+        }
+
+        $sql .= " ORDER BY post.created_at DESC";
+
+        $limit = max(1, min($limit, 50));
+        $offset = max(0, $offset);
+        $sql .= " LIMIT {$limit} OFFSET {$offset}";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
-    $sql .= " ORDER BY post.created_at DESC";
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
-
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
 
     public function getPostMedia(int $postId): array
     {
@@ -86,179 +89,179 @@ public function getFeedPosts(int $userId, bool $followingOnly = false): array
     }
 
 
-public function toggleLike(int $userId, int $postId): array
-{
-    $this->db->beginTransaction();
+    public function toggleLike(int $userId, int $postId): array
+    {
+        $this->db->beginTransaction();
 
-    try {
-        
-        $stmt = $this->db->prepare("
+        try {
+
+            $stmt = $this->db->prepare("
             SELECT post_id
             FROM post
             WHERE post_id = ?
             FOR UPDATE
         ");
-        $stmt->execute([$postId]);
+            $stmt->execute([$postId]);
 
-        if ($stmt->fetchColumn() === false) {
-            throw new RuntimeException("Post not found.");
-        }
-  
-        $stmt = $this->db->prepare("
+            if ($stmt->fetchColumn() === false) {
+                throw new RuntimeException("Post not found.");
+            }
+
+            $stmt = $this->db->prepare("
             SELECT 1
             FROM post_like
             WHERE user_id = ? AND post_id = ?
         ");
-        $stmt->execute([$userId, $postId]);
+            $stmt->execute([$userId, $postId]);
 
-        $liked = $stmt->fetchColumn() !== false;
+            $liked = $stmt->fetchColumn() !== false;
 
-        if ($liked) {
-            $stmt = $this->db->prepare("
+            if ($liked) {
+                $stmt = $this->db->prepare("
                 DELETE FROM post_like
                 WHERE user_id = ? AND post_id = ?
             ");
-            $stmt->execute([$userId, $postId]);
-            $liked = false;
-        } else {
-            $stmt = $this->db->prepare("
+                $stmt->execute([$userId, $postId]);
+                $liked = false;
+            } else {
+                $stmt = $this->db->prepare("
                 INSERT INTO post_like (user_id, post_id)
                 VALUES (?, ?)
             ");
-            $stmt->execute([$userId, $postId]);
-            $liked = true;
-        }
+                $stmt->execute([$userId, $postId]);
+                $liked = true;
+            }
 
-        $stmt = $this->db->prepare("
+            $stmt = $this->db->prepare("
             SELECT COUNT(*)
             FROM post_like
             WHERE post_id = ?
         ");
-        $stmt->execute([$postId]);
+            $stmt->execute([$postId]);
 
-        $likeCount = (int) $stmt->fetchColumn();
+            $likeCount = (int) $stmt->fetchColumn();
 
-        $this->db->commit();
+            $this->db->commit();
 
-        return [
-            "liked" => $liked,
-            "like_count" => $likeCount
-        ];
-    } catch (Throwable $e) {
-        if ($this->db->inTransaction()) {
-            $this->db->rollBack();
+            return [
+                "liked" => $liked,
+                "like_count" => $likeCount
+            ];
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
         }
-
-        throw $e;
     }
-}
 
-public function toggleSave(int $userId, int $postId): bool
-{
-    $this->db->beginTransaction();
+    public function toggleSave(int $userId, int $postId): bool
+    {
+        $this->db->beginTransaction();
 
-    try {
-        $stmt = $this->db->prepare("
+        try {
+            $stmt = $this->db->prepare("
             SELECT post_id
             FROM post
             WHERE post_id = ?
             FOR UPDATE
         ");
-        $stmt->execute([$postId]);
+            $stmt->execute([$postId]);
 
-        if ($stmt->fetchColumn() === false) {
-            throw new RuntimeException("Post not found.");
-        }
+            if ($stmt->fetchColumn() === false) {
+                throw new RuntimeException("Post not found.");
+            }
 
-        $stmt = $this->db->prepare("
+            $stmt = $this->db->prepare("
             SELECT 1
             FROM save
             WHERE user_id = ? AND post_id = ?
         ");
-        $stmt->execute([$userId, $postId]);
+            $stmt->execute([$userId, $postId]);
 
-        if ($stmt->fetchColumn() !== false) {
-            $stmt = $this->db->prepare("
+            if ($stmt->fetchColumn() !== false) {
+                $stmt = $this->db->prepare("
                 DELETE FROM save
                 WHERE user_id = ? AND post_id = ?
             ");
-            $stmt->execute([$userId, $postId]);
-            $saved = false;
-        } else {
-            $stmt = $this->db->prepare("
+                $stmt->execute([$userId, $postId]);
+                $saved = false;
+            } else {
+                $stmt = $this->db->prepare("
                 INSERT INTO save (user_id, post_id)
                 VALUES (?, ?)
             ");
-            $stmt->execute([$userId, $postId]);
-            $saved = true;
+                $stmt->execute([$userId, $postId]);
+                $saved = true;
+            }
+
+            $this->db->commit();
+
+            return $saved;
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
         }
-
-        $this->db->commit();
-
-        return $saved;
-    } catch (Throwable $e) {
-        if ($this->db->inTransaction()) {
-            $this->db->rollBack();
-        }
-
-        throw $e;
     }
-}
-public function createPostWithMedia(
-    int $userId,
-    string $title,
-    string $description,
-    string $topic,
-    string $sources,
-    array $mediaRecords
-): int {
-    $this->db->beginTransaction();
+    public function createPostWithMedia(
+        int $userId,
+        string $title,
+        string $description,
+        string $topic,
+        string $sources,
+        array $mediaRecords
+    ): int {
+        $this->db->beginTransaction();
 
-    try {
-        $stmt = $this->db->prepare("
+        try {
+            $stmt = $this->db->prepare("
             INSERT INTO post (user_id, title, description, topic, sources)
             VALUES (?, ?, ?, ?, ?)
         ");
-        $stmt->execute([
-            $userId,
-            $title,
-            $description,
-            $topic,
-            $sources
-        ]);
+            $stmt->execute([
+                $userId,
+                $title,
+                $description,
+                $topic,
+                $sources
+            ]);
 
-        $postId = (int) $this->db->lastInsertId();
+            $postId = (int) $this->db->lastInsertId();
 
-        if ($mediaRecords !== []) {
-            $mediaStmt = $this->db->prepare("
+            if ($mediaRecords !== []) {
+                $mediaStmt = $this->db->prepare("
                 INSERT INTO post_media (post_id, file, media_type, sort_order)
                 VALUES (?, ?, ?, ?)
             ");
 
-            foreach ($mediaRecords as $index => $media) {
-                $mediaStmt->execute([
-                    $postId,
-                    $media["file"],
-                    $media["media_type"],
-                    $index + 1
-                ]);
+                foreach ($mediaRecords as $index => $media) {
+                    $mediaStmt->execute([
+                        $postId,
+                        $media["file"],
+                        $media["media_type"],
+                        $index + 1
+                    ]);
+                }
             }
+
+            $this->db->commit();
+
+            return $postId;
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
         }
-
-        $this->db->commit();
-
-        return $postId;
-    } catch (Throwable $e) {
-        if ($this->db->inTransaction()) {
-            $this->db->rollBack();
-        }
-
-        throw $e;
     }
-}
-public function getPostById(int $postId, int $viewerId): ?array
-{
-    $stmt = $this->db->prepare("
+    public function getPostById(int $postId, int $viewerId): ?array
+    {
+        $stmt = $this->db->prepare("
         SELECT
             post.*,
             users.username,
@@ -296,38 +299,38 @@ public function getPostById(int $postId, int $viewerId): ?array
         WHERE post.post_id = ?
     ");
 
-    $stmt->execute([$viewerId, $viewerId, $viewerId, $postId]);
-    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->execute([$viewerId, $viewerId, $viewerId, $postId]);
+        $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    return $post === false ? null : $post;
-}
-public function getPostOwnerId(int $postId): ?int
-{
-    $stmt = $this->db->prepare("
+        return $post === false ? null : $post;
+    }
+    public function getPostOwnerId(int $postId): ?int
+    {
+        $stmt = $this->db->prepare("
         SELECT user_id
         FROM post
         WHERE post_id = ?
     ");
-    $stmt->execute([$postId]);
+        $stmt->execute([$postId]);
 
-    $ownerId = $stmt->fetchColumn();
+        $ownerId = $stmt->fetchColumn();
 
-    return $ownerId === false ? null : (int) $ownerId;
-}
-public function getLikedPosts(
-    int $userId,
-    string $topic,
-    string $sort
-): array {
-    $orderByOptions = [
-        "newest_post" => "p.created_at DESC",
-        "oldest_post" => "p.created_at ASC",
-        "title_asc" => "p.title ASC"
-    ];
+        return $ownerId === false ? null : (int) $ownerId;
+    }
+    public function getLikedPosts(
+        int $userId,
+        string $topic,
+        string $sort
+    ): array {
+        $orderByOptions = [
+            "newest_post" => "p.created_at DESC",
+            "oldest_post" => "p.created_at ASC",
+            "title_asc" => "p.title ASC"
+        ];
 
-    $orderBy = $orderByOptions[$sort] ?? $orderByOptions["newest_post"];
+        $orderBy = $orderByOptions[$sort] ?? $orderByOptions["newest_post"];
 
-    $sql = "
+        $sql = "
         SELECT
             p.post_id,
             p.title,
@@ -351,37 +354,37 @@ public function getLikedPosts(
         WHERE pl.user_id = ?
     ";
 
-    $params = [$userId];
+        $params = [$userId];
 
-    if ($topic !== "") {
-        $sql .= " AND p.topic = ?";
-        $params[] = $topic;
+        if ($topic !== "") {
+            $sql .= " AND p.topic = ?";
+            $params[] = $topic;
+        }
+
+        $sql .= " ORDER BY " . $orderBy;
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    $sql .= " ORDER BY " . $orderBy;
+    public function getSavedPosts(
+        int $userId,
+        string $topic,
+        string $sort
+    ): array {
+        $orderByOptions = [
+            "newest_saved" => "s.created_at DESC",
+            "oldest_saved" => "s.created_at ASC",
+            "newest_post" => "p.created_at DESC",
+            "oldest_post" => "p.created_at ASC",
+            "title_asc" => "p.title ASC"
+        ];
 
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
+        $orderBy = $orderByOptions[$sort] ?? $orderByOptions["newest_saved"];
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-public function getSavedPosts(
-    int $userId,
-    string $topic,
-    string $sort
-): array {
-    $orderByOptions = [
-        "newest_saved" => "s.created_at DESC",
-        "oldest_saved" => "s.created_at ASC",
-        "newest_post" => "p.created_at DESC",
-        "oldest_post" => "p.created_at ASC",
-        "title_asc" => "p.title ASC"
-    ];
-
-    $orderBy = $orderByOptions[$sort] ?? $orderByOptions["newest_saved"];
-
-    $sql = "
+        $sql = "
         SELECT
             p.post_id,
             p.user_id,
@@ -405,105 +408,105 @@ public function getSavedPosts(
         WHERE s.user_id = ?
     ";
 
-    $params = [$userId];
+        $params = [$userId];
 
-    if ($topic !== "") {
-        $sql .= " AND p.topic = ?";
-        $params[] = $topic;
+        if ($topic !== "") {
+            $sql .= " AND p.topic = ?";
+            $params[] = $topic;
+        }
+
+        $sql .= " ORDER BY " . $orderBy;
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    $sql .= " ORDER BY " . $orderBy;
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
-
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-public function removeLike(int $userId, int $postId): void
-{
-    $stmt = $this->db->prepare("
+    public function removeLike(int $userId, int $postId): void
+    {
+        $stmt = $this->db->prepare("
         DELETE FROM post_like
         WHERE user_id = ? AND post_id = ?
     ");
-    $stmt->execute([$userId, $postId]);
-}
-public function deletePost(int $postId, int $userId): ?array
-{
-    $this->db->beginTransaction();
+        $stmt->execute([$userId, $postId]);
+    }
+    public function deletePost(int $postId, int $userId): ?array
+    {
+        $this->db->beginTransaction();
 
-    try {
-        $stmt = $this->db->prepare("
+        try {
+            $stmt = $this->db->prepare("
             SELECT post_id
             FROM post
             WHERE post_id = ? AND user_id = ?
             FOR UPDATE
         ");
-        $stmt->execute([$postId, $userId]);
+            $stmt->execute([$postId, $userId]);
 
-        if ($stmt->fetchColumn() === false) {
-            $this->db->rollBack();
-            return null;
-        }
+            if ($stmt->fetchColumn() === false) {
+                $this->db->rollBack();
+                return null;
+            }
 
-        $stmt = $this->db->prepare("
+            $stmt = $this->db->prepare("
             SELECT file
             FROM post_media
             WHERE post_id = ?
         ");
-        $stmt->execute([$postId]);
-        $postFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $stmt->execute([$postId]);
+            $postFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        $stmt = $this->db->prepare("
+            $stmt = $this->db->prepare("
             SELECT media_file
             FROM comment
             WHERE post_id = ? AND media_file IS NOT NULL
         ");
-        $stmt->execute([$postId]);
-        $commentFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            $stmt->execute([$postId]);
+            $commentFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        $stmt = $this->db->prepare("
+            $stmt = $this->db->prepare("
             DELETE FROM post
             WHERE post_id = ? AND user_id = ?
         ");
-        $stmt->execute([$postId, $userId]);
+            $stmt->execute([$postId, $userId]);
 
-        if ($stmt->rowCount() !== 1) {
-            throw new RuntimeException("Post was not deleted.");
+            if ($stmt->rowCount() !== 1) {
+                throw new RuntimeException("Post was not deleted.");
+            }
+
+            $this->db->commit();
+
+            return [
+                "posts" => $postFiles,
+                "comments" => $commentFiles
+            ];
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
         }
-
-        $this->db->commit();
-
-        return [
-            "posts" => $postFiles,
-            "comments" => $commentFiles
-        ];
-    } catch (Throwable $e) {
-        if ($this->db->inTransaction()) {
-            $this->db->rollBack();
-        }
-
-        throw $e;
     }
-}
 
-public function searchExplorePosts(
-    string $search,
-    string $topic,
-    string $sort,
-    int $limit,
-    int $offset
-): array {
-    $orderByOptions = [
-        "newest" => "p.created_at DESC",
-        "oldest" => "p.created_at ASC",
-        "title_asc" => "p.title ASC",
-        "title_desc" => "p.title DESC"
-    ];
+    public function searchExplorePosts(
+        string $search,
+        string $topic,
+        string $sort,
+        int $limit,
+        int $offset
+    ): array {
+        $orderByOptions = [
+            "newest" => "p.created_at DESC",
+            "oldest" => "p.created_at ASC",
+            "title_asc" => "p.title ASC",
+            "title_desc" => "p.title DESC"
+        ];
 
-    $orderBy = $orderByOptions[$sort] ?? $orderByOptions["newest"];
+        $orderBy = $orderByOptions[$sort] ?? $orderByOptions["newest"];
 
-    $sql = "
+        $sql = "
         SELECT
             p.post_id,
             p.user_id,
@@ -525,83 +528,81 @@ public function searchExplorePosts(
         )
     ";
 
-    $conditions = [];
-    $params = [];
+        $conditions = [];
+        $params = [];
 
-    if ($search !== "") {
-        $conditions[] = "(
+        if ($search !== "") {
+            $conditions[] = "(
             p.title LIKE ?
             OR p.description LIKE ?
             OR p.topic LIKE ?
             OR u.username LIKE ?
         )";
 
-        $term = "%" . $search . "%";
-        array_push($params, $term, $term, $term, $term);
+            $term = "%" . $search . "%";
+            array_push($params, $term, $term, $term, $term);
+        }
+
+        if ($topic !== "") {
+            $conditions[] = "p.topic = ?";
+            $params[] = $topic;
+        }
+
+        if ($conditions !== []) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        $sql .= " ORDER BY " . $orderBy . " LIMIT ? OFFSET ?";
+
+        $stmt = $this->db->prepare($sql);
+
+        foreach ($params as $index => $value) {
+            $stmt->bindValue($index + 1, $value, PDO::PARAM_STR);
+        }
+
+        $stmt->bindValue(count($params) + 1, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(count($params) + 2, $offset, PDO::PARAM_INT);
+
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    if ($topic !== "") {
-        $conditions[] = "p.topic = ?";
-        $params[] = $topic;
-    }
-
-    if ($conditions !== []) {
-        $sql .= " WHERE " . implode(" AND ", $conditions);
-    }
-
-    $sql .= " ORDER BY " . $orderBy . " LIMIT ? OFFSET ?";
-
-    $stmt = $this->db->prepare($sql);
-
-    foreach ($params as $index => $value) {
-        $stmt->bindValue($index + 1, $value, PDO::PARAM_STR);
-    }
-
-    $stmt->bindValue(count($params) + 1, $limit, PDO::PARAM_INT);
-    $stmt->bindValue(count($params) + 2, $offset, PDO::PARAM_INT);
-
-    $stmt->execute();
-
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-public function countExplorePosts(string $search, string $topic): int
-{
-    $sql = "
+    public function countExplorePosts(string $search, string $topic): int
+    {
+        $sql = "
         SELECT COUNT(*)
         FROM post p
         INNER JOIN users u ON u.user_id = p.user_id
     ";
 
-    $conditions = [];
-    $params = [];
+        $conditions = [];
+        $params = [];
 
-    if ($search !== "") {
-        $conditions[] = "(
+        if ($search !== "") {
+            $conditions[] = "(
             p.title LIKE ?
             OR p.description LIKE ?
             OR p.topic LIKE ?
             OR u.username LIKE ?
         )";
 
-        $term = "%" . $search . "%";
-        array_push($params, $term, $term, $term, $term);
+            $term = "%" . $search . "%";
+            array_push($params, $term, $term, $term, $term);
+        }
+
+        if ($topic !== "") {
+            $conditions[] = "p.topic = ?";
+            $params[] = $topic;
+        }
+
+        if ($conditions !== []) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn();
     }
-
-    if ($topic !== "") {
-        $conditions[] = "p.topic = ?";
-        $params[] = $topic;
-    }
-
-    if ($conditions !== []) {
-        $sql .= " WHERE " . implode(" AND ", $conditions);
-    }
-
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute($params);
-
-    return (int) $stmt->fetchColumn();
-}
-
-
 }
