@@ -19,12 +19,13 @@
     </a>
 
     <nav class="footer-nav" aria-label="Footer navigation">
+        <a href="index.php">Home</a>
         <a href="index.php#about">About</a>
-        <a href="index.php#topics">Explore</a>
+        <a href="public-explore.php">Explore</a>
         <a href="index.php#community">Community</a>
-        <a href="help.php">Help</a>
         <a href="contact.php">Contact</a>
-        <a href="#">Privacy</a>
+        <a href="terms.php">Terms of Service</a>
+        <a href="privacy.php">Privacy Policy</a>
     </nav>
 
     <p class="footer-copy">

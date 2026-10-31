@@ -80,11 +80,16 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
         class="site-nav"
         aria-label="Main navigation"
     >
-        <a href="/witchy/index.php#about">
+    
+        <a href="/witchy/index.php">
+            Home
+        </a>
+
+        <a href="/witchy/about.php">
             About
         </a>
 
-        <a href="/witchy/index.php#topics">
+        <a href="/witchy/public-explore.php">
             Explore
         </a>
 

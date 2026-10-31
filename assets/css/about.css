@@ -1,0 +1,340 @@
+
+/* ========================================
+   WITCHY - ABOUT PAGE
+   about.css
+
+   Page: about.php
+   Requires: style.css
+   ======================================== */
+
+
+/* ========================================
+   1. GENERAL
+   ======================================== */
+
+.about-page {
+    background: var(--surface-soft);
+}
+
+.about-page h1,
+.about-page h2 {
+    color: var(--text);
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.8px;
+}
+
+.about-container {
+    width: min(88%, 1320px);
+    margin-inline: auto;
+}
+
+.about-eyebrow {
+    margin: 0 0 16px;
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+
+/* ========================================
+   2. HERO
+   ======================================== */
+
+.about-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 70px;
+    min-height: 610px;
+    padding: 65px 8%;
+    background: var(--surface-soft);
+}
+
+.about-hero-content {
+    max-width: 590px;
+}
+
+.about-hero h1 {
+    max-width: 560px;
+    margin: 0;
+    font-size: clamp(44px, 4.4vw, 64px);
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+}
+
+.about-hero-tagline {
+    margin: 22px 0 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.about-hero-description {
+    max-width: 540px;
+    margin: 14px 0 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.about-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.about-hero-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+}
+
+.about-hero-visual img {
+    display: block;
+    width: 100%;
+    max-width: 580px;
+    max-height: 570px;
+    object-fit: contain;
+}
+
+
+/* ========================================
+   3. INTRODUCTION
+   ======================================== */
+
+.about-intro {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 90px;
+    padding-top: 90px;
+    padding-bottom: 90px;
+}
+
+.about-intro h2,
+.about-section-heading h2,
+.about-values h2,
+.about-final-cta h2 {
+    margin: 0;
+    font-size: clamp(30px, 3vw, 42px);
+    line-height: 1.15;
+}
+
+.about-intro-copy p,
+.about-values p:not(.about-eyebrow) {
+    margin: 0 0 17px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+
+/* ========================================
+   4. COMMUNITY FEATURES
+   ======================================== */
+
+.about-features {
+    padding: 85px 0 95px;
+    background: var(--background);
+}
+
+.about-section-heading {
+    max-width: 640px;
+    margin-bottom: 34px;
+}
+
+.about-section-heading > p:last-child {
+    margin: 16px 0 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.about-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.about-feature-card {
+    padding: 36px 30px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+}
+
+.about-feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: var(--accent-soft);
+    color: var(--primary);
+    font-size: 27px;
+}
+
+.about-feature-card h3 {
+    margin: 24px 0 10px;
+    color: var(--text);
+    font-size: 19px;
+    font-weight: 600;
+}
+
+.about-feature-card p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+
+/* ========================================
+   5. VALUES
+   ======================================== */
+
+.about-values {
+    display: grid;
+    grid-template-columns: 0.7fr 1.3fr;
+    align-items: center;
+    gap: 75px;
+    padding-top: 95px;
+    padding-bottom: 95px;
+}
+
+.about-values-decor {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 270px;
+    border-radius: 22px;
+    background: linear-gradient(
+        145deg,
+        var(--accent-soft),
+        var(--surface)
+    );
+    color: var(--primary);
+    font-size: clamp(90px, 12vw, 170px);
+}
+
+.about-values h2 {
+    margin-bottom: 22px;
+}
+
+.about-values .button {
+    margin-top: 12px;
+}
+
+
+/* ========================================
+   6. FINAL CTA
+   ======================================== */
+
+.about-final-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 85px 24px 95px;
+    text-align: center;
+    background: var(--background);
+}
+
+.about-final-cta > p:not(.about-eyebrow) {
+    max-width: 580px;
+    margin: 18px 0 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.about-final-cta .about-actions {
+    justify-content: center;
+}
+
+
+/* ========================================
+   7. RESPONSIVE
+   ======================================== */
+
+@media (max-width: 900px) {
+
+    .about-hero {
+        gap: 36px;
+        padding-inline: 6%;
+    }
+
+    .about-intro {
+        gap: 45px;
+    }
+
+    .about-values {
+        gap: 40px;
+    }
+}
+
+@media (max-width: 800px) {
+
+    .about-hero {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        min-height: auto;
+        padding: 60px 24px;
+    }
+
+    .about-hero-visual {
+        max-width: 430px;
+        margin: 0 auto;
+    }
+
+    .about-container {
+        width: calc(100% - 48px);
+    }
+
+    .about-intro,
+    .about-values {
+        grid-template-columns: 1fr;
+        gap: 26px;
+        padding-top: 65px;
+        padding-bottom: 65px;
+    }
+
+    .about-values-decor {
+        min-height: 190px;
+    }
+
+    .about-feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-features {
+        padding: 65px 0;
+    }
+}
+
+@media (max-width: 500px) {
+
+    .about-hero h1 {
+        font-size: clamp(40px, 10vw, 52px);
+    }
+
+    .about-actions {
+        flex-direction: column;
+    }
+
+    .about-actions .button {
+        width: 100%;
+    }
+
+    .about-feature-card {
+        padding: 28px 24px;
+    }
+
+    .about-final-cta {
+        padding: 65px 24px;
+    }
+}
