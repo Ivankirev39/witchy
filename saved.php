@@ -13,6 +13,7 @@ $topic = trim($_GET["topic"] ?? "");
 
 $postModel = new Post($conn);
 $savedPosts = $postModel->getSavedPosts($user_id, $topic, $sort);
+$sortUrl = "saved.php?topic=" . urlencode($topic) . "&sort=";
 
 require_once __DIR__ . "/includes/user_header.php";
 ?>
@@ -64,19 +65,19 @@ require_once __DIR__ . "/includes/user_header.php";
     <div class="saved-sort">
         <label for="saved-sort">Sort by:</label>
         <select id="saved-sort" onchange="window.location.href=this.value">
-            <option value="saved.php?sort=newest_saved" <?= $sort === "newest_saved" ? "selected" : "" ?>>
+            <option value="<?= $sortUrl ?>newest_saved" <?= $sort === "newest_saved" ? "selected" : "" ?>>
                 Recently saved
             </option>
-            <option value="saved.php?sort=oldest_saved" <?= $sort === "oldest_saved" ? "selected" : "" ?>>
+            <option value="<?= $sortUrl ?>oldest_saved" <?= $sort === "oldest_saved" ? "selected" : "" ?>>
                 Oldest saved
             </option>
-            <option value="saved.php?sort=newest_post" <?= $sort === "newest_post" ? "selected" : "" ?>>
+            <option value="<?= $sortUrl ?>newest_post" <?= $sort === "newest_post" ? "selected" : "" ?>>
                 Newest post
             </option>
-            <option value="saved.php?sort=oldest_post" <?= $sort === "oldest_post" ? "selected" : "" ?>>
+            <option value="<?= $sortUrl ?>oldest_post" <?= $sort === "oldest_post" ? "selected" : "" ?>>
                 Oldest post
             </option>
-            <option value="saved.php?sort=title_asc" <?= $sort === "title_asc" ? "selected" : "" ?>>
+            <option value="<?= $sortUrl ?>title_asc" <?= $sort === "title_asc" ? "selected" : "" ?>>
                 Title A–Z
             </option>
         </select>
