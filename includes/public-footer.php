@@ -23,7 +23,8 @@
         <a href="index.php#about">About</a>
         <a href="public-explore.php">Explore</a>
         <a href="index.php#community">Community</a>
-        <a href="contact.php">Contact</a>
+        <a href="public_help.php">Help</a>
+        <a href="public-contact.php">Contact</a>
         <a href="terms.php">Terms of Service</a>
         <a href="privacy.php">Privacy Policy</a>
     </nav>

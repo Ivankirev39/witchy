@@ -330,3 +330,12 @@ html.dark-mode .contact-errors {
         width: 100%;
     }
 }
+/* Hide the anti-spam honeypot field */
+.contact-honeypot {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
