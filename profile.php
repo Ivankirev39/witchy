@@ -35,15 +35,30 @@ if (!$is_own_profile) {
 $follower_count = $followModel->countFollowers($profile_id);
 $following_count = $followModel->countFollowing($profile_id);
 
-// Get user's posts
+// Get user's posts and profile pin status
 $postStmt = $conn->prepare("
-    SELECT post_id, title, description, topic, created_at
-    FROM post
-    WHERE user_id = ?
-    ORDER BY created_at DESC
+    SELECT
+        p.post_id,
+        p.title,
+        p.description,
+        p.topic,
+        p.created_at,
+        CASE
+            WHEN pp.post_id IS NOT NULL THEN 1
+            ELSE 0
+        END AS is_profile_pinned
+    FROM post p
+    LEFT JOIN profile_pinned_post pp
+        ON pp.post_id = p.post_id
+        AND pp.user_id = ?
+    WHERE p.user_id = ?
+    ORDER BY
+        is_profile_pinned DESC,
+        pp.pinned_at DESC,
+        p.created_at DESC
 ");
 
-$postStmt->execute([$profile_id]);
+$postStmt->execute([$profile_id, $profile_id]);
 $posts = $postStmt->fetchAll(PDO::FETCH_ASSOC);
 $post_count = count($posts);
 
@@ -103,7 +118,6 @@ require_once __DIR__ . "/includes/user_header.php";
                     <?php endif; ?>
                 </div>
 
-
                 <?php if ($is_own_profile): ?>
 
                     <div class="profile-owner-actions">
@@ -117,7 +131,6 @@ require_once __DIR__ . "/includes/user_header.php";
                     </div>
 
                 <?php else: ?>
-
 
                     <form
                         action="follow_user.php"
@@ -161,17 +174,13 @@ require_once __DIR__ . "/includes/user_header.php";
             </div>
 
             <?php if (!empty($user["bio"])): ?>
-
                 <p class="profile-bio">
                     <?= nl2br(htmlspecialchars($user["bio"], ENT_QUOTES, "UTF-8")) ?>
                 </p>
-
             <?php else: ?>
-
                 <p class="profile-bio profile-empty">
                     No bio yet.
                 </p>
-
             <?php endif; ?>
 
             <div class="profile-stats">
@@ -231,6 +240,8 @@ require_once __DIR__ . "/includes/user_header.php";
 
     </section>
 
+   
+
     <section class="profile-posts">
 
         <div class="profile-section-heading">
@@ -240,7 +251,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
         <?php if ($post_count > 0): ?>
 
-            <div class="profile-post-grid">
+            <div class="profile-post-grid" id="profile-post-grid">
 
                 <?php foreach ($posts as $post): ?>
 
@@ -254,93 +265,123 @@ require_once __DIR__ . "/includes/user_header.php";
                     $firstMedia = $mediaCount > 0 ? $postMedia[0] : null;
                     ?>
 
-                    <a
-                        href="post.php?id=<?= $postId ?>"
-                        class="profile-post-card <?= !$firstMedia ? "profile-text-post" : "" ?>"
-                        aria-label="View <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
-                    >
+                    <div class="profile-post-item" id="post-<?= $postId ?>">
 
-                        <?php if ($firstMedia): ?>
+                        <?php if ($is_own_profile): ?>
 
-                            <?php
-                            $mediaFile = basename($firstMedia["file"]);
-                            $mediaPath = "uploads/posts/" . rawurlencode($mediaFile);
-                            ?>
-
-                            <?php if ($firstMedia["media_type"] === "image"): ?>
-
-                                <img
-                                    class="profile-post-media"
-                                    src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
-                                    alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
-                                    loading="lazy"
+                            <form
+                                action="profile_pin.php"
+                                method="POST"
+                                class="profile-pin-form"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
                                 >
 
-                            <?php elseif ($firstMedia["media_type"] === "video"): ?>
+                                <input
+                                    type="hidden"
+                                    name="post_id"
+                                    value="<?= $postId ?>"
+                                >
 
-                                <video
-                                    class="profile-post-media"
-                                    src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
-                                    muted
-                                    playsinline
-                                    preload="metadata"
-                                ></video>
+                                <button
+                                    type="submit"
+                                    class="profile-pin-button <?= !empty($post["is_profile_pinned"]) ? "is-pinned" : "" ?>"
+                                    aria-label="<?= !empty($post["is_profile_pinned"]) ? "Unpin post" : "Pin post to profile" ?>"
+                                    title="<?= !empty($post["is_profile_pinned"]) ? "Unpin post" : "Pin to profile" ?>"
+                                >
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z"/>
+                                        <path d="M12 14v7"/>
+                                    </svg>
+                                </button>
+                            </form>
 
-                                <span class="profile-video-icon" aria-hidden="true">
-                                    ▶
-                                </span>
+                        <?php endif; ?>
 
-                            <?php endif; ?>
+                        <a
+                            href="post.php?id=<?= $postId ?>"
+                            class="profile-post-card <?= !$firstMedia ? "profile-text-post" : "" ?>"
+                            aria-label="View <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
+                        >
 
-                            <?php if ($mediaCount > 1): ?>
+                            <?php if ($firstMedia): ?>
 
-                                <span class="profile-media-count">
-                                    <?= $mediaCount ?>
-                                </span>
+                                <?php
+                                $mediaFile = basename($firstMedia["file"]);
+                                $mediaPath = "uploads/posts/" . rawurlencode($mediaFile);
+                                ?>
 
-                            <?php endif; ?>
+                                <?php if ($firstMedia["media_type"] === "image"): ?>
 
-                        <?php else: ?>
+                                    <img
+                                        class="profile-post-media"
+                                        src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
+                                        alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
+                                        loading="lazy"
+                                    >
 
-                            <div class="profile-text-content">
+                                <?php elseif ($firstMedia["media_type"] === "video"): ?>
 
-                                <span class="profile-text-symbol" aria-hidden="true">
-                                    ✦
-                                </span>
+                                    <video
+                                        class="profile-post-media"
+                                        src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
+                                        muted
+                                        playsinline
+                                        preload="metadata"
+                                    ></video>
 
-                                <?php if (!empty($post["topic"])): ?>
-
-                                    <span class="profile-text-topic">
-                                        #<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
+                                    <span class="profile-video-icon" aria-hidden="true">
+                                        ▶
                                     </span>
 
                                 <?php endif; ?>
 
-                                <?php if (!empty($post["description"])): ?>
-
-                                    <p class="profile-text-description">
-                                        <?= htmlspecialchars($post["description"], ENT_QUOTES, "UTF-8") ?>
-                                    </p>
-
-                                <?php else: ?>
-
-                                    <p class="profile-text-description">
-                                        <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
-                                    </p>
-
+                                <?php if ($mediaCount > 1): ?>
+                                    <span class="profile-media-count">
+                                        <?= $mediaCount ?>
+                                    </span>
                                 <?php endif; ?>
 
+                            <?php else: ?>
+
+                                <div class="profile-text-content">
+
+                                    <span class="profile-text-symbol" aria-hidden="true">
+                                        ✦
+                                    </span>
+
+                                    <?php if (!empty($post["topic"])): ?>
+                                        <span class="profile-text-topic">
+                                            #<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
+                                        </span>
+                                    <?php endif; ?>
+
+                                    <p class="profile-text-description">
+                                        <?= htmlspecialchars(
+                                            !empty($post["description"])
+                                                ? $post["description"]
+                                                : $post["title"],
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        ) ?>
+                                    </p>
+
+                                </div>
+
+                            <?php endif; ?>
+
+                            <div class="profile-post-overlay">
+                                <strong>
+                                    <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
+                                </strong>
                             </div>
 
-                        <?php endif; ?>
+                        </a>
 
-                        <div class="profile-post-overlay">
-                            <strong>
-                                <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
-                            </strong>
-                        </div>
-
-                    </a>
+                    </div>
 
                 <?php endforeach; ?>
 
@@ -398,7 +439,7 @@ require_once __DIR__ . "/includes/user_header.php";
     >
 </div>
 
-<script src="assets/js/profile.js"></script>
+<script src="/witchy/assets/js/profile.js?v=2"></script>
 
 <?php
 require_once __DIR__ . "/includes/user_footer.php";

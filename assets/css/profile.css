@@ -485,9 +485,204 @@
     outline-offset: 3px;
 }
 
-/* ========================================
-   DARK MODE
-   ======================================== */
+
+/* PROFILE PINNING */
+
+   .profile-post-item {
+    position: relative;
+    min-width: 0;
+}
+
+.profile-post-item .profile-post-card {
+    display: block;
+    width: 100%;
+}
+
+/* Pin icon */
+.profile-pin-form {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    margin: 0;
+}
+
+.profile-pin-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 9px;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--brand-plum);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.85);
+    transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease,
+        transform 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.profile-pin-button svg {
+    width: 19px;
+    height: 19px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Reveal icon on hover and keyboard focus */
+.profile-post-item:hover .profile-pin-button,
+.profile-post-item:focus-within .profile-pin-button {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+/* Pinned icon stays visible */
+.profile-pin-button.is-pinned {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+    background: var(--accent);
+    color: var(--brand-white);
+}
+
+.profile-pin-button:hover {
+    background: var(--accent-soft);
+    color: var(--brand-plum);
+}
+
+.profile-pin-button:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+}
+
+/* Pinned post label */
+.profile-pinned-badge {
+    position: absolute;
+    top: 52px;
+    left: 12px;
+    z-index: 4;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--brand-plum);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* Pin status and warning */
+.profile-pin-message {
+    margin: 0 0 18px;
+    padding: 14px 18px;
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.profile-pin-warning {
+    border-color: var(--accent);
+    font-weight: 600;
+}
+
+/* Dark mode */
+html.dark-mode .profile-pin-button {
+    background: #29242d;
+    border-color: #806b84;
+    color: #ead9ed;
+}
+
+html.dark-mode .profile-pin-button.is-pinned {
+    background: #806b84;
+    color: #ffffff;
+}
+
+html.dark-mode .profile-pin-button:hover {
+    background: #493b4d;
+}
+
+html.dark-mode .profile-pinned-badge {
+    background: #493b4d;
+    border-color: #806b84;
+    color: #ead9ed;
+}
+
+html.dark-mode .profile-pin-message {
+    background: #29242d;
+    border-color: #806b84;
+    color: #f1e8dc;
+}
+
+/* Mobile and touch devices */
+@media (hover: none) {
+    .profile-pin-button {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+    }
+}
+
+@media (max-width: 600px) {
+    .profile-pin-form {
+        top: 8px;
+        right: 8px;
+    }
+
+    .profile-pin-button {
+        width: 34px;
+        height: 34px;
+        padding: 8px;
+    }
+
+    .profile-pinned-badge {
+        top: 44px;
+        left: 8px;
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+}
+
+.profile-pin-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 20px;
+    padding: 15px 18px;
+    border: 1px solid var(--accent);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+html.dark-mode .profile-pin-warning {
+    background: #493b4d;
+    border-color: #806b84;
+    color: #f1e8dc;
+}
+
+
+/* DARK MODE */
+
 html.dark-mode .profile-cover {
     background: #29242d;
     border-color: #343039;
@@ -555,9 +750,8 @@ html.dark-mode .profile-text-description {
 html.dark-mode .profile-no-posts {
     border-color: #343039;
 }
-/* ========================================
-   TABLET
-   ======================================== */
+
+/* TABLET */
 @media (max-width: 850px) {
     .profile-post-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -566,9 +760,7 @@ html.dark-mode .profile-no-posts {
         grid-template-columns: 1fr;
     }
 }
-/* ========================================
-   MOBILE
-   ======================================== */
+/* MOBILE */
 @media (max-width: 600px) {
     .profile-cover {
         height: 150px;
