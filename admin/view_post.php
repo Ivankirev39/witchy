@@ -28,12 +28,70 @@ if ($returnFrom === "user" && $returnUserId && $returnUserId > 0) {
     $returnUserId = null;
 }
 
-if (($_GET["status"] ?? "") === "error") {
+if (($_GET["status"] ?? "") === "pinned") {
+    $statusMessage = "The post was pinned to the community feed.";
+} elseif (($_GET["status"] ?? "") === "unpinned") {
+    $statusMessage = "The post was unpinned from the community feed.";
+} elseif (($_GET["status"] ?? "") === "pin_error") {
+    $statusMessage = "The post pin status could not be changed. Please try again.";
+} elseif (($_GET["status"] ?? "") === "error") {
     $statusMessage = "The post could not be deleted. Please try again.";
 } elseif (($_GET["comment_status"] ?? "") === "deleted") {
     $statusMessage = "The comment was successfully deleted.";
 } elseif (($_GET["comment_status"] ?? "") === "error") {
     $statusMessage = "The comment could not be deleted. Please try again.";
+}
+
+if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "toggle_sticky") {
+    if (!csrf_valid($_POST["csrf_token"] ?? "")) {
+        $errorMessage = "Your security token was invalid. Please refresh and try again.";
+    } elseif (!$postId || $postId < 1) {
+        $errorMessage = "Invalid post selected.";
+    } else {
+        try {
+            $checkStmt = $conn->prepare("
+                SELECT is_sticky
+                FROM post
+                WHERE post_id = :post_id
+                LIMIT 1
+            ");
+            $checkStmt->execute(["post_id" => $postId]);
+            $currentSticky = $checkStmt->fetchColumn();
+
+            if ($currentSticky === false) {
+                $errorMessage = "This post could not be found.";
+            } else {
+                $newSticky = (int) $currentSticky === 1 ? 0 : 1;
+
+                $updateStmt = $conn->prepare("
+                    UPDATE post
+                    SET is_sticky = :is_sticky
+                    WHERE post_id = :post_id
+                ");
+
+                $updateStmt->execute([
+                    "is_sticky" => $newSticky,
+                    "post_id" => $postId
+                ]);
+
+                $redirectUrl = "/witchy/admin/view_post.php?id=" . (int) $postId;
+
+                if ($returnFrom === "user" && $returnUserId) {
+                    $redirectUrl .= "&from=user&return_user_id=" . (int) $returnUserId;
+                }
+
+                $redirectUrl .= $newSticky === 1
+                    ? "&status=pinned"
+                    : "&status=unpinned";
+
+                header("Location: " . $redirectUrl);
+                exit;
+            }
+        } catch (PDOException $e) {
+            error_log("Admin post pin error: " . $e->getMessage());
+            $errorMessage = "The post pin status could not be changed. Please try again.";
+        }
+    }
 }
 
 if (!$postId || $postId < 1) {
@@ -358,22 +416,28 @@ require_once __DIR__ . "/includes/admin_header.php";
                         </span>
                     </div>
 
-                    <div class="admin-moderation-details">
+                    <div class="admin-moderation-pin">
+                        <h4>Community feed</h4>
 
                         <p>
-                            <strong>Post ID:</strong>
-                            <?= (int) $post["post_id"] ?>
+                            <?= !empty($post["is_sticky"])
+                                ? "This post is currently pinned at the top of the community feed."
+                                : "Pin this post to give it priority in the community feed." ?>
                         </p>
 
-                        <p>
-                            <strong>Comments:</strong>
-                            <?= count($comments) ?>
-                        </p>
+                        <form method="POST" action="/witchy/admin/view_post.php?id=<?= (int) $post["post_id"] ?><?= $returnFrom === "user" && $returnUserId ? "&amp;from=user&amp;return_user_id=" . (int) $returnUserId : "" ?>"
+                            onsubmit="return confirm('Are you sure you want to <?= !empty($post["is_sticky"]) ? "unpin" : "pin" ?> this post?');">
 
-                        <p>
-                            <strong>Additional media:</strong>
-                            <?= count($media) ?>
-                        </p>
+                            <input type="hidden" name="csrf_token"
+                                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+
+                            <input type="hidden" name="action" value="toggle_sticky">
+
+                            <button type="submit">
+                                <?= !empty($post["is_sticky"]) ? "Unpin post" : "Pin to community feed" ?>
+                            </button>
+
+                        </form>
 
                     </div>
 

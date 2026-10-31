@@ -13,6 +13,12 @@ $posts = [];
 $comments = [];
 $activeBan = null;
 $banHistory = [];
+
+$postCount = 0;
+$commentCount = 0;
+$followerCount = 0;
+$followingCount = 0;
+
 $errorMessage = "";
 $successMessage = "";
 
@@ -249,6 +255,43 @@ if (!$userId || $userId < 1) {
 
         if ($user) {
 
+            // Count total posts
+            $stmt = $conn->prepare("
+                SELECT COUNT(*)
+                FROM post
+                WHERE user_id = :user_id
+            ");
+            $stmt->execute([":user_id" => $userId]);
+            $postCount = (int) $stmt->fetchColumn();
+        
+            // Count total comments
+            $stmt = $conn->prepare("
+                SELECT COUNT(*)
+                FROM comment
+                WHERE user_id = :user_id
+            ");
+            $stmt->execute([":user_id" => $userId]);
+            $commentCount = (int) $stmt->fetchColumn();
+        
+            // Count followers
+            $stmt = $conn->prepare("
+                SELECT COUNT(*)
+                FROM follow
+                WHERE following_id = :user_id
+            ");
+            $stmt->execute([":user_id" => $userId]);
+            $followerCount = (int) $stmt->fetchColumn();
+        
+            // Count following
+            $stmt = $conn->prepare("
+                SELECT COUNT(*)
+                FROM follow
+                WHERE follower_id = :user_id
+            ");
+            $stmt->execute([":user_id" => $userId]);
+            $followingCount = (int) $stmt->fetchColumn();
+        
+
             // Load recent posts
             $stmt = $conn->prepare("
                 SELECT post_id, title, topic, created_at
@@ -441,6 +484,48 @@ require_once __DIR__ . "/includes/admin_header.php";
                 </div>
 
             </div>
+        </section>
+
+        <!-- User activity overview -->
+        <section class="admin-content-panel admin-user-activity-panel">
+
+        <header class="admin-content-panel-header">
+            <h3>Activity overview</h3>
+            <p>A summary of this member's activity in the community.</p>
+        </header>
+
+        <div class="admin-user-activity-grid">
+
+            <div class="admin-user-activity-card">
+                <span class="admin-user-activity-number">
+                    <?= $postCount ?>
+                </span>
+                <span class="admin-user-activity-label">Total posts</span>
+            </div>
+
+            <div class="admin-user-activity-card">
+                <span class="admin-user-activity-number">
+                    <?= $commentCount ?>
+                </span>
+                <span class="admin-user-activity-label">Total comments</span>
+            </div>
+
+            <div class="admin-user-activity-card">
+                <span class="admin-user-activity-number">
+                    <?= $followerCount ?>
+                </span>
+                <span class="admin-user-activity-label">Followers</span>
+            </div>
+
+            <div class="admin-user-activity-card">
+                <span class="admin-user-activity-number">
+                    <?= $followingCount ?>
+                </span>
+                <span class="admin-user-activity-label">Following</span>
+            </div>
+
+        </div>
+
         </section>
 
         <!-- Account status and moderation -->

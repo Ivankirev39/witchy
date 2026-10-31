@@ -70,7 +70,7 @@ class Post
             $params[] = $userId;
         }
 
-        $sql .= " ORDER BY post.created_at DESC";
+        $sql .= " ORDER BY post.is_sticky DESC, post.created_at DESC";
 
         $limit = max(1, min($limit, 50));
         $offset = max(0, $offset);

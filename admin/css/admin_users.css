@@ -608,6 +608,86 @@
     margin-top: 15px;
 }
 
+
+/* ========================================
+   User activity overview
+======================================== */
+
+.admin-user-activity-panel {
+    padding: 26px;
+}
+
+.admin-user-activity-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 22px;
+}
+
+.admin-user-activity-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 125px;
+    padding: 22px;
+    background: #fff;
+    border: 1px solid #e9e1ec;
+    border-radius: 14px;
+    box-shadow: 0 3px 10px rgba(55, 35, 65, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-user-activity-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 18px rgba(55, 35, 65, 0.09);
+}
+
+.admin-user-activity-number {
+    display: block;
+    margin-bottom: 9px;
+    color: #493052;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -1px;
+}
+
+.admin-user-activity-label {
+    color: #786d7d;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+/* Responsive layout */
+
+@media (max-width: 900px) {
+    .admin-user-activity-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-user-activity-panel {
+        padding: 18px;
+    }
+
+    .admin-user-activity-grid {
+        gap: 12px;
+    }
+
+    .admin-user-activity-card {
+        min-height: 105px;
+        padding: 17px;
+    }
+
+    .admin-user-activity-number {
+        font-size: 27px;
+    }
+}
+
+
 /* Responsive profile layout */
 
 @media (max-width: 650px) {

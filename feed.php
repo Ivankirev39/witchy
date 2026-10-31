@@ -69,6 +69,17 @@ require_once __DIR__ . "/includes/user_header.php";
             ?>
             <article class="post-card" id="post-<?= $postId ?>">
                 <!-- POST AUTHOR -->
+                
+                <?php if (!empty($post["is_sticky"])): ?>
+                    <div class="admin-pinned-badge">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z"/>
+                        <path d="M12 14v7"/>
+                    </svg>
+                        <span>Admin Pinned</span>
+                    </div>
+                <?php endif; ?>
+
                 <div class="post-author">
                     <a
                         href="profile.php?id=<?= (int) $post["user_id"] ?>"

@@ -540,6 +540,56 @@
     outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
+
+
+/* ADMIN COMMUNITY PIN */
+.admin-pinned-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    width: fit-content;
+    margin: 14px 16px 0;
+    padding: 6px 12px;
+
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+
+    background: var(--accent-soft);
+    color: var(--brand-plum);
+
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.25px;
+    line-height: 1.3;
+}
+
+.admin-pinned-badge svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* DARK MODE */
+html.dark-mode .admin-pinned-badge {
+    background: #493b4d;
+    border-color: #806b84;
+    color: #ead9ed;
+}
+
+/* MOBILE */
+@media (max-width: 500px) {
+    .admin-pinned-badge {
+        margin: 12px 14px 0;
+        padding: 5px 10px;
+        font-size: 11px;
+    }
+}
+
 /* DARK MODE*/
 html.dark-mode .feed-page h1 {
     color: #f1e8dc;
