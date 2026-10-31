@@ -193,4 +193,17 @@ class Comment
 
         return $commentsByPost;
     }
+    public function getProfileImageByUserId(int $userId): ?string
+    {
+        $stmt = $this->db->prepare("
+        SELECT profile_image
+        FROM users
+        WHERE user_id = ?
+    ");
+        $stmt->execute([$userId]);
+
+        $profileImage = $stmt->fetchColumn();
+
+        return $profileImage === false ? null : $profileImage;
+    }
 }

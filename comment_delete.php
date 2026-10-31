@@ -58,5 +58,9 @@ if ($isAjax) {
     exit;
 }
 // Fallback if JavaScript is unavailable
-header("Location: feed.php#post-" . $post_id);
+if (($_POST["return_to"] ?? "") === "post" && $post_id > 0) {
+    header("Location: post.php?id=" . $post_id);
+} else {
+    header("Location: feed.php#post-" . $post_id);
+}
 exit;

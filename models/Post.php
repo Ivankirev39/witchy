@@ -347,7 +347,6 @@ class Post
                 p.title,
                 p.description,
                 p.topic,
-                p.image,
                 p.created_at,
                 u.username,
                 pm.file AS media_file,

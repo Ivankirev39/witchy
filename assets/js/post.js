@@ -85,8 +85,85 @@
     removeButton.addEventListener("click", clearPreview);
 })();
 
+//DELETE COMMENT WITHOUT RELOAD
+document.addEventListener("submit", async (event) => {
+    const form = event.target.closest(
+        ".post-detail-comment-list .delete-comment-form"
+    );
 
- // LOAD MORE COMMENTS — INDIVIDUAL POST
+    if (!form) return;
+
+    event.preventDefault();
+
+    if (!confirm("Are you sure you want to delete this comment?")) {
+        return;
+    }
+
+    const button = form.querySelector(".delete-comment-button");
+    const comment = form.closest(".post-detail-comment");
+    const commentsList = form.closest(".post-detail-comment-list");
+    const commentCount = document.querySelector(
+        ".post-detail-actions .comment-icon + span"
+    );
+
+    button.disabled = true;
+
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Comment delete request failed.");
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+            throw new Error("Comment could not be deleted.");
+        }
+
+        comment.remove();
+
+        if (commentCount) {
+            commentCount.textContent = data.comment_count;
+        }
+
+        const remainingComments =
+            commentsList.querySelectorAll(".post-detail-comment").length;
+        const loadMoreButton = document.querySelector(
+            ".post-detail-comments .load-more-comments-button"
+        );
+
+        if (loadMoreButton) {
+            loadMoreButton.dataset.offset = remainingComments;
+
+            if (Number(data.comment_count) <= remainingComments) {
+                loadMoreButton.remove();
+            }
+        }
+
+        const emptyMessage = commentsList.querySelector(
+            ".post-detail-no-comments"
+        );
+
+        if (Number(data.comment_count) === 0 && !emptyMessage) {
+            const message = document.createElement("p");
+            message.className = "post-detail-no-comments";
+            message.textContent = "No comments yet. Be the first to comment.";
+            commentsList.appendChild(message);
+        }
+    } catch (error) {
+        console.error("Delete comment error:", error);
+        button.disabled = false;
+    }
+});
+
+// LOAD MORE COMMENTS — INDIVIDUAL POST
 document.querySelectorAll(
     ".post-detail-comments .load-more-comments-button"
 ).forEach(button => {
@@ -247,3 +324,35 @@ document.querySelectorAll(
         }
     });
 });
+// SAVE POST WITHOUT RELOADING
+document.querySelector(
+    '.post-detail-actions form[action="save_post.php"]'
+)?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    const button = form.querySelector("button");
+    button.disabled = true;
+
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+
+        if (!response.ok) throw new Error("Save request failed.");
+
+        const data = await response.json();
+        if (!data.success) throw new Error(data.message || "Save failed.");
+
+        button.classList.toggle("active", data.saved);
+        button.setAttribute("aria-label", data.saved ? "Remove from saved" : "Save post");
+        button.title = data.saved ? "Saved" : "Save";
+    } catch (error) {
+        console.error("Save error:", error);
+    } finally {
+        button.disabled = false;
+    }
+});
+

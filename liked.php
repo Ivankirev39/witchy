@@ -73,7 +73,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 <?php foreach ($likedPosts as $post): ?>
                     <?php
                     $postId = (int) $post["post_id"];
-                    $mediaFile = $post["media_file"] ?: $post["image"];
+                    $mediaFile = $post["media_file"] ?? "";
                     $mediaPath = $mediaFile ? "uploads/posts/" . rawurlencode(basename($mediaFile)) : "";
                     $isVideo = $post["media_file"] && $post["media_type"] === "video";
                     ?>
