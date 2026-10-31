@@ -252,58 +252,58 @@
 /* =========================
    DARK MODE
    ========================= */
-html.dark-mode .help-hero {
+:is(html.dark-mode, body.dark-mode) .help-hero {
     background: #29232f;
 }
-html.dark-mode .help-hero h1,
-html.dark-mode .help-section-heading h2,
-html.dark-mode .help-support h2 {
+:is(html.dark-mode, body.dark-mode) .help-hero h1,
+:is(html.dark-mode, body.dark-mode) .help-section-heading h2,
+:is(html.dark-mode, body.dark-mode) .help-support h2 {
     color: #f1eaf3;
 }
-html.dark-mode .help-hero p,
-html.dark-mode .help-section-heading p,
-html.dark-mode .help-support p {
+:is(html.dark-mode, body.dark-mode) .help-hero p,
+:is(html.dark-mode, body.dark-mode) .help-section-heading p,
+:is(html.dark-mode, body.dark-mode) .help-support p {
     color: #bdb0c3;
 }
-html.dark-mode .help-search,
-html.dark-mode .help-category,
-html.dark-mode .help-faq-item {
+:is(html.dark-mode, body.dark-mode) .help-search,
+:is(html.dark-mode, body.dark-mode) .help-category,
+:is(html.dark-mode, body.dark-mode) .help-faq-item {
     border-color: #413747;
     background: #242028;
 }
-html.dark-mode .help-search input,
-html.dark-mode .help-faq-item summary {
+:is(html.dark-mode, body.dark-mode) .help-search input,
+:is(html.dark-mode, body.dark-mode) .help-faq-item summary {
     color: #f1eaf3;
 }
-html.dark-mode .help-category {
+:is(html.dark-mode, body.dark-mode) .help-category {
     color: #d5c5dc;
 }
-html.dark-mode .help-category:hover,
-html.dark-mode .help-category.active {
+:is(html.dark-mode, body.dark-mode) .help-category:hover,
+:is(html.dark-mode, body.dark-mode) .help-category.active {
     border-color: #765c7e;
     background: #765c7e;
     color: #fff;
 }
-html.dark-mode .help-faq-answer,
-html.dark-mode .help-no-results {
+:is(html.dark-mode, body.dark-mode) .help-faq-answer,
+:is(html.dark-mode, body.dark-mode) .help-no-results {
     color: #c8bdcd;
 }
-html.dark-mode .help-faq-answer a {
+:is(html.dark-mode, body.dark-mode) .help-faq-answer a {
     color: #d6aee0;
 }
-html.dark-mode .help-faq-item:hover,
-html.dark-mode .help-faq-item[open] {
+:is(html.dark-mode, body.dark-mode) .help-faq-item:hover,
+:is(html.dark-mode, body.dark-mode) .help-faq-item[open] {
     border-color: #926d9d;
 }
-html.dark-mode .help-support {
+:is(html.dark-mode, body.dark-mode) .help-support {
     border-color: #413747;
     background: #29232f;
 }
-html.dark-mode .help-button-secondary {
+:is(html.dark-mode, body.dark-mode) .help-button-secondary {
     border-color: #926d9d;
     color: #e1c2e8;
 }
-html.dark-mode .help-button-secondary:hover {
+:is(html.dark-mode, body.dark-mode) .help-button-secondary:hover {
     background: #403348;
 }
 /* =========================
@@ -346,4 +346,52 @@ html.dark-mode .help-button-secondary:hover {
     .help-button {
         width: 100%;
     }
+}
+/* ========================================
+   WITCHY TYPOGRAPHY ALIGNMENT
+   ======================================== */
+
+.help-page {
+    font-family: var(--font-body);
+}
+
+/* Main hero title */
+.help-hero h1 {
+    font-family: var(--font-display);
+    font-size: var(--font-size-hero);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+}
+
+/* Section headings */
+.help-section-heading h2,
+.help-support h2 {
+    font-family: var(--font-display);
+    font-size: var(--font-size-section);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.8px;
+}
+
+/* Descriptions */
+.help-hero p,
+.help-section-heading > p,
+.help-support > p {
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+}
+
+/* FAQ questions */
+.help-faq-item summary {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* FAQ answers */
+.help-faq-answer {
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: var(--line-height-body);
 }

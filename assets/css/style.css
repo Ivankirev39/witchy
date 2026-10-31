@@ -37,12 +37,28 @@
     --success-background: #EEF6F0;
     --shadow: rgba(55, 20, 70, 0.08);
     --shadow-hover: rgba(55, 20, 70, 0.14);
+    /* WITCHY TYPOGRAPHY SYSTEM */
+
+    --font-size-hero: clamp(44px, 4.4vw, 64px);
+    --font-size-section: clamp(30px, 3vw, 42px);
+    --font-size-card: 18px;
+    --font-size-body: 14px;
+    --font-size-small: 12px;
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-body: 1.75;
 }
+
 
 /* =========================
    DARK MODE
    ========================= */
-body.dark-mode {
+body.dark-mode,
+html.dark-mode body {
     --background: #100E12;
     --surface: #272629;
     --surface-soft: #211F23;

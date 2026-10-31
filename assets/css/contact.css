@@ -339,3 +339,58 @@ html.dark-mode .contact-errors {
     height: 1px;
     overflow: hidden;
 }
+/* ========================================
+   WITCHY TYPOGRAPHY ALIGNMENT
+   ======================================== */
+
+.contact-page {
+    font-family: var(--font-body);
+}
+
+/* Main heading */
+.contact-hero h1 {
+    font-family: var(--font-display);
+    font-size: var(--font-size-hero);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+}
+
+/* Section heading */
+.contact-section-heading h2 {
+    font-family: var(--font-display);
+    font-size: var(--font-size-section);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.8px;
+}
+
+/* Sidebar heading */
+.contact-info-card h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+/* Body paragraphs */
+.contact-hero p,
+.contact-section-heading p,
+.contact-info-card p,
+.contact-note-card p {
+    font-size: var(--font-size-body);
+    line-height: var(--line-height-body);
+}
+
+/* Form fields */
+.contact-field label {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.contact-field input,
+.contact-field select,
+.contact-field textarea {
+    font-family: var(--font-body);
+    font-size: 14px;
+}

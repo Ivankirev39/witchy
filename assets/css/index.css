@@ -613,14 +613,14 @@
 /* Core actions */
 
 body.dark-mode .core-action::before,
-html.dark-mode .core-action::before {
+:is(html.dark-mode, body.dark-mode) .core-action::before {
     background: rgba(10, 5, 15, 0.55);
 }
 
 /* Topic cards */
 
 body.dark-mode .topic-card-visual,
-html.dark-mode .topic-card-visual {
+:is(html.dark-mode, body.dark-mode) .topic-card-visual {
     background: linear-gradient(
         150deg,
         var(--brand-plum),
@@ -632,31 +632,31 @@ html.dark-mode .topic-card-visual {
 /* Community information card */
 
 body.dark-mode .community-card,
-html.dark-mode .community-card {
+:is(html.dark-mode, body.dark-mode) .community-card {
     background: var(--surface-soft);
 }
 
 /* Latest community posts */
 
 body.dark-mode .latest-post-card,
-html.dark-mode .latest-post-card {
+:is(html.dark-mode, body.dark-mode) .latest-post-card {
     background: var(--surface);
     border-color: var(--border);
 }
 
 body.dark-mode .latest-post-topic,
-html.dark-mode .latest-post-topic {
+:is(html.dark-mode, body.dark-mode) .latest-post-topic {
     background: #393044;
     color: #d5b8e9;
 }
 
 body.dark-mode .latest-post-author,
-html.dark-mode .latest-post-author {
+:is(html.dark-mode, body.dark-mode) .latest-post-author {
     color: var(--text-secondary);
 }
 
 body.dark-mode .latest-post-placeholder,
-html.dark-mode .latest-post-placeholder {
+:is(html.dark-mode, body.dark-mode) .latest-post-placeholder {
     background: linear-gradient(
         135deg,
         #302838,
@@ -666,7 +666,7 @@ html.dark-mode .latest-post-placeholder {
 }
 
 body.dark-mode .latest-post-text-preview,
-html.dark-mode .latest-post-text-preview {
+:is(html.dark-mode, body.dark-mode) .latest-post-text-preview {
     color: var(--text);
 }
 

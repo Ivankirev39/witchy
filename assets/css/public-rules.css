@@ -257,3 +257,65 @@ body.dark-mode .public-rules-page .button:focus-visible {
         transform: none;
     }
 }
+/* ========================================
+   WITCHY RULES — TYPOGRAPHY FIX
+   ======================================== */
+
+.public-rules-page {
+    font-family: var(--font-body);
+    color: var(--text);
+}
+
+/* Main heading */
+.public-rules-hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(44px, 4.4vw, 64px);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    color: var(--text);
+}
+
+/* Hero description */
+.public-rules-hero > p:last-child {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--text-secondary);
+}
+
+/* Section headings */
+.public-rule h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.3px;
+    color: var(--text);
+}
+
+/* Rule descriptions */
+.public-rule p {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--text-secondary);
+}
+
+/* Bottom CTA heading */
+.public-rules-cta h2 {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 3vw, 42px);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.8px;
+    color: var(--text);
+}
+
+/* Bottom CTA description */
+.public-rules-cta > p {
+    font-size: 14px;
+    line-height: 1.75;
+    color: var(--text-secondary);
+}
