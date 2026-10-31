@@ -20,9 +20,9 @@
 
     <nav class="footer-nav" aria-label="Footer navigation">
         <a href="index.php">Home</a>
-        <a href="index.php#about">About</a>
+        <a href="about.php">About</a>
         <a href="public-explore.php">Explore</a>
-        <a href="index.php#community">Community</a>
+        <a href="community.php">Community</a>
         <a href="public_help.php">Help</a>
         <a href="public-contact.php">Contact</a>
         <a href="terms.php">Terms of Service</a>

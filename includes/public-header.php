@@ -93,7 +93,7 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
             Explore
         </a>
 
-        <a href="/witchy/index.php#community">
+        <a href="/witchy/community.php">
             Community
         </a>
     </nav>

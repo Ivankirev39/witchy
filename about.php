@@ -149,8 +149,12 @@ require_once __DIR__ . "/includes/public-header.php";
     <section class="about-values about-container"
              aria-labelledby="about-values-title">
 
-        <div class="about-values-decor" aria-hidden="true">
-            ✧
+        <div class="about-values-decor">
+            <img
+                src="images/about-decor.png"
+                alt="A cozy witchcraft setting with books, candles, crystals and a sleeping cat"
+                loading="lazy"
+            >
         </div>
 
         <div>
