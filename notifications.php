@@ -112,7 +112,11 @@ require_once __DIR__ . "/includes/user_header.php";
                     : "images/default-profile.jpg";
                 ?>
                 <article class="notification-item <?= !$notification["is_read"] ? "unread" : "" ?>">
-                    <a href="<?= htmlspecialchars($target, ENT_QUOTES, "UTF-8") ?>" class="notification-content">
+                    <a
+                        href="<?= htmlspecialchars($target, ENT_QUOTES, "UTF-8") ?>"
+                        class="notification-content"
+                        data-notification-id="<?= (int) $notification["notification_id"] ?>"
+                    >
                         <div class="notification-avatar">
                             <img src="/witchy/<?= htmlspecialchars($avatar, ENT_QUOTES, "UTF-8") ?>" alt="">
                             <span class="notification-type"><?= $symbol ?></span>
@@ -139,6 +143,67 @@ require_once __DIR__ . "/includes/user_header.php";
         <?php endif; ?>
     </div>
 </section>
+
+<script>
+document.querySelectorAll(".notification-content").forEach(link => {
+    link.addEventListener("click", async function(event) {
+        // Preserve normal browser shortcuts.
+        if (
+            event.ctrlKey ||
+            event.metaKey ||
+            event.shiftKey ||
+            event.altKey ||
+            event.button !== 0
+        ) {
+            return;
+        }
+
+        event.preventDefault();
+
+        if (this.dataset.processing === "true") return;
+
+        const notificationId = this.dataset.notificationId;
+        const destination = this.href;
+
+        this.dataset.processing = "true";
+
+        const formData = new URLSearchParams();
+        formData.append("action", "read");
+        formData.append("notification_id", notificationId);
+        formData.append(
+            "csrf_token",
+            <?= json_encode(
+                csrf_token(),
+                JSON_HEX_TAG | JSON_HEX_AMP |
+                JSON_HEX_APOS | JSON_HEX_QUOT
+            ) ?>
+        );
+
+        try {
+            const response = await fetch(
+                "/witchy/notifications.php",
+                {
+                    method: "POST",
+                    credentials: "same-origin",
+                    body: formData
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Could not mark notification as read.");
+            }
+
+            // Existing PHP updates is_read in the database.
+            window.location.assign(destination);
+
+        } catch (error) {
+            console.error(error);
+            this.dataset.processing = "false";
+            alert("Could not mark notification as read. Please try again.");
+        }
+    });
+});
+</script>
 <?php
 require_once __DIR__ . "/includes/user_footer.php";
 ?>
