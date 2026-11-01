@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/includes/admin_auth.php";
 require_once __DIR__ . "/../config/db.php";
@@ -13,7 +14,10 @@ $stats = [
     "comments" => 0,
     "rules" => 0,
     "pinned" => 0,
-    "hot" => 0
+    "hot" => 0,
+    "active_bans" => 0,
+    "posts_this_week" => 0,
+    "comments_this_week" => 0
 ];
 
 $recentActivity = [];
@@ -21,36 +25,75 @@ $dashboardError = "";
 
 try {
     // Community statistics.
-    $stats["users"] = (int) $conn
-        ->query("SELECT COUNT(*) FROM users")
-        ->fetchColumn();
+    $stats["users"] = (int) $conn->query(
+        "SELECT COUNT(*) FROM users"
+    )->fetchColumn();
 
-    $stats["posts"] = (int) $conn
-        ->query("SELECT COUNT(*) FROM post")
-        ->fetchColumn();
+    $stats["posts"] = (int) $conn->query(
+        "SELECT COUNT(*) FROM post"
+    )->fetchColumn();
 
-    $stats["comments"] = (int) $conn
-        ->query("SELECT COUNT(*) FROM comment")
-        ->fetchColumn();
+    $stats["comments"] = (int) $conn->query(
+        "SELECT COUNT(*) FROM comment"
+    )->fetchColumn();
 
-    $stats["rules"] = (int) $conn
-        ->query("SELECT COUNT(*) FROM rule")
-        ->fetchColumn();
+    $stats["rules"] = (int) $conn->query(
+        "SELECT COUNT(*) FROM rule"
+    )->fetchColumn();
 
-    // Moderation overview.
+    // Moderation statistics.
     $moderationStats = $conn->query("
         SELECT
-            COALESCE(SUM(CASE WHEN is_sticky = 1 THEN 1 ELSE 0 END), 0)
-                AS pinned_posts,
-            COALESCE(SUM(CASE WHEN is_hot = 1 THEN 1 ELSE 0 END), 0)
-                AS hot_posts
-        FROM post
+            (
+                SELECT COUNT(*)
+                FROM post
+                WHERE is_sticky = 1
+            ) AS pinned_posts,
+            (
+                SELECT COUNT(*)
+                FROM post p
+                WHERE
+                    EXISTS (
+                        SELECT 1
+                        FROM post_like pl
+                        WHERE pl.post_id = p.post_id
+                          AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM comment c
+                        WHERE c.post_id = p.post_id
+                          AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                    )
+            ) AS hot_posts
     ")->fetch(PDO::FETCH_ASSOC);
 
     $stats["pinned"] = (int) $moderationStats["pinned_posts"];
     $stats["hot"] = (int) $moderationStats["hot_posts"];
 
-    // Latest posts and comments in chronological order.
+    // Active bans.
+    $stats["active_bans"] = (int) $conn->query("
+        SELECT COUNT(*)
+        FROM ban
+        WHERE revoked_at IS NULL
+          AND (expires_at IS NULL OR expires_at > NOW())
+    ")->fetchColumn();
+
+    // Posts created during the last seven days.
+    $stats["posts_this_week"] = (int) $conn->query("
+        SELECT COUNT(*)
+        FROM post
+        WHERE created_at >= NOW() - INTERVAL 7 DAY
+    ")->fetchColumn();
+
+    // Comments created during the last seven days.
+    $stats["comments_this_week"] = (int) $conn->query("
+        SELECT COUNT(*)
+        FROM comment
+        WHERE created_at >= NOW() - INTERVAL 7 DAY
+    ")->fetchColumn();
+
+    // Latest posts and comments.
     $activityQuery = $conn->query("
         SELECT *
         FROM (
@@ -90,7 +133,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
 <section class="admin-dashboard">
 
-    <!-- Welcome section -->
+    <!-- Welcome -->
     <header class="dashboard-welcome">
         <div>
             <span class="dashboard-eyebrow">WITCHY ADMINISTRATION</span>
@@ -117,59 +160,95 @@ require_once __DIR__ . "/includes/admin_header.php";
     <?php endif; ?>
 
 
-    <!-- Community statistics -->
+    <!-- Community overview -->
     <section class="dashboard-section">
 
         <div class="dashboard-section-heading">
             <div>
+                <span class="dashboard-section-eyebrow">COMMUNITY STATISTICS</span>
                 <h2>Community overview</h2>
-                <p>A snapshot of your Witchy community.</p>
+                <p>Key figures and recent community activity.</p>
             </div>
         </div>
 
-        <div class="dashboard-stats-grid">
+        <!-- Primary statistics -->
+        <div class="dashboard-primary-stats">
 
-            <article class="dashboard-stat-card">
-                <div class="dashboard-stat-icon users-icon">♙</div>
-                <div>
-                    <span class="dashboard-stat-label">Registered users</span>
-                    <strong class="dashboard-stat-number">
-                        <?= number_format($stats["users"]) ?>
-                    </strong>
+            <article class="dashboard-primary-card">
+                <div class="dashboard-primary-top">
+                    <span class="dashboard-stat-label">Registered members</span>
+                    <span class="dashboard-stat-icon users-icon">♙</span>
                 </div>
+                <strong class="dashboard-primary-number">
+                    <?= number_format($stats["users"]) ?>
+                </strong>
+                <span class="dashboard-stat-caption">Total community accounts</span>
             </article>
 
-            <article class="dashboard-stat-card">
-                <div class="dashboard-stat-icon posts-icon">✧</div>
-                <div>
+            <article class="dashboard-primary-card">
+                <div class="dashboard-primary-top">
                     <span class="dashboard-stat-label">Community posts</span>
-                    <strong class="dashboard-stat-number">
-                        <?= number_format($stats["posts"]) ?>
-                    </strong>
+                    <span class="dashboard-stat-icon posts-icon">✧</span>
                 </div>
+                <strong class="dashboard-primary-number">
+                    <?= number_format($stats["posts"]) ?>
+                </strong>
+                <span class="dashboard-stat-caption">Published posts</span>
             </article>
 
-            <article class="dashboard-stat-card">
-                <div class="dashboard-stat-icon comments-icon">☽</div>
-                <div>
+            <article class="dashboard-primary-card">
+                <div class="dashboard-primary-top">
                     <span class="dashboard-stat-label">Comments</span>
-                    <strong class="dashboard-stat-number">
-                        <?= number_format($stats["comments"]) ?>
-                    </strong>
+                    <span class="dashboard-stat-icon comments-icon">☽</span>
+                </div>
+                <strong class="dashboard-primary-number">
+                    <?= number_format($stats["comments"]) ?>
+                </strong>
+                <span class="dashboard-stat-caption">Community discussions</span>
+            </article>
+
+            <article class="dashboard-primary-card">
+                <div class="dashboard-primary-top">
+                    <span class="dashboard-stat-label">Community rules</span>
+                    <span class="dashboard-stat-icon rules-icon">✿</span>
+                </div>
+                <strong class="dashboard-primary-number">
+                    <?= number_format($stats["rules"]) ?>
+                </strong>
+                <span class="dashboard-stat-caption">Published guidelines</span>
+            </article>
+
+        </div>
+
+        <!-- Secondary statistics -->
+        <div class="dashboard-secondary-stats">
+
+            <article class="dashboard-secondary-card">
+                <span class="dashboard-secondary-icon ban-icon">♧</span>
+                <div>
+                    <span class="dashboard-stat-label">Active bans</span>
+                    <strong><?= number_format($stats["active_bans"]) ?></strong>
                 </div>
             </article>
 
-            <article class="dashboard-stat-card">
-                <div class="dashboard-stat-icon rules-icon">✿</div>
+            <article class="dashboard-secondary-card">
+                <span class="dashboard-secondary-icon posts-icon">✧</span>
                 <div>
-                    <span class="dashboard-stat-label">Community rules</span>
-                    <strong class="dashboard-stat-number">
-                        <?= number_format($stats["rules"]) ?>
-                    </strong>
+                    <span class="dashboard-stat-label">Posts this week</span>
+                    <strong><?= number_format($stats["posts_this_week"]) ?></strong>
+                </div>
+            </article>
+
+            <article class="dashboard-secondary-card">
+                <span class="dashboard-secondary-icon comments-icon">☽</span>
+                <div>
+                    <span class="dashboard-stat-label">Comments this week</span>
+                    <strong><?= number_format($stats["comments_this_week"]) ?></strong>
                 </div>
             </article>
 
         </div>
+
     </section>
 
 
@@ -285,34 +364,28 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             <a href="users.php" class="dashboard-action-card">
                 <div class="dashboard-action-icon">♙</div>
-
                 <div>
                     <h3>Manage users</h3>
                     <p>Review registered accounts and member information.</p>
                 </div>
-
                 <span class="dashboard-action-arrow">→</span>
             </a>
 
             <a href="content.php" class="dashboard-action-card">
                 <div class="dashboard-action-icon">✧</div>
-
                 <div>
                     <h3>Manage content</h3>
                     <p>Review community posts and comments.</p>
                 </div>
-
                 <span class="dashboard-action-arrow">→</span>
             </a>
 
             <a href="rules.php" class="dashboard-action-card">
                 <div class="dashboard-action-icon">☽</div>
-
                 <div>
                     <h3>Manage rules</h3>
                     <p>Maintain Witchy's community guidelines.</p>
                 </div>
-
                 <span class="dashboard-action-arrow">→</span>
             </a>
 
@@ -338,7 +411,6 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             <article class="dashboard-moderation-card">
                 <div class="moderation-icon pinned-icon">⌖</div>
-
                 <div>
                     <strong><?= number_format($stats["pinned"]) ?></strong>
                     <span>Pinned posts</span>
@@ -347,10 +419,9 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             <article class="dashboard-moderation-card">
                 <div class="moderation-icon hot-icon">♨</div>
-
                 <div>
                     <strong><?= number_format($stats["hot"]) ?></strong>
-                    <span>Hot posts</span>
+                    <span>Trending posts · Last 48 hours</span>
                 </div>
             </article>
 

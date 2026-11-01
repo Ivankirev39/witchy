@@ -1,41 +1,63 @@
-/* ADMIN — CONTENT MANAGEMENT & POST REVIEW */
 
+/* =========================================================
+   WITCHY ADMIN — CONTENT MANAGEMENT & POST REVIEW
+   ========================================================= */
 
-/* 1. CONTENT MANAGEMENT PAGE */
-
-.admin-content-page {
+   .admin-content-page {
     display: flex;
     flex-direction: column;
     gap: 24px;
+    color: #382d40;
 }
 
 .admin-content-heading {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 7px;
 }
 
 .admin-content-heading h2 {
     margin: 0;
     color: #302638;
     font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: -0.035em;
 }
 
 .admin-content-heading p {
     margin: 0;
-    color: #817587;
+    color: #827689;
+    font-size: 0.94rem;
+    line-height: 1.6;
+}
+
+.admin-content-page > p > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #76558d;
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-decoration: none;
+}
+
+.admin-content-page > p > a:hover {
+    color: #513767;
 }
 
 
-/* 2. CONTENT TABS */
+/* =========================================================
+   CONTENT TABS
+   ========================================================= */
 
 .admin-content-tabs {
     display: flex;
-    gap: 8px;
+    gap: 5px;
     width: fit-content;
     max-width: 100%;
-    padding: 6px;
-    background: #eee8f3;
+    padding: 5px;
+    background: #f0ebf4;
+    border: 1px solid #e9e0ef;
     border-radius: 12px;
 }
 
@@ -43,104 +65,121 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 20px;
-    border-radius: 9px;
-    color: #68447f;
+    padding: 10px 19px;
+    border-radius: 8px;
+    color: #745b82;
+    font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
-    transition: background 0.2s ease, color 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .admin-content-tabs a:hover {
-    background: #e3d9ec;
+    background: #e7dfed;
+    color: #513767;
 }
 
 .admin-content-tabs a.active {
-    background: #8660a2;
-    color: #ffffff;
-    box-shadow: 0 2px 6px rgba(48, 38, 56, 0.12);
+    background: #ffffff;
+    color: #68447f;
+    box-shadow: 0 2px 7px rgba(48, 38, 56, 0.09);
 }
 
 
-/* 3. SEARCH FORM */
+/* =========================================================
+   SEARCH
+   ========================================================= */
 
 .admin-content-search {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 10px;
-    padding: 18px;
+    padding: 17px;
     background: #ffffff;
-    border: 1px solid #e9e0ef;
-    border-radius: 14px;
+    border: 1px solid #e9e1ed;
+    border-radius: 13px;
 }
 
 .admin-content-search input {
     flex: 1;
     min-width: 220px;
     padding: 11px 14px;
-    border: 1px solid #e9e0ef;
+    border: 1px solid #e5dce9;
     border-radius: 9px;
-    font: inherit;
+    background: #ffffff;
     color: #302638;
+    font: inherit;
+    font-size: 0.9rem;
 }
 
 .admin-content-search input:focus {
-    outline: 2px solid #c8afd9;
-    border-color: #8660a2;
+    outline: 3px solid rgba(134, 96, 162, 0.14);
+    border-color: #9875b0;
 }
 
 .admin-content-search button {
-    padding: 11px 20px;
-    border: none;
+    padding: 11px 19px;
+    border: 1px solid #795995;
     border-radius: 9px;
-    background: #8660a2;
+    background: #795995;
     color: #ffffff;
     font: inherit;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 650;
     cursor: pointer;
     transition: background 0.2s ease;
 }
 
 .admin-content-search button:hover {
-    background: #68447f;
+    background: #624477;
 }
 
 .admin-content-search a {
-    color: #68447f;
+    padding: 9px 10px;
+    color: #76558d;
+    font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
 }
 
 
-/* 4. CONTENT PANELS */
+/* =========================================================
+   SHARED PANELS
+   ========================================================= */
 
 .admin-content-panel {
     overflow: hidden;
     background: #ffffff;
-    border: 1px solid #e9e0ef;
-    border-radius: 14px;
+    border: 1px solid #e9e1ed;
+    border-radius: 15px;
 }
 
 .admin-content-panel-header {
-    padding: 20px 22px;
-    border-bottom: 1px solid #e9e0ef;
+    padding: 19px 22px;
+    border-bottom: 1px solid #eee8f1;
+    background: #fcfbfd;
 }
 
 .admin-content-panel-header h3 {
     margin: 0;
-    color: #302638;
-    font-size: 1.1rem;
+    color: #382d40;
+    font-size: 1.08rem;
+    font-weight: 700;
+    letter-spacing: -0.015em;
 }
 
 .admin-content-panel-header p {
     margin: 5px 0 0;
-    color: #817587;
-    font-size: 0.9rem;
+    color: #897d90;
+    font-size: 0.86rem;
+    line-height: 1.5;
 }
 
 
-/* 5. CONTENT TABLES */
+/* =========================================================
+   CONTENT TABLES
+   ========================================================= */
 
 .admin-content-table-wrapper {
     width: 100%;
@@ -163,23 +202,27 @@
 
 .admin-content-table th {
     background: #faf8fc;
-    color: #817587;
-    font-size: 0.78rem;
+    color: #897d90;
+    font-size: 0.73rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.055em;
     text-transform: uppercase;
     white-space: nowrap;
 }
 
 .admin-content-table td {
-    border-top: 1px solid #f0eaf3;
-    color: #403548;
-    font-size: 0.9rem;
+    border-top: 1px solid #f0ebf3;
+    color: #514657;
+    font-size: 0.88rem;
 }
 
 .admin-content-table td:first-child {
     color: #817587;
     font-weight: 600;
+}
+
+.admin-content-table tbody tr {
+    transition: background 0.15s ease;
 }
 
 .admin-content-table tbody tr:hover {
@@ -197,72 +240,81 @@
     white-space: nowrap;
 }
 
-
-/* 6. CLICKABLE POST ROWS */
-
 .admin-clickable-row {
     cursor: pointer;
-    transition: background 0.15s ease;
 }
 
 .admin-clickable-row:hover {
-    background: #f2edf8 !important;
+    background: #f6f1f9 !important;
 }
 
 .admin-clickable-row:focus-visible {
-    outline: 2px solid #9b78c5;
+    outline: 2px solid #9875b0;
     outline-offset: -2px;
 }
 
 
-/* 7. POST STATUS LABELS */
+/* =========================================================
+   STATUS LABELS
+   ========================================================= */
 
 .admin-content-status {
     display: inline-flex;
     align-items: center;
+    gap: 5px;
     padding: 5px 10px;
+    border: 1px solid #e8dfed;
     border-radius: 20px;
-    background: #f0eaf5;
+    background: #f5f0f8;
     color: #68447f;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 700;
     white-space: nowrap;
 }
 
 .admin-content-status.hot {
-    background: #fff0e8;
+    border-color: #f2dfd2;
+    background: #fff5ef;
     color: #a75b35;
 }
 
 .admin-content-status.pinned {
-    background: #e9e4f7;
+    border-color: #e1d8f1;
+    background: #f1edfa;
     color: #624a91;
 }
 
 
-/*  8. EMPTY AND ERROR STATES  */
+/* =========================================================
+   EMPTY AND ERROR STATES
+   ========================================================= */
 
 .admin-content-empty {
-    padding: 38px 20px;
-    color: #817587;
+    padding: 36px 20px;
+    color: #897d90;
     text-align: center;
+    font-size: 0.9rem;
 }
 
 .admin-content-error {
     padding: 14px 16px;
-    border: 1px solid #e9cbd0;
+    border: 1px solid #f0d6db;
     border-radius: 10px;
-    background: #fff4f5;
+    background: #fff6f7;
     color: #a94455;
+    font-size: 0.9rem;
+    line-height: 1.5;
 }
 
 
-/*  9. POST REVIEW LAYOUT */
+/* =========================================================
+   POST REVIEW LAYOUT
+   ========================================================= */
 
 .admin-review-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 290px;
-    gap: 24px;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 22px;
     align-items: start;
 }
 
@@ -274,7 +326,7 @@
 .admin-review-main {
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 20px;
 }
 
 .admin-review-sidebar {
@@ -283,127 +335,237 @@
 }
 
 
-/* 10. POST REVIEW — LEFT PANEL */
+/* =========================================================
+   POST REVIEW PANELS
+   ========================================================= */
 
 .admin-review-main .admin-content-panel {
-    padding: 26px;
+    padding: 24px;
+    border: 1px solid #e9e1ed;
+    border-radius: 15px;
     background: #ffffff;
-    border: 1px solid #e9e0ef;
-    border-radius: 16px;
-    box-shadow: 0 5px 18px rgba(48, 38, 56, 0.06);
+    box-shadow: 0 3px 12px rgba(48, 38, 56, 0.035);
 }
 
 .admin-review-main .admin-content-panel-header {
-    margin: -26px -26px 20px;
-    padding: 20px 26px;
-    border-bottom: 1px solid #e9e0ef;
-    background: #faf8fc;
+    margin: -24px -24px 21px;
+    padding: 19px 24px;
+    border-bottom: 1px solid #eee8f1;
+    background: #fcfbfd;
 }
 
 .admin-review-main .admin-content-panel-header h3 {
-    margin: 0 0 9px;
-    color: #302638;
-    font-size: 1.3rem;
+    margin: 0 0 7px;
+    color: #35283d;
+    font-size: 1.22rem;
+    font-weight: 700;
     line-height: 1.4;
+    letter-spacing: -0.025em;
     overflow-wrap: anywhere;
 }
 
 .admin-review-main .admin-content-panel-header p {
     margin: 0;
-    color: #817587;
-    font-size: 0.88rem;
+    color: #897d90;
+    font-size: 0.85rem;
 }
 
 .admin-review-main .admin-content-panel > p {
-    margin: 12px 0;
-    color: #594d61;
-    line-height: 1.6;
+    margin: 11px 0;
+    color: #65596a;
+    font-size: 0.9rem;
+    line-height: 1.65;
     overflow-wrap: anywhere;
 }
 
 .admin-review-main .admin-content-panel > p strong {
-    color: #302638;
+    color: #403348;
+    font-weight: 650;
+}
+
+.admin-review-main .admin-content-panel a {
+    color: #76558d;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.admin-review-main .admin-content-panel a:hover {
+    color: #513767;
+    text-decoration: underline;
 }
 
 
-/*  11. POST DESCRIPTION */
+/* =========================================================
+   POST DESCRIPTION
+   ========================================================= */
 
 .admin-post-description {
-    margin: 22px 0;
-    padding: 18px;
+    margin: 21px 0;
+    padding: 17px 19px;
+    border: 1px solid #eee6f2;
     border-left: 3px solid #a88bc1;
     border-radius: 0 10px 10px 0;
-    background: #f7f3fa;
-    color: #493d51;
-    line-height: 1.75;
+    background: #faf8fc;
+    color: #514657;
+    font-size: 0.92rem;
+    line-height: 1.8;
     overflow-wrap: anywhere;
 }
 
 
-/* 12. POST MEDIA */
+/* =========================================================
+   POST MEDIA
+   ========================================================= */
 
 .admin-post-media {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid #eee7f2;
+    margin-top: 23px;
+    padding-top: 19px;
+    border-top: 1px solid #eee8f1;
 }
 
 .admin-post-media h4,
 .admin-review-main .admin-content-panel h4 {
-    margin: 0 0 14px;
+    margin: 0 0 13px;
     color: #68447f;
-    font-size: 1rem;
+    font-size: 0.96rem;
+    font-weight: 700;
 }
 
 .admin-post-media img,
 .admin-post-media video {
     display: block;
     width: 100%;
-    max-height: 480px;
+    max-height: 460px;
     margin: 12px 0;
-    border: 1px solid #e9e0ef;
-    border-radius: 12px;
-    background: #f7f4f9;
+    border: 1px solid #e9e1ed;
+    border-radius: 11px;
+    background: #f8f5fa;
     object-fit: contain;
 }
 
 .admin-review-main .admin-content-panel > div > p {
-    color: #594d61;
+    color: #65596a;
+    font-size: 0.9rem;
     line-height: 1.7;
     overflow-wrap: anywhere;
 }
 
 
-/* 13. POST COMMENTS */
+/* =========================================================
+   ENGAGEMENT CARDS
+   ========================================================= */
+
+.admin-post-engagement-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 11px;
+    margin: 20px 0 25px;
+}
+
+.admin-post-engagement-card {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    padding: 16px 13px;
+    border: 1px solid #ece4f0;
+    border-radius: 12px;
+    background: #fcfafd;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-post-engagement-card:hover {
+    border-color: #d8c6e5;
+    transform: translateY(-2px);
+}
+
+.admin-post-engagement-card > span {
+    color: #9875b0;
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.admin-post-engagement-card strong {
+    color: #392b42;
+    font-size: 1.45rem;
+    font-weight: 750;
+    letter-spacing: -0.035em;
+}
+
+.admin-post-engagement-card small {
+    color: #897d90;
+    font-size: 0.74rem;
+    line-height: 1.4;
+}
+
+.admin-post-recent-engagement {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+    margin: 13px 0;
+}
+
+.admin-post-recent-engagement > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 15px;
+    border: 1px solid #e9e0ef;
+    border-radius: 11px;
+    background: #f7f3fa;
+}
+
+.admin-post-recent-engagement strong {
+    color: #624477;
+    font-size: 1.3rem;
+    font-weight: 750;
+}
+
+.admin-post-recent-engagement span {
+    color: #817587;
+    font-size: 0.8rem;
+}
+
+.admin-post-score-note {
+    margin: 14px 0 0;
+    color: #897d90;
+    font-size: 0.79rem;
+    line-height: 1.65;
+}
+
+
+/* =========================================================
+   COMMENTS
+   ========================================================= */
 
 .admin-post-comment {
-    margin-top: 14px;
+    margin-top: 13px;
     padding: 17px;
-    border: 1px solid #e9e0ef;
+    border: 1px solid #ece5f0;
     border-radius: 12px;
-    background: #faf8fc;
+    background: #fcfbfd;
 }
 
 .admin-post-comment + .admin-post-comment {
-    margin-top: 12px;
+    margin-top: 11px;
 }
 
 .admin-post-comment p {
-    color: #594d61;
-    font-size: 0.92rem;
-    line-height: 1.65;
+    color: #625669;
+    font-size: 0.89rem;
+    line-height: 1.7;
     overflow-wrap: anywhere;
 }
 
 .admin-post-comment p:first-child {
     margin-top: 0;
-    color: #817587;
-    font-size: 0.85rem;
+    color: #897d90;
+    font-size: 0.8rem;
 }
 
 .admin-post-comment p:first-child strong {
     color: #68447f;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .admin-post-comment p:last-child {
@@ -414,14 +576,12 @@
     color: #68447f;
 }
 
-/* Individual comment moderation actions */
-
 .admin-comment-actions {
     display: flex;
     justify-content: flex-end;
-    margin-top: 16px;
+    margin-top: 15px;
     padding-top: 12px;
-    border-top: 1px solid #e9e0ef;
+    border-top: 1px solid #eee8f1;
 }
 
 .admin-comment-actions form {
@@ -430,141 +590,222 @@
 
 .admin-review-main .admin-content-empty {
     padding: 24px 16px;
-    border: 1px dashed #d9cbe3;
+    border: 1px dashed #ded2e6;
     border-radius: 10px;
-    background: #faf8fc;
-    color: #817587;
+    background: #fcfbfd;
+    color: #897d90;
     text-align: center;
 }
 
 
-/* 14. MODERATION PANEL — RIGHT SIDE */
+/* =========================================================
+   MODERATION SIDEBAR
+   ========================================================= */
 
 .admin-moderation-panel {
-    padding: 24px;
-    border: 1px solid rgba(190, 160, 220, 0.2);
-    border-radius: 16px;
-    background: linear-gradient(
-        145deg,
-        #422b4e,
-        #2b1f37
-    );
-    box-shadow: 0 8px 24px rgba(20, 10, 30, 0.2);
+    padding: 21px;
+    border: 1px solid #e6ddea;
+    border-radius: 15px;
+    background: #ffffff;
+    box-shadow: 0 3px 12px rgba(48, 38, 56, 0.04);
 }
 
 .admin-moderation-panel > h3 {
-    margin: 0 0 20px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid rgba(210, 185, 230, 0.2);
-    color: #eadcf5;
-    font-size: 1.2rem;
+    margin: 0 0 18px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee8f1;
+    color: #382d40;
+    font-size: 1.08rem;
+    font-weight: 750;
 }
 
 
-/* 15. MODERATION AUTHOR INFORMATION*/
+/* Moderation status list */
+
+.admin-post-status-list {
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 8px;
+}
+
+.admin-post-status-list > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee8f1;
+}
+
+.admin-post-status-list span {
+    color: #897d90;
+    font-size: 0.82rem;
+}
+
+.admin-post-status-list strong {
+    color: #624477;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+
+/* Author details */
 
 .admin-moderation-author {
     display: flex;
     flex-direction: column;
     gap: 7px;
-    padding: 14px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.045);
+    padding: 15px;
+    border: 1px solid #eee6f2;
+    border-radius: 11px;
+    background: #faf8fc;
+    margin-bottom: 18px;
 }
 
 .admin-moderation-label {
-    color: #bba9ca;
-    font-size: 0.8rem;
+    color: #897d90;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
 }
 
 .admin-moderation-author strong {
-    color: #f1e7f8;
-    font-size: 1.05rem;
+    color: #403348;
+    font-size: 0.98rem;
+    overflow-wrap: anywhere;
 }
 
 .admin-moderation-author span:last-child {
-    color: #bba9ca;
-    font-size: 0.85rem;
+    color: #897d90;
+    font-size: 0.8rem;
 }
 
-.admin-moderation-details {
-    padding: 16px 4px;
+.admin-moderation-author a {
+    width: fit-content;
+    margin-top: 3px;
+    color: #76558d;
+    font-size: 0.82rem;
+    font-weight: 650;
+    text-decoration: none;
 }
 
-.admin-moderation-details p {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 10px 0;
-    color: #d4c5df;
-    font-size: 0.9rem;
-}
-
-.admin-moderation-details strong {
-    color: #f0e5f7;
+.admin-moderation-author a:hover {
+    color: #513767;
+    text-decoration: underline;
 }
 
 
-/* 16. MODERATION DANGER AREA */
+/* Pin controls */
+
+.admin-moderation-pin {
+    margin-top: 14px;
+    padding-top: 18px;
+}
+
+.admin-moderation-pin h4 {
+    margin: 0 0 8px;
+    color: #68447f;
+    font-size: 0.94rem;
+}
+
+.admin-moderation-pin p {
+    margin: 0 0 14px;
+    color: #817587;
+    font-size: 0.84rem;
+    line-height: 1.6;
+}
+
+.admin-moderation-pin form {
+    margin: 0;
+}
+
+.admin-moderation-pin button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #795995;
+    border-radius: 9px;
+    background: #795995;
+    color: #ffffff;
+    font: inherit;
+    font-size: 0.87rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.admin-moderation-pin button:hover {
+    background: #624477;
+    transform: translateY(-1px);
+}
+
+
+/* Danger area */
 
 .admin-moderation-danger {
-    margin-top: 8px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(210, 185, 230, 0.2);
+    margin-top: 20px;
+    padding-top: 19px;
+    border-top: 1px solid #eee8f1;
 }
 
 .admin-moderation-danger h4 {
-    margin: 0 0 10px;
-    color: #f0a5b4;
-    font-size: 1rem;
+    margin: 0 0 8px;
+    color: #a34e62;
+    font-size: 0.94rem;
 }
 
 .admin-moderation-danger p {
-    margin: 0 0 18px;
-    color: #c8b8d2;
-    font-size: 0.88rem;
+    margin: 0 0 15px;
+    color: #897d90;
+    font-size: 0.82rem;
     line-height: 1.6;
 }
 
 
-/* 17. DELETE BUTTONS */
+/* Delete buttons */
 
 .admin-delete-button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: auto;
-    padding: 6px 11px;
-    border: 1px solid rgba(255, 170, 190, 0.25);
-    border-radius: 7px;
-    background: #87384f;
-    color: #ffffff;
+    padding: 7px 12px;
+    border: 1px solid #efd9de;
+    border-radius: 8px;
+    background: #fff4f5;
+    color: #a34460;
     font-size: 0.8rem;
-    font-weight: 600;
-    line-height: 1.2;
+    font-weight: 650;
+    line-height: 1.3;
     cursor: pointer;
-    transition: background 0.2s ease, transform 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .admin-delete-button:hover {
-    background: #a34460;
-    transform: translateY(-1px);
+    border-color: #e8bdc7;
+    background: #fce8ec;
 }
 
-.admin-delete-button:focus-visible {
-    outline: 3px solid #d9b9ed;
+.admin-delete-button:focus-visible,
+.admin-moderation-pin button:focus-visible {
+    outline: 3px solid rgba(134, 96, 162, 0.25);
     outline-offset: 3px;
 }
 
 .admin-moderation-danger .admin-delete-button {
     width: 100%;
-    padding: 12px 16px;
-    font-size: 0.95rem;
+    padding: 11px 14px;
+    font-size: 0.87rem;
 }
 
-/* Pagination */
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
 
 .admin-pagination {
     display: flex;
@@ -576,8 +817,8 @@
 }
 
 .admin-pagination-info {
-    font-size: 0.9rem;
-    color: #777;
+    color: #897d90;
+    font-size: 0.86rem;
 }
 
 .admin-pagination-links {
@@ -594,31 +835,43 @@
     justify-content: center;
     min-width: 36px;
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #e5dce9;
     border-radius: 8px;
     text-decoration: none;
 }
 
 .admin-pagination-links a {
-    color: inherit;
+    color: #68447f;
 }
 
 .admin-pagination-links a:hover,
 .admin-pagination-links span.active {
-    background: #eee8f4;
-    border-color: #cbbbd9;
+    border-color: #d8c6e5;
+    background: #f2edf7;
 }
 
 .admin-pagination-links span.active {
-    font-weight: 600;
+    color: #68447f;
+    font-weight: 700;
 }
 
 
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
-/* 18. RESPONSIVE — TABLETS */
+@media (max-width: 1000px) {
+    .admin-review-layout {
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 16px;
+    }
+
+    .admin-post-engagement-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
 
 @media (max-width: 850px) {
-
     .admin-review-layout {
         grid-template-columns: 1fr;
     }
@@ -628,14 +881,14 @@
     }
 
     .admin-moderation-panel {
-        padding: 20px;
+        padding: 21px;
     }
 }
 
-
-/* 19. RESPONSIVE — MOBILE */
-
 @media (max-width: 650px) {
+    .admin-content-heading h2 {
+        font-size: 1.55rem;
+    }
 
     .admin-content-tabs {
         width: 100%;
@@ -644,6 +897,7 @@
     .admin-content-tabs a {
         flex: 1;
         padding: 10px 12px;
+        font-size: 0.84rem;
     }
 
     .admin-content-search {
@@ -657,16 +911,16 @@
     .admin-content-search button {
         flex: 1;
     }
-
-    .admin-content-heading h2 {
-        font-size: 1.5rem;
-    }
 }
 
-
-/* 20. RESPONSIVE — SMALL MOBILE */
-
 @media (max-width: 600px) {
+    .admin-review-layout {
+        gap: 16px;
+    }
+
+    .admin-review-main {
+        gap: 16px;
+    }
 
     .admin-review-main .admin-content-panel {
         padding: 18px;
@@ -674,7 +928,7 @@
 
     .admin-review-main .admin-content-panel-header {
         margin: -18px -18px 18px;
-        padding: 18px;
+        padding: 17px 18px;
     }
 
     .admin-post-description {
@@ -689,15 +943,18 @@
     .admin-post-media video {
         max-height: 320px;
     }
-}
-
-@media (max-width: 480px) {
-
-    .admin-review-layout {
-        gap: 16px;
-    }
 
     .admin-moderation-panel {
-        padding: 16px;
+        padding: 18px;
+    }
+}
+
+@media (max-width: 380px) {
+    .admin-post-recent-engagement {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-post-engagement-card {
+        padding: 13px 11px;
     }
 }

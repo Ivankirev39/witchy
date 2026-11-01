@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/includes/admin_auth.php";
 require_once __DIR__ . "/../config/db.php";
@@ -11,10 +12,19 @@ $postId = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
 $post = null;
 $media = [];
 $comments = [];
+$engagement = [
+    "likes" => 0,
+    "comments" => 0,
+    "saves" => 0,
+    "recent_likes" => 0,
+    "recent_comments" => 0,
+    "popularity_score" => 0
+];
+
 $errorMessage = "";
 $statusMessage = "";
 
-// Remember where the review page was opened from.
+// Return navigation.
 $returnFrom = $_GET["from"] ?? "";
 $returnUserId = filter_input(INPUT_GET, "return_user_id", FILTER_VALIDATE_INT);
 
@@ -28,6 +38,7 @@ if ($returnFrom === "user" && $returnUserId && $returnUserId > 0) {
     $returnUserId = null;
 }
 
+// Status messages.
 if (($_GET["status"] ?? "") === "pinned") {
     $statusMessage = "The post was pinned to the community feed.";
 } elseif (($_GET["status"] ?? "") === "unpinned") {
@@ -42,7 +53,11 @@ if (($_GET["status"] ?? "") === "pinned") {
     $statusMessage = "The comment could not be deleted. Please try again.";
 }
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "toggle_sticky") {
+// Pin/unpin action.
+if (
+    $_SERVER["REQUEST_METHOD"] === "POST"
+    && ($_POST["action"] ?? "") === "toggle_sticky"
+) {
     if (!csrf_valid($_POST["csrf_token"] ?? "")) {
         $errorMessage = "Your security token was invalid. Please refresh and try again.";
     } elseif (!$postId || $postId < 1) {
@@ -55,6 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "toggl
                 WHERE post_id = :post_id
                 LIMIT 1
             ");
+
             $checkStmt->execute(["post_id" => $postId]);
             $currentSticky = $checkStmt->fetchColumn();
 
@@ -94,6 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && ($_POST["action"] ?? "") === "toggl
     }
 }
 
+// Load post and related information.
 if (!$postId || $postId < 1) {
     $errorMessage = "Invalid post selected.";
 } else {
@@ -123,6 +140,7 @@ if (!$postId || $postId < 1) {
         if (!$post) {
             $errorMessage = "This post could not be found.";
         } else {
+            // Post media.
             $mediaStmt = $conn->prepare("
                 SELECT media_id, file, media_type, sort_order
                 FROM post_media
@@ -133,6 +151,7 @@ if (!$postId || $postId < 1) {
             $mediaStmt->execute(["post_id" => $postId]);
             $media = $mediaStmt->fetchAll(PDO::FETCH_ASSOC);
 
+            // Comments.
             $commentStmt = $conn->prepare("
                 SELECT
                     c.comment_id,
@@ -150,6 +169,59 @@ if (!$postId || $postId < 1) {
 
             $commentStmt->execute(["post_id" => $postId]);
             $comments = $commentStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Engagement statistics.
+            $engagementStmt = $conn->prepare("
+                SELECT
+                    (
+                        SELECT COUNT(*)
+                        FROM post_like pl
+                        WHERE pl.post_id = p.post_id
+                    ) AS total_likes,
+
+                    (
+                        SELECT COUNT(*)
+                        FROM comment c
+                        WHERE c.post_id = p.post_id
+                    ) AS total_comments,
+
+                    (
+                        SELECT COUNT(*)
+                        FROM save s
+                        WHERE s.post_id = p.post_id
+                    ) AS total_saves,
+
+                    (
+                        SELECT COUNT(*)
+                        FROM post_like pl
+                        WHERE pl.post_id = p.post_id
+                          AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                    ) AS recent_likes,
+
+                    (
+                        SELECT COUNT(*)
+                        FROM comment c
+                        WHERE c.post_id = p.post_id
+                          AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                    ) AS recent_comments
+
+                FROM post p
+                WHERE p.post_id = :post_id
+            ");
+
+            $engagementStmt->execute(["post_id" => $postId]);
+            $engagementData = $engagementStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($engagementData) {
+                $engagement["likes"] = (int) $engagementData["total_likes"];
+                $engagement["comments"] = (int) $engagementData["total_comments"];
+                $engagement["saves"] = (int) $engagementData["total_saves"];
+                $engagement["recent_likes"] = (int) $engagementData["recent_likes"];
+                $engagement["recent_comments"] = (int) $engagementData["recent_comments"];
+
+                $engagement["popularity_score"] =
+                    $engagement["likes"] + ($engagement["comments"] * 3);
+            }
         }
 
     } catch (PDOException $e) {
@@ -158,6 +230,17 @@ if (!$postId || $postId < 1) {
     }
 }
 
+$isPinned = $post && (int) $post["is_sticky"] === 1;
+
+$isTrending = (
+    $engagement["recent_likes"] > 0
+    || $engagement["recent_comments"] > 0
+);
+
+$createdDate = $post && !empty($post["created_at"])
+    ? strtotime($post["created_at"])
+    : false;
+
 require_once __DIR__ . "/includes/admin_header.php";
 ?>
 
@@ -165,7 +248,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
     <header class="admin-content-heading">
         <h2>Post review</h2>
-        <p>Review the post, its author and its discussion.</p>
+        <p>Review the post, its performance, author and discussion.</p>
     </header>
 
     <p>
@@ -192,7 +275,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             <div class="admin-review-main">
 
-                <!-- Post details -->
+                <!-- Post information -->
                 <section class="admin-content-panel">
 
                     <header class="admin-content-panel-header">
@@ -214,18 +297,25 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                     <p>
                         <strong>Published:</strong>
-                        <?= htmlspecialchars($post["created_at"] ?? "", ENT_QUOTES, "UTF-8") ?>
+
+                        <?php if ($createdDate !== false): ?>
+                            <time datetime="<?= date("c", $createdDate) ?>">
+                                <?= date("M j, Y · g:i a", $createdDate) ?>
+                            </time>
+                        <?php else: ?>
+                            Unknown
+                        <?php endif; ?>
                     </p>
 
                     <p>
-                        <strong>Status:</strong>
+                        <strong>Author:</strong>
 
-                        <?php if ($post["is_sticky"]): ?>
-                            Pinned
-                        <?php elseif ($post["is_hot"]): ?>
-                            Hot
+                        <?php if (!empty($post["user_id"])): ?>
+                            <a href="/witchy/admin/view_user.php?id=<?= (int) $post["user_id"] ?>">
+                                <?= htmlspecialchars($post["username"] ?? "Unknown", ENT_QUOTES, "UTF-8") ?>
+                            </a>
                         <?php else: ?>
-                            Normal
+                            Unknown member
                         <?php endif; ?>
                     </p>
 
@@ -285,6 +375,68 @@ require_once __DIR__ . "/includes/admin_header.php";
                     <?php endif; ?>
 
                 </section>
+
+
+                <!-- Engagement overview -->
+                <section class="admin-content-panel">
+
+                    <header class="admin-content-panel-header">
+                        <h3>Post engagement</h3>
+                        <p>Engagement statistics for this post.</p>
+                    </header>
+
+                    <div class="admin-post-engagement-grid">
+
+                        <article class="admin-post-engagement-card">
+                            <span>♡</span>
+                            <strong><?= number_format($engagement["likes"]) ?></strong>
+                            <small>Total likes</small>
+                        </article>
+
+                        <article class="admin-post-engagement-card">
+                            <span>☽</span>
+                            <strong><?= number_format($engagement["comments"]) ?></strong>
+                            <small>Total comments</small>
+                        </article>
+
+                        <article class="admin-post-engagement-card">
+                            <span>♧</span>
+                            <strong><?= number_format($engagement["saves"]) ?></strong>
+                            <small>Total saves</small>
+                        </article>
+
+                        <article class="admin-post-engagement-card">
+                            <span>✧</span>
+                            <strong><?= number_format($engagement["popularity_score"]) ?></strong>
+                            <small>Popularity score</small>
+                        </article>
+
+                    </div>
+
+                    <h4>Recent engagement · Last 48 hours</h4>
+
+                    <div class="admin-post-recent-engagement">
+
+                        <div>
+                            <strong><?= number_format($engagement["recent_likes"]) ?></strong>
+                            <span>Recent likes</span>
+                        </div>
+
+                        <div>
+                            <strong><?= number_format($engagement["recent_comments"]) ?></strong>
+                            <span>Recent comments</span>
+                        </div>
+
+                    </div>
+
+                    <p class="admin-post-score-note">
+                        Popularity score = total likes + (total comments × 3).
+                        Trending eligibility requires at least one like or comment
+                        in the last 48 hours.
+                    </p>
+
+                </section>
+
 
                 <!-- Comment moderation -->
                 <section class="admin-content-panel">
@@ -376,10 +528,7 @@ require_once __DIR__ . "/includes/admin_header.php";
                                             value="<?= $returnUserId !== null ? (int) $returnUserId : "" ?>"
                                         >
 
-                                        <button
-                                            type="submit"
-                                            class="admin-delete-button"
-                                        >
+                                        <button type="submit" class="admin-delete-button">
                                             Delete comment
                                         </button>
 
@@ -397,13 +546,14 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             </div>
 
+
             <!-- Moderation sidebar -->
             <aside class="admin-review-sidebar">
 
                 <section class="admin-content-panel admin-moderation-panel">
 
-                    <h3>Moderation</h3>
-
+                    <h3>Moderation status</h3>
+                    
                     <div class="admin-moderation-author">
                         <span class="admin-moderation-label">Post author</span>
 
@@ -414,27 +564,71 @@ require_once __DIR__ . "/includes/admin_header.php";
                         <span>
                             User ID: <?= (int) $post["user_id"] ?>
                         </span>
+
+                        <?php if (!empty($post["user_id"])): ?>
+                            <a href="/witchy/admin/view_user.php?id=<?= (int) $post["user_id"] ?>">
+                                Review member
+                            </a>
+                        <?php endif; ?>
                     </div>
+
+                    <div class="admin-post-status-list">
+
+                        <div>
+                            <span>Community pin</span>
+
+                            <strong>
+                                <?= $isPinned ? "Pinned" : "Not pinned" ?>
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Trending</span>
+
+                            <strong>
+                                <?= $isTrending ? "Trending" : "Not trending" ?>
+                            </strong>
+                        </div>
+
+                        <div>
+                            <span>Recent likes</span>
+                            <strong><?= number_format($engagement["recent_likes"]) ?></strong>
+                        </div>
+
+                        <div>
+                            <span>Recent comments</span>
+                            <strong><?= number_format($engagement["recent_comments"]) ?></strong>
+                        </div>
+
+                    </div>
+
+                    
 
                     <div class="admin-moderation-pin">
                         <h4>Community feed</h4>
 
                         <p>
-                            <?= !empty($post["is_sticky"])
+                            <?= $isPinned
                                 ? "This post is currently pinned at the top of the community feed."
                                 : "Pin this post to give it priority in the community feed." ?>
                         </p>
 
-                        <form method="POST" action="/witchy/admin/view_post.php?id=<?= (int) $post["post_id"] ?><?= $returnFrom === "user" && $returnUserId ? "&amp;from=user&amp;return_user_id=" . (int) $returnUserId : "" ?>"
-                            onsubmit="return confirm('Are you sure you want to <?= !empty($post["is_sticky"]) ? "unpin" : "pin" ?> this post?');">
+                        <form
+                            method="POST"
+                            action="/witchy/admin/view_post.php?id=<?= (int) $post["post_id"] ?><?= $returnFrom === "user" && $returnUserId ? "&amp;from=user&amp;return_user_id=" . (int) $returnUserId : "" ?>"
+                            onsubmit="return confirm('Are you sure you want to <?= $isPinned ? "unpin" : "pin" ?> this post?');"
+                        >
 
-                            <input type="hidden" name="csrf_token"
-                                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                            >
 
                             <input type="hidden" name="action" value="toggle_sticky">
 
                             <button type="submit">
-                                <?= !empty($post["is_sticky"]) ? "Unpin post" : "Pin to community feed" ?>
+                                <?= $isPinned ? "Unpin post" : "Pin to community feed" ?>
                             </button>
 
                         </form>
@@ -446,9 +640,8 @@ require_once __DIR__ . "/includes/admin_header.php";
                         <h4>Delete post</h4>
 
                         <p>
-                            Permanently removes this post, its comments,
-                            likes, saves and related notifications.
-                            Uploaded files are queued for cleanup.
+                            Permanently removes this post and its associated
+                            content. Uploaded files are queued for cleanup.
                         </p>
 
                         <form
