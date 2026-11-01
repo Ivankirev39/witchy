@@ -102,3 +102,11 @@ html.dark-mode .rule-description {
     line-height: var(--line-height-body);
     color: var(--text-secondary);
 }
+.rules-header p {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: var(--line-height-body);
+    color: var(--text-secondary);
+    margin: 10px 0 0;
+}
