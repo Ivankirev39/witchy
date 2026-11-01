@@ -9,6 +9,8 @@ $pdo = $pdoConnector->connectToDB();
 $pageTitle = "Create a post | Witchy";
 $postModel = new Post($pdo);
 
+$pageCss = "upload.css";
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!csrf_valid($_POST["csrf_token"] ?? null)) {
         http_response_code(403);

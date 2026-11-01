@@ -31,7 +31,6 @@ if (isset($_SESSION["user_id"])) {
     <link rel="stylesheet" href="/witchy/assets/css/user_header.css">
     <link rel="stylesheet" href="/witchy/assets/css/feed.css">
     <link rel="stylesheet" href="/witchy/assets/css/profile.css">
-    <link rel="stylesheet" href="/witchy/assets/css/rules.css">
     <link rel="stylesheet" href="/witchy/assets/css/upload.css">
     <link rel="stylesheet" href="/witchy/assets/css/post_not_found.css">
     <?php if (!empty($pageCss)): ?>

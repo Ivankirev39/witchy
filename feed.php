@@ -33,6 +33,8 @@ if ($hasNextPage) {
     array_pop($posts);
 }
 
+$pageCss = "feed.css";
+
 $postIds = array_column($posts, "post_id");
 $postMediaByPost = $postFeedModel->getPostMediaForPosts($postIds);
 $commentsByPost = $commentModel->getCommentsForPosts($postIds, 5);
