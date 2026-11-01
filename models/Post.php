@@ -76,6 +76,7 @@ class Post
             throw $e;
         }
     }
+
     public function getPostById(int $postId, int $viewerId): ?array
     {
         $stmt = $this->db->prepare("
@@ -83,34 +84,40 @@ class Post
                 post.*,
                 users.username,
                 users.profile_image,
+
                 (
                     SELECT COUNT(*)
                     FROM post_like
                     WHERE post_like.post_id = post.post_id
                 ) AS like_count,
+
                 (
                     SELECT COUNT(*)
                     FROM comment
                     WHERE comment.post_id = post.post_id
                 ) AS comment_count,
+
                 EXISTS (
                     SELECT 1
                     FROM post_like
                     WHERE post_like.post_id = post.post_id
                     AND post_like.user_id = ?
                 ) AS user_liked,
+
                 EXISTS (
                     SELECT 1
                     FROM save
                     WHERE save.post_id = post.post_id
                     AND save.user_id = ?
                 ) AS user_saved,
+
                 EXISTS (
                     SELECT 1
                     FROM follow
                     WHERE follow.follower_id = ?
                     AND follow.following_id = post.user_id
                 ) AS user_follows
+
             FROM post
             INNER JOIN users ON users.user_id = post.user_id
             WHERE post.post_id = ?
@@ -121,6 +128,7 @@ class Post
 
         return $post === false ? null : $post;
     }
+
     public function getPostOwnerId(int $postId): ?int
     {
         $stmt = $this->db->prepare("
@@ -134,6 +142,7 @@ class Post
 
         return $ownerId === false ? null : (int) $ownerId;
     }
+
     public function getLikedPosts(
         int $userId,
         string $topic,
@@ -304,8 +313,14 @@ class Post
         string $topic,
         string $sort,
         int $limit,
-        int $offset
+        int $offset,
+        string $tab,
+        int $userId
     ): array {
+        $tab = in_array($tab, ["all", "hot", "popular"], true)
+            ? $tab
+            : "all";
+
         $orderByOptions = [
             "newest" => "p.created_at DESC",
             "oldest" => "p.created_at ASC",
@@ -315,6 +330,9 @@ class Post
 
         $orderBy = $orderByOptions[$sort] ?? $orderByOptions["newest"];
 
+        $limit = max(1, min($limit, 50));
+        $offset = max(0, $offset);
+
         $sql = "
             SELECT
                 p.post_id,
@@ -323,11 +341,49 @@ class Post
                 p.description,
                 p.topic,
                 p.created_at,
+                p.is_sticky,
                 u.username,
+
+                EXISTS (
+                    SELECT 1
+                    FROM post_like pl_user
+                    WHERE pl_user.post_id = p.post_id
+                      AND pl_user.user_id = ?
+                ) AS user_liked,
+
                 pm.file AS media_file,
-                pm.media_type
+                pm.media_type,
+
+                (
+                    SELECT COUNT(*)
+                    FROM post_like pl
+                    WHERE pl.post_id = p.post_id
+                ) AS like_count,
+
+                (
+                    SELECT COUNT(*)
+                    FROM comment c
+                    WHERE c.post_id = p.post_id
+                ) AS comment_count,
+
+                (
+                    SELECT COUNT(*)
+                    FROM post_like pl
+                    WHERE pl.post_id = p.post_id
+                      AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                ) AS recent_like_count,
+
+                (
+                    SELECT COUNT(*)
+                    FROM comment c
+                    WHERE c.post_id = p.post_id
+                      AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                ) AS recent_comment_count
+
             FROM post p
+
             INNER JOIN users u ON u.user_id = p.user_id
+
             LEFT JOIN post_media pm ON pm.media_id = (
                 SELECT pm2.media_id
                 FROM post_media pm2
@@ -338,7 +394,7 @@ class Post
         ";
 
         $conditions = [];
-        $params = [];
+        $params = [$userId];
 
         if ($search !== "") {
             $conditions[] = "(
@@ -357,16 +413,76 @@ class Post
             $params[] = $topic;
         }
 
+        if ($tab === "hot") {
+            $conditions[] = "(
+                EXISTS (
+                    SELECT 1
+                    FROM post_like pl
+                    WHERE pl.post_id = p.post_id
+                      AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                )
+                OR EXISTS (
+                    SELECT 1
+                    FROM comment c
+                    WHERE c.post_id = p.post_id
+                      AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                )
+            )";
+
+            $orderBy = "
+                (
+                    (
+                        SELECT COUNT(*)
+                        FROM post_like pl
+                        WHERE pl.post_id = p.post_id
+                          AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                    )
+                    +
+                    3 * (
+                        SELECT COUNT(*)
+                        FROM comment c
+                        WHERE c.post_id = p.post_id
+                          AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                    )
+                ) DESC,
+                p.created_at DESC
+            ";
+        } elseif ($tab === "popular") {
+            $orderBy = "
+                (
+                    (
+                        SELECT COUNT(*)
+                        FROM post_like pl
+                        WHERE pl.post_id = p.post_id
+                    )
+                    +
+                    3 * (
+                        SELECT COUNT(*)
+                        FROM comment c
+                        WHERE c.post_id = p.post_id
+                    )
+                ) DESC,
+                p.created_at DESC
+            ";
+        }
+
         if ($conditions !== []) {
             $sql .= " WHERE " . implode(" AND ", $conditions);
         }
 
-        $sql .= " ORDER BY " . $orderBy . " LIMIT ? OFFSET ?";
+        $sql .= "
+            ORDER BY p.is_sticky DESC, {$orderBy}
+            LIMIT ? OFFSET ?
+        ";
 
         $stmt = $this->db->prepare($sql);
 
         foreach ($params as $index => $value) {
-            $stmt->bindValue($index + 1, $value, PDO::PARAM_STR);
+            $stmt->bindValue(
+                $index + 1,
+                $value,
+                $index === 0 ? PDO::PARAM_INT : PDO::PARAM_STR
+            );
         }
 
         $stmt->bindValue(count($params) + 1, $limit, PDO::PARAM_INT);
@@ -377,8 +493,15 @@ class Post
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function countExplorePosts(string $search, string $topic): int
-    {
+    public function countExplorePosts(
+        string $search,
+        string $topic,
+        string $tab = "all"
+    ): int {
+        $tab = in_array($tab, ["all", "hot", "popular"], true)
+            ? $tab
+            : "all";
+
         $sql = "
             SELECT COUNT(*)
             FROM post p
@@ -403,6 +526,23 @@ class Post
         if ($topic !== "") {
             $conditions[] = "p.topic = ?";
             $params[] = $topic;
+        }
+
+        if ($tab === "hot") {
+            $conditions[] = "(
+                EXISTS (
+                    SELECT 1
+                    FROM post_like pl
+                    WHERE pl.post_id = p.post_id
+                      AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                )
+                OR EXISTS (
+                    SELECT 1
+                    FROM comment c
+                    WHERE c.post_id = p.post_id
+                      AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                )
+            )";
         }
 
         if ($conditions !== []) {
