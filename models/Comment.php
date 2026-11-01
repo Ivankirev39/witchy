@@ -206,4 +206,18 @@ class Comment
 
         return $profileImage === false ? null : $profileImage;
     }
+    public function getUserDetailsByUserId(int $userId): ?array
+{
+    $stmt = $this->db->prepare("
+        SELECT username, profile_image
+        FROM users
+        WHERE user_id = ?
+    ");
+
+    $stmt->execute([$userId]);
+
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    return $user ?: null;
+}
 }

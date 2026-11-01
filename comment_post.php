@@ -165,7 +165,7 @@ if ($commentId) {
     }
 }
 $commentCount = $commentModel->getCommentCountByPostId($post_id);
-$username = $commentModel->getUsernameByUserId($user_id);
+$userDetails = $commentModel->getUserDetailsByUserId($user_id);
 
 if ($isAjax) {
     header("Content-Type: application/json");
@@ -173,11 +173,13 @@ if ($isAjax) {
     echo json_encode([
         "success" => true,
         "comment_id" => $commentId,
+        "user_id" => $user_id,
         "comment" => $commentText,
         "media_url" => $mediaFile !== null
             ? "uploads/comments/" . rawurlencode($mediaFile)
             : null,
-        "username" => $username,
+        "username" => $userDetails["username"],
+        "profile_image" => $userDetails["profile_image"],
         "created_at" => date("Y-m-d H:i:s"),
         "comment_count" => $commentCount
     ]);
