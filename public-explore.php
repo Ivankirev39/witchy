@@ -1,4 +1,5 @@
 <?php
+
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/models/DBConnector.php";
 
@@ -10,6 +11,13 @@ $pageCss = "public-explore.css";
 
 $search = trim($_GET["search"] ?? "");
 $topic = trim($_GET["topic"] ?? "");
+
+$allowedTabs = ["all", "hot", "popular"];
+$tab = $_GET["tab"] ?? "all";
+
+if (!in_array($tab, $allowedTabs, true)) {
+    $tab = "all";
+}
 
 $allowedSorts = [
     "newest" => "p.created_at DESC, p.post_id DESC",
@@ -53,19 +61,112 @@ if ($topic !== "") {
     $params[] = $topic;
 }
 
-$whereSql = "";
+$whereSql = $conditions
+    ? " WHERE " . implode(" AND ", $conditions)
+    : "";
 
-if ($conditions) {
-    $whereSql = " WHERE " . implode(" AND ", $conditions);
+/* ENGAGEMENT DATA */
+$engagementJoins = "";
+$engagementCondition = "";
+$countJoins = "";
+$scoreSql = "0";
+
+/*
+ * TRENDING:
+ * Likes = 1 point.
+ * Comments = 3 points.
+ * Only engagement from the last 48 hours counts.
+ *
+ * Posts must have at least one recent like or comment.
+ * Pinned posts do not bypass this requirement.
+ */
+if ($tab === "hot") {
+    $engagementJoins = "
+        LEFT JOIN (
+            SELECT
+                post_id,
+                COUNT(*) AS like_count
+            FROM post_like
+            WHERE liked_at >= NOW() - INTERVAL 48 HOUR
+            GROUP BY post_id
+        ) recent_likes
+            ON recent_likes.post_id = p.post_id
+
+        LEFT JOIN (
+            SELECT
+                post_id,
+                COUNT(*) AS comment_count
+            FROM comment
+            WHERE created_at >= NOW() - INTERVAL 48 HOUR
+            GROUP BY post_id
+        ) recent_comments
+            ON recent_comments.post_id = p.post_id
+    ";
+
+    $countJoins = $engagementJoins;
+
+    $engagementCondition = "
+        AND (
+            COALESCE(recent_likes.like_count, 0) > 0
+            OR COALESCE(recent_comments.comment_count, 0) > 0
+        )
+    ";
+
+    $scoreSql = "
+        (
+            COALESCE(recent_likes.like_count, 0)
+            + (COALESCE(recent_comments.comment_count, 0) * 3)
+        )
+    ";
+}
+
+/* POPULAR: ALL-TIME ENGAGEMENT */
+elseif ($tab === "popular") {
+    $engagementJoins = "
+        LEFT JOIN (
+            SELECT
+                post_id,
+                COUNT(*) AS like_count
+            FROM post_like
+            GROUP BY post_id
+        ) all_likes
+            ON all_likes.post_id = p.post_id
+
+        LEFT JOIN (
+            SELECT
+                post_id,
+                COUNT(*) AS comment_count
+            FROM comment
+            GROUP BY post_id
+        ) all_comments
+            ON all_comments.post_id = p.post_id
+    ";
+
+    $scoreSql = "
+        (
+            COALESCE(all_likes.like_count, 0)
+            + (COALESCE(all_comments.comment_count, 0) * 3)
+        )
+    ";
 }
 
 /* COUNT MATCHING POSTS */
 $countSql = "
     SELECT COUNT(*)
     FROM post p
-    INNER JOIN users u ON u.user_id = p.user_id
+    INNER JOIN users u
+        ON u.user_id = p.user_id
+    $countJoins
     $whereSql
 ";
+
+if ($engagementCondition !== "") {
+    if ($whereSql === "") {
+        $countSql .= " WHERE " . substr(trim($engagementCondition), 4);
+    } else {
+        $countSql .= $engagementCondition;
+    }
+}
 
 $countStatement = $pdo->prepare($countSql);
 $countStatement->execute($params);
@@ -76,7 +177,22 @@ $totalPages = max(1, (int) ceil($totalPosts / $postsPerPage));
 $page = min($page, $totalPages);
 $offset = ($page - 1) * $postsPerPage;
 
-/* FETCH POSTS AND THEIR FIRST MEDIA FILE */
+/* DETERMINE ORDER */
+if ($tab === "hot" || $tab === "popular") {
+    $orderSql = "
+        p.is_sticky DESC,
+        $scoreSql DESC,
+        p.created_at DESC,
+        p.post_id DESC
+    ";
+} else {
+    $orderSql = "
+        p.is_sticky DESC,
+        {$allowedSorts[$sort]}
+    ";
+}
+
+/* FETCH POSTS */
 $sql = "
     SELECT
         p.post_id,
@@ -84,7 +200,10 @@ $sql = "
         p.description,
         p.topic,
         p.created_at,
+        p.is_sticky,
         u.username,
+        $scoreSql AS engagement_score,
+
         (
             SELECT pm.file
             FROM post_media pm
@@ -92,6 +211,7 @@ $sql = "
             ORDER BY pm.sort_order ASC, pm.media_id ASC
             LIMIT 1
         ) AS media_file,
+
         (
             SELECT pm.media_type
             FROM post_media pm
@@ -99,10 +219,27 @@ $sql = "
             ORDER BY pm.sort_order ASC, pm.media_id ASC
             LIMIT 1
         ) AS media_type
+
     FROM post p
-    INNER JOIN users u ON u.user_id = p.user_id
+
+    INNER JOIN users u
+        ON u.user_id = p.user_id
+
+    $engagementJoins
+
     $whereSql
-    ORDER BY {$allowedSorts[$sort]}
+";
+
+if ($engagementCondition !== "") {
+    if ($whereSql === "") {
+        $sql .= " WHERE " . substr(trim($engagementCondition), 4);
+    } else {
+        $sql .= $engagementCondition;
+    }
+}
+
+$sql .= "
+    ORDER BY $orderSql
     LIMIT {$postsPerPage} OFFSET {$offset}
 ";
 
@@ -111,19 +248,16 @@ $statement->execute($params);
 
 $posts = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-/*
- * Return a readable preview without cutting a word in half.
- * The full description stays in the database and is shown on the post page.
- */
-function publicExploreDescriptionPreview(string $description, int $limit = 105): array
-{
+/* DESCRIPTION PREVIEW */
+function publicExploreDescriptionPreview(
+    string $description,
+    int $limit = 105
+): array {
     $description = trim($description);
 
-    if (function_exists("mb_strlen")) {
-        $length = mb_strlen($description, "UTF-8");
-    } else {
-        $length = strlen($description);
-    }
+    $length = function_exists("mb_strlen")
+        ? mb_strlen($description, "UTF-8")
+        : strlen($description);
 
     if ($length <= $limit) {
         return [
@@ -132,13 +266,10 @@ function publicExploreDescriptionPreview(string $description, int $limit = 105):
         ];
     }
 
-    if (function_exists("mb_substr")) {
-        $preview = mb_substr($description, 0, $limit, "UTF-8");
-    } else {
-        $preview = substr($description, 0, $limit);
-    }
+    $preview = function_exists("mb_substr")
+        ? mb_substr($description, 0, $limit, "UTF-8")
+        : substr($description, 0, $limit);
 
-    // Prefer ending the preview at a word boundary.
     $lastSpace = strrpos($preview, " ");
 
     if ($lastSpace !== false && $lastSpace > (int) ($limit * 0.65)) {
@@ -157,12 +288,17 @@ function publicExploreUrl(array $overrides = []): string
     $parameters = [
         "search" => trim($_GET["search"] ?? ""),
         "topic" => trim($_GET["topic"] ?? ""),
+        "tab" => $_GET["tab"] ?? "all",
         "sort" => $_GET["sort"] ?? "newest",
         "page" => $_GET["page"] ?? 1
     ];
 
     foreach ($overrides as $key => $value) {
         $parameters[$key] = $value;
+    }
+
+    if (($parameters["tab"] ?? "all") === "all") {
+        unset($parameters["tab"]);
     }
 
     if (($parameters["sort"] ?? "newest") === "newest") {
@@ -209,8 +345,56 @@ require_once __DIR__ . "/includes/public-header.php";
         <?php endif; ?>
     </header>
 
+    <!-- DISCOVERY TABS -->
+    <nav class="public-explore-tabs" aria-label="Explore post categories">
+
+        <a
+            href="<?= htmlspecialchars(
+                publicExploreUrl(["tab" => "all", "page" => 1]),
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>"
+            class="<?= $tab === "all" ? "active" : "" ?>"
+            <?= $tab === "all" ? 'aria-current="page"' : "" ?>
+        >
+            All Posts
+        </a>
+
+        <a
+            href="<?= htmlspecialchars(
+                publicExploreUrl(["tab" => "hot", "page" => 1]),
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>"
+            class="<?= $tab === "hot" ? "active" : "" ?>"
+            <?= $tab === "hot" ? 'aria-current="page"' : "" ?>
+        >
+            Trending
+        </a>
+
+        <a
+            href="<?= htmlspecialchars(
+                publicExploreUrl(["tab" => "popular", "page" => 1]),
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>"
+            class="<?= $tab === "popular" ? "active" : "" ?>"
+            <?= $tab === "popular" ? 'aria-current="page"' : "" ?>
+        >
+            Popular
+        </a>
+
+    </nav>
+
     <!-- SEARCH -->
     <form class="public-explore-search" action="public-explore.php" method="GET">
+
+        <input
+            type="hidden"
+            name="tab"
+            value="<?= htmlspecialchars($tab, ENT_QUOTES, "UTF-8") ?>"
+        >
+
         <?php if ($topic !== ""): ?>
             <input
                 type="hidden"
@@ -230,12 +414,15 @@ require_once __DIR__ . "/includes/public-header.php";
                 placeholder="Search titles, topics or authors..."
                 value="<?= htmlspecialchars($search, ENT_QUOTES, "UTF-8") ?>"
             >
+
             <button type="submit">Search</button>
         </div>
+
     </form>
 
     <!-- TOPIC FILTERS -->
     <nav class="explore-topics" aria-label="Browse topics">
+
         <a
             href="<?= htmlspecialchars(
                 publicExploreUrl(["topic" => "", "page" => 1]),
@@ -243,7 +430,9 @@ require_once __DIR__ . "/includes/public-header.php";
                 "UTF-8"
             ) ?>"
             class="<?= $topic === "" ? "active" : "" ?>"
-        >All</a>
+        >
+            All
+        </a>
 
         <?php
         $topics = [
@@ -260,6 +449,7 @@ require_once __DIR__ . "/includes/public-header.php";
         ?>
 
         <?php foreach ($topics as $topicOption): ?>
+
             <a
                 href="<?= htmlspecialchars(
                     publicExploreUrl([
@@ -273,60 +463,104 @@ require_once __DIR__ . "/includes/public-header.php";
             >
                 <?= htmlspecialchars($topicOption, ENT_QUOTES, "UTF-8") ?>
             </a>
+
         <?php endforeach; ?>
+
     </nav>
 
-    <!-- SORT -->
-    <div class="explore-sort">
-        <label for="explore-sort">Sort by:</label>
+    <!-- SORT: ALL POSTS ONLY -->
+    <?php if ($tab === "all"): ?>
 
-        <select
-            id="explore-sort"
-            onchange="window.location.href=this.value"
-        >
-            <?php
-            $sortLabels = [
-                "newest" => "Newest",
-                "oldest" => "Oldest",
-                "title_asc" => "Title A–Z",
-                "title_desc" => "Title Z–A"
-            ];
-            ?>
+        <div class="explore-sort">
 
-            <?php foreach ($sortLabels as $sortValue => $sortLabel): ?>
-                <option
-                    value="<?= htmlspecialchars(
-                        publicExploreUrl([
-                            "sort" => $sortValue,
-                            "page" => 1
-                        ]),
-                        ENT_QUOTES,
-                        "UTF-8"
-                    ) ?>"
-                    <?= $sort === $sortValue ? "selected" : "" ?>
-                >
-                    <?= htmlspecialchars($sortLabel, ENT_QUOTES, "UTF-8") ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
+            <label for="explore-sort">Sort by:</label>
+
+            <select
+                id="explore-sort"
+                onchange="window.location.href=this.value"
+            >
+
+                <?php
+                $sortLabels = [
+                    "newest" => "Newest",
+                    "oldest" => "Oldest",
+                    "title_asc" => "Title A–Z",
+                    "title_desc" => "Title Z–A"
+                ];
+                ?>
+
+                <?php foreach ($sortLabels as $sortValue => $sortLabel): ?>
+
+                    <option
+                        value="<?= htmlspecialchars(
+                            publicExploreUrl([
+                                "sort" => $sortValue,
+                                "page" => 1
+                            ]),
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                        <?= $sort === $sortValue ? "selected" : "" ?>
+                    >
+                        <?= htmlspecialchars($sortLabel, ENT_QUOTES, "UTF-8") ?>
+                    </option>
+
+                <?php endforeach; ?>
+
+            </select>
+
+        </div>
+
+    <?php endif; ?>
 
     <!-- POSTS -->
     <section class="explore-content" aria-label="Explore posts">
+
         <div class="explore-grid">
 
             <?php if (empty($posts)): ?>
+
                 <div class="explore-empty">
-                    <h2>No posts found</h2>
-                    <p>
-                        Try another search or topic, or check back later
-                        for new posts from the community.
-                    </p>
+
+                    <span class="explore-empty-icon" aria-hidden="true">✧</span>
+
+                    <?php if ($tab === "hot" && $search === "" && $topic === ""): ?>
+
+                        <h2>Nothing is trending just yet</h2>
+
+                        <p>
+                            New activity will appear here as the community
+                            likes and comments on posts.
+                        </p>
+
+                    <?php elseif ($tab === "popular" && $search === "" && $topic === ""): ?>
+
+                        <h2>No popular posts yet</h2>
+
+                        <p>
+                            The most-loved posts from the community
+                            will find their way here.
+                        </p>
+
+                    <?php else: ?>
+
+                        <h2>No posts found</h2>
+
+                        <p>
+                            Try another search or topic, or check back later
+                            for new posts from the community.
+                        </p>
+
+                    <?php endif; ?>
+
                     <a href="public-explore.php">Browse all posts</a>
+
                 </div>
+
             <?php else: ?>
 
                 <?php foreach ($posts as $post): ?>
+
                     <?php
                     $postUrl = "post.php?id=" . (int) $post["post_id"];
 
@@ -340,26 +574,39 @@ require_once __DIR__ . "/includes/public-header.php";
                     $isImage = $mediaPath !== ""
                         && in_array($mediaType, ["image", "photo"], true);
 
-                    $isVideo = $mediaPath !== "" && $mediaType === "video";
+                    $isVideo = $mediaPath !== ""
+                        && $mediaType === "video";
 
                     $description = trim($post["description"] ?? "");
                     $preview = publicExploreDescriptionPreview($description);
                     ?>
 
                     <article class="explore-cards">
-                        <!-- IMAGE -->
+
                         <a
                             class="explore-cards-image"
                             href="<?= htmlspecialchars($postUrl, ENT_QUOTES, "UTF-8") ?>"
                             aria-label="View post: <?= htmlspecialchars($post["title"] ?: "Untitled post", ENT_QUOTES, "UTF-8") ?>"
                         >
+
+                            <?php if ((int) $post["is_sticky"] === 1): ?>
+
+                                <span class="public-explore-pinned">
+                                    ✦ Pinned
+                                </span>
+
+                            <?php endif; ?>
+
                             <?php if ($isImage): ?>
+
                                 <img
                                     src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
                                     alt="<?= htmlspecialchars($post["title"] ?: "Post image", ENT_QUOTES, "UTF-8") ?>"
                                     loading="lazy"
                                 >
+
                             <?php elseif ($isVideo): ?>
+
                                 <video
                                     preload="metadata"
                                     muted
@@ -368,17 +615,22 @@ require_once __DIR__ . "/includes/public-header.php";
                                 >
                                     <source src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>">
                                 </video>
+
                                 <span class="explore-video-label">Video</span>
+
                             <?php else: ?>
+
                                 <span class="explore-cards-placeholder" aria-hidden="true">
                                     <span class="explore-placeholder-icon">✦</span>
                                     <span>No image</span>
                                 </span>
+
                             <?php endif; ?>
+
                         </a>
 
-                        <!-- CARD CONTENT -->
                         <div class="explore-cards-body">
+
                             <p class="explore-cards-author">
                                 @<?= htmlspecialchars($post["username"] ?? "user", ENT_QUOTES, "UTF-8") ?>
                             </p>
@@ -390,29 +642,44 @@ require_once __DIR__ . "/includes/public-header.php";
                             </h2>
 
                             <?php if ($description !== ""): ?>
+
                                 <p class="explore-cards-description">
                                     <?= htmlspecialchars($preview["text"], ENT_QUOTES, "UTF-8") ?>
+
                                     <?php if ($preview["truncated"]): ?>
+
                                         <a
                                             class="explore-read-more"
                                             href="<?= htmlspecialchars($postUrl, ENT_QUOTES, "UTF-8") ?>"
                                             aria-label="Read the full post: <?= htmlspecialchars($post["title"] ?: "Untitled post", ENT_QUOTES, "UTF-8") ?>"
-                                        >Read more</a>
+                                        >
+                                            Read more
+                                        </a>
+
                                     <?php endif; ?>
+
                                 </p>
+
                             <?php else: ?>
+
                                 <p class="explore-cards-description explore-no-description">
                                     No description provided.
                                 </p>
+
                             <?php endif; ?>
 
                             <div class="explore-cards-meta">
+
                                 <?php if (!empty($post["topic"])): ?>
+
                                     <span class="explore-cards-topic">
                                         <?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
                                     </span>
+
                                 <?php else: ?>
+
                                     <span></span>
+
                                 <?php endif; ?>
 
                                 <time
@@ -421,20 +688,28 @@ require_once __DIR__ . "/includes/public-header.php";
                                 >
                                     <?= date("M j, Y", strtotime($post["created_at"])) ?>
                                 </time>
+
                             </div>
+
                         </div>
+
                     </article>
+
                 <?php endforeach; ?>
 
             <?php endif; ?>
 
         </div>
+
     </section>
 
     <!-- PAGINATION -->
     <?php if ($totalPages > 1): ?>
+
         <nav class="explore-pagination" aria-label="Explore pages">
+
             <?php if ($page > 1): ?>
+
                 <a
                     class="explore-pagination-button"
                     href="<?= htmlspecialchars(
@@ -442,11 +717,16 @@ require_once __DIR__ . "/includes/public-header.php";
                         ENT_QUOTES,
                         "UTF-8"
                     ) ?>"
-                >← Previous</a>
+                >
+                    ← Previous
+                </a>
+
             <?php endif; ?>
 
             <div class="explore-pagination-pages">
+
                 <?php for ($pageNumber = 1; $pageNumber <= $totalPages; $pageNumber++): ?>
+
                     <a
                         href="<?= htmlspecialchars(
                             publicExploreUrl(["page" => $pageNumber]),
@@ -458,10 +738,13 @@ require_once __DIR__ . "/includes/public-header.php";
                     >
                         <?= $pageNumber ?>
                     </a>
+
                 <?php endfor; ?>
+
             </div>
 
             <?php if ($page < $totalPages): ?>
+
                 <a
                     class="explore-pagination-button"
                     href="<?= htmlspecialchars(
@@ -469,9 +752,14 @@ require_once __DIR__ . "/includes/public-header.php";
                         ENT_QUOTES,
                         "UTF-8"
                     ) ?>"
-                >Next →</a>
+                >
+                    Next →
+                </a>
+
             <?php endif; ?>
+
         </nav>
+
     <?php endif; ?>
 
     <p class="public-explore-join">

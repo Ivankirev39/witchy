@@ -167,6 +167,109 @@
 }
 
 /* =========================================================
+   PUBLIC DISCOVERY TABS
+   ========================================================= */
+
+   .explore-page .public-explore-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin: 0 0 28px;
+}
+
+.explore-page .public-explore-tabs a {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 21px;
+    border: 1px solid var(--public-border);
+    border-radius: 999px;
+    background: var(--public-card);
+    color: var(--public-text);
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.explore-page .public-explore-tabs a:hover {
+    border-color: var(--public-accent);
+    color: var(--public-accent);
+    transform: translateY(-1px);
+}
+
+.explore-page .public-explore-tabs a.active {
+    border-color: var(--public-accent);
+    background: var(--public-accent);
+    color: #fff;
+}
+
+.explore-page .public-explore-tabs a:focus-visible {
+    outline: 3px solid var(--public-accent);
+    outline-offset: 3px;
+}
+
+/* Pinned post label */
+
+.explore-page .public-explore-pinned {
+    position: absolute;
+    z-index: 2;
+    top: 11px;
+    left: 11px;
+    padding: 6px 11px;
+    border: 1px solid rgb(255 255 255 / 25%);
+    border-radius: 999px;
+    background: rgb(54 35 70 / 88%);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+}
+
+/* Empty state decoration */
+
+.explore-page .explore-empty-icon {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--public-accent);
+    font-size: 2rem;
+}
+
+body.dark-mode .explore-page .public-explore-tabs a {
+    border-color: var(--border);
+    background: var(--surface);
+    color: var(--text);
+}
+
+body.dark-mode .explore-page .public-explore-tabs a.active {
+    border-color: var(--public-accent);
+    background: var(--public-accent);
+    color: #fff;
+}
+
+@media (max-width: 600px) {
+    .explore-page .public-explore-tabs {
+        gap: 7px;
+        margin-bottom: 22px;
+    }
+
+    .explore-page .public-explore-tabs a {
+        min-height: 38px;
+        padding: 8px 15px;
+        font-size: 0.86rem;
+    }
+}
+
+
+/* =========================================================
    SORTING
    ========================================================= */
 
