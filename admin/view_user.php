@@ -896,19 +896,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
 </section>
 
-<script>
-document.querySelectorAll(".admin-clickable-row").forEach(row => {
-    row.addEventListener("click", () => {
-        window.location.href = row.dataset.href;
-    });
+<script src="js/view_user.js" defer></script>
 
-    row.addEventListener("keydown", event => {
-        if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            window.location.href = row.dataset.href;
-        }
-    });
-});
-</script>
 
 <?php require_once __DIR__ . "/includes/admin_footer.php"; ?>

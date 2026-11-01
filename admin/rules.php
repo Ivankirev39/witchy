@@ -508,14 +508,6 @@ require_once __DIR__ . "/includes/admin_header.php";
 </section>
 
 
-<script>
-function toggleRuleEdit(ruleId) {
-    const panel = document.getElementById("edit-rule-" + ruleId);
-
-    if (panel) {
-        panel.hidden = !panel.hidden;
-    }
-}
-</script>
+<script src="js/rules.js" defer></script>
 
 <?php require_once __DIR__ . "/includes/admin_footer.php"; ?>
