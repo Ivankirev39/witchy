@@ -28,10 +28,12 @@ if ($postId <= 0) {
 
     if ($isAjax) {
         header("Content-Type: application/json; charset=UTF-8");
+
         echo json_encode([
             "success" => false,
             "message" => "Invalid post ID."
         ]);
+
         exit;
     }
 
@@ -41,6 +43,7 @@ if ($postId <= 0) {
 
 $connector = new \DataAccess\DB\DBConnector();
 $pdo = $connector->connectToDB();
+
 $postInteraction = new PostInteraction($pdo);
 
 try {
@@ -50,10 +53,12 @@ try {
 
     if ($isAjax) {
         header("Content-Type: application/json; charset=UTF-8");
+
         echo json_encode([
             "success" => false,
             "message" => "Post not found."
         ]);
+
         exit;
     }
 
@@ -63,10 +68,12 @@ try {
 
 if ($isAjax) {
     header("Content-Type: application/json; charset=UTF-8");
+
     echo json_encode([
         "success" => true,
         "saved" => $saved
     ]);
+
     exit;
 }
 

@@ -20,25 +20,24 @@ class PostFeed
                 post.*,
                 users.username AS author_username,
                 users.profile_image AS author_profile_image,
-
                 v.like_count,
                 v.comment_count,
 
-                EXISTS(
+                EXISTS (
                     SELECT 1
                     FROM post_like
                     WHERE post_like.post_id = post.post_id
                     AND post_like.user_id = ?
                 ) AS user_liked,
 
-                EXISTS(
+                EXISTS (
                     SELECT 1
                     FROM save
                     WHERE save.post_id = post.post_id
                     AND save.user_id = ?
                 ) AS user_saved,
 
-                EXISTS(
+                EXISTS (
                     SELECT 1
                     FROM follow
                     WHERE follow.follower_id = ?
@@ -69,7 +68,9 @@ class PostFeed
             $params[] = $userId;
         }
 
-        $sql .= " ORDER BY post.is_sticky DESC, post.created_at DESC";
+        $sql .= "
+            ORDER BY post.is_sticky DESC, post.created_at DESC
+        ";
 
         $limit = max(1, min($limit, 50));
         $offset = max(0, $offset);
@@ -82,7 +83,7 @@ class PostFeed
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-     public function getPostMediaForPosts(array $postIds): array
+    public function getPostMediaForPosts(array $postIds): array
     {
         $postIds = array_values(array_filter(
             array_map("intval", $postIds),
@@ -93,14 +94,18 @@ class PostFeed
             return [];
         }
 
-        $placeholders = implode(",", array_fill(0, count($postIds), "?"));
+        $placeholders = implode(
+            ",",
+            array_fill(0, count($postIds), "?")
+        );
 
         $stmt = $this->db->prepare("
-        SELECT post_id, media_id, file, media_type, sort_order
-        FROM post_media
-        WHERE post_id IN ($placeholders)
-        ORDER BY post_id ASC, sort_order ASC, media_id ASC
-    ");
+            SELECT post_id, media_id, file, media_type, sort_order
+            FROM post_media
+            WHERE post_id IN ($placeholders)
+            ORDER BY post_id ASC, sort_order ASC, media_id ASC
+        ");
+
         $stmt->execute($postIds);
 
         $mediaByPost = [];
@@ -111,10 +116,4 @@ class PostFeed
 
         return $mediaByPost;
     }
-
 }
-
-
-
-
-    

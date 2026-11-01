@@ -297,10 +297,50 @@ require_once __DIR__ . "/includes/user_header.php";
 
                 <div class="explore-empty">
 
-                    <?php if ($tab === "hot"): ?>
+                    <?php if ($search !== ""): ?>
 
+                        <span class="explore-empty-symbol" aria-hidden="true">✧</span>
+
+                        <h2>No results found</h2>
+                        <p>
+                            We couldn't find any posts matching
+                            "<strong><?php echo htmlspecialchars($search, ENT_QUOTES, "UTF-8"); ?></strong>".
+                        </p>
+
+                    <?php elseif ($topic !== ""): ?>
+                        <?php
+                        $clearTopicParams = [];
+
+                        if ($search !== "") {
+                            $clearTopicParams["search"] = $search;
+                        }
+
+                        if ($tab !== "all") {
+                            $clearTopicParams["tab"] = $tab;
+                        }
+
+                        $clearTopicUrl = "explore.php";
+
+                        if ($clearTopicParams !== []) {
+                            $clearTopicUrl .= "?" . http_build_query($clearTopicParams);
+                        }
+                        ?>
+
+                        <span class="explore-empty-symbol" aria-hidden="true">✧</span>
+                        <h2>No posts in this corner yet</h2>
+                        <p>
+                            The <strong><?php echo htmlspecialchars($topic, ENT_QUOTES, "UTF-8"); ?></strong>
+                            section is quiet for now. Perhaps its next discovery will come from you.
+                        </p>
+                        <a
+                            href="<?php echo htmlspecialchars($clearTopicUrl, ENT_QUOTES, "UTF-8"); ?>"
+                            class="explore-empty-link">
+                            Explore all topics
+                        </a>
+
+                    <?php elseif ($tab === "hot"): ?>
+                        <span class="explore-empty-symbol" aria-hidden="true">✧</span>
                         <h2>No hot posts right now</h2>
-
                         <p>
                             There hasn't been any engagement on matching posts
                             during the last 48 hours. Check back later!
@@ -308,34 +348,20 @@ require_once __DIR__ . "/includes/user_header.php";
 
                     <?php elseif ($tab === "popular"): ?>
 
+                        <span class="explore-empty-symbol" aria-hidden="true">✧</span>
                         <h2>No popular posts yet</h2>
-
                         <p>
                             Posts will appear here as the community likes
                             and comments on them.
                         </p>
 
-                    <?php elseif ($search !== ""): ?>
-
-                        <h2>No results found</h2>
-
-                        <p>
-                            We couldn't find any posts matching
-                            "<strong>
-                                <?php echo htmlspecialchars($search, ENT_QUOTES, "UTF-8"); ?>
-                            </strong>".
-                        </p>
-
                     <?php else: ?>
-
+                        <span class="explore-empty-symbol" aria-hidden="true">✧</span>
                         <h2>No posts to explore yet</h2>
-
                         <p>
                             Check back later for new posts from the Witchy community.
                         </p>
-
                     <?php endif; ?>
-
                 </div>
 
             <?php else: ?>

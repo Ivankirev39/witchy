@@ -39,6 +39,7 @@ class Post
                 INSERT INTO post (user_id, title, description, topic, sources)
                 VALUES (?, ?, ?, ?, ?)
             ");
+
             $stmt->execute([
                 $userId,
                 $title,
@@ -123,7 +124,13 @@ class Post
             WHERE post.post_id = ?
         ");
 
-        $stmt->execute([$viewerId, $viewerId, $viewerId, $postId]);
+        $stmt->execute([
+            $viewerId,
+            $viewerId,
+            $viewerId,
+            $postId
+        ]);
+
         $post = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $post === false ? null : $post;
@@ -136,6 +143,7 @@ class Post
             FROM post
             WHERE post_id = ?
         ");
+
         $stmt->execute([$postId]);
 
         $ownerId = $stmt->fetchColumn();
@@ -166,16 +174,24 @@ class Post
                 u.username,
                 pm.file AS media_file,
                 pm.media_type
+
             FROM post_like pl
-            INNER JOIN post p ON p.post_id = pl.post_id
-            INNER JOIN users u ON u.user_id = p.user_id
-            LEFT JOIN post_media pm ON pm.media_id = (
-                SELECT pm2.media_id
-                FROM post_media pm2
-                WHERE pm2.post_id = p.post_id
-                ORDER BY pm2.sort_order ASC, pm2.media_id ASC
-                LIMIT 1
-            )
+
+            INNER JOIN post p
+                ON p.post_id = pl.post_id
+
+            INNER JOIN users u
+                ON u.user_id = p.user_id
+
+            LEFT JOIN post_media pm
+                ON pm.media_id = (
+                    SELECT pm2.media_id
+                    FROM post_media pm2
+                    WHERE pm2.post_id = p.post_id
+                    ORDER BY pm2.sort_order ASC, pm2.media_id ASC
+                    LIMIT 1
+                )
+
             WHERE pl.user_id = ?
         ";
 
@@ -220,16 +236,24 @@ class Post
                 u.username,
                 pm.file AS media_file,
                 pm.media_type
+
             FROM save s
-            INNER JOIN post p ON p.post_id = s.post_id
-            INNER JOIN users u ON u.user_id = p.user_id
-            LEFT JOIN post_media pm ON pm.media_id = (
-                SELECT pm2.media_id
-                FROM post_media pm2
-                WHERE pm2.post_id = p.post_id
-                ORDER BY pm2.sort_order ASC, pm2.media_id ASC
-                LIMIT 1
-            )
+
+            INNER JOIN post p
+                ON p.post_id = s.post_id
+
+            INNER JOIN users u
+                ON u.user_id = p.user_id
+
+            LEFT JOIN post_media pm
+                ON pm.media_id = (
+                    SELECT pm2.media_id
+                    FROM post_media pm2
+                    WHERE pm2.post_id = p.post_id
+                    ORDER BY pm2.sort_order ASC, pm2.media_id ASC
+                    LIMIT 1
+                )
+
             WHERE s.user_id = ?
         ";
 
@@ -248,7 +272,6 @@ class Post
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    
     public function deletePost(int $postId, int $userId): ?array
     {
         $this->db->beginTransaction();
@@ -260,6 +283,7 @@ class Post
                 WHERE post_id = ? AND user_id = ?
                 FOR UPDATE
             ");
+
             $stmt->execute([$postId, $userId]);
 
             if ($stmt->fetchColumn() === false) {
@@ -272,6 +296,7 @@ class Post
                 FROM post_media
                 WHERE post_id = ?
             ");
+
             $stmt->execute([$postId]);
             $postFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -280,6 +305,7 @@ class Post
                 FROM comment
                 WHERE post_id = ? AND media_file IS NOT NULL
             ");
+
             $stmt->execute([$postId]);
             $commentFiles = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -287,6 +313,7 @@ class Post
                 DELETE FROM post
                 WHERE post_id = ? AND user_id = ?
             ");
+
             $stmt->execute([$postId, $userId]);
 
             if ($stmt->rowCount() !== 1) {
@@ -348,7 +375,7 @@ class Post
                     SELECT 1
                     FROM post_like pl_user
                     WHERE pl_user.post_id = p.post_id
-                      AND pl_user.user_id = ?
+                    AND pl_user.user_id = ?
                 ) AS user_liked,
 
                 pm.file AS media_file,
@@ -370,27 +397,29 @@ class Post
                     SELECT COUNT(*)
                     FROM post_like pl
                     WHERE pl.post_id = p.post_id
-                      AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                    AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
                 ) AS recent_like_count,
 
                 (
                     SELECT COUNT(*)
                     FROM comment c
                     WHERE c.post_id = p.post_id
-                      AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                    AND c.created_at >= NOW() - INTERVAL 48 HOUR
                 ) AS recent_comment_count
 
             FROM post p
 
-            INNER JOIN users u ON u.user_id = p.user_id
+            INNER JOIN users u
+                ON u.user_id = p.user_id
 
-            LEFT JOIN post_media pm ON pm.media_id = (
-                SELECT pm2.media_id
-                FROM post_media pm2
-                WHERE pm2.post_id = p.post_id
-                ORDER BY pm2.sort_order ASC, pm2.media_id ASC
-                LIMIT 1
-            )
+            LEFT JOIN post_media pm
+                ON pm.media_id = (
+                    SELECT pm2.media_id
+                    FROM post_media pm2
+                    WHERE pm2.post_id = p.post_id
+                    ORDER BY pm2.sort_order ASC, pm2.media_id ASC
+                    LIMIT 1
+                )
         ";
 
         $conditions = [];
@@ -405,7 +434,14 @@ class Post
             )";
 
             $term = "%" . $search . "%";
-            array_push($params, $term, $term, $term, $term);
+
+            array_push(
+                $params,
+                $term,
+                $term,
+                $term,
+                $term
+            );
         }
 
         if ($topic !== "") {
@@ -419,13 +455,13 @@ class Post
                     SELECT 1
                     FROM post_like pl
                     WHERE pl.post_id = p.post_id
-                      AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                    AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
                 )
                 OR EXISTS (
                     SELECT 1
                     FROM comment c
                     WHERE c.post_id = p.post_id
-                      AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                    AND c.created_at >= NOW() - INTERVAL 48 HOUR
                 )
             )";
 
@@ -435,14 +471,14 @@ class Post
                         SELECT COUNT(*)
                         FROM post_like pl
                         WHERE pl.post_id = p.post_id
-                          AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                        AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
                     )
                     +
                     3 * (
                         SELECT COUNT(*)
                         FROM comment c
                         WHERE c.post_id = p.post_id
-                          AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                        AND c.created_at >= NOW() - INTERVAL 48 HOUR
                     )
                 ) DESC,
                 p.created_at DESC
@@ -505,7 +541,8 @@ class Post
         $sql = "
             SELECT COUNT(*)
             FROM post p
-            INNER JOIN users u ON u.user_id = p.user_id
+            INNER JOIN users u
+                ON u.user_id = p.user_id
         ";
 
         $conditions = [];
@@ -520,7 +557,14 @@ class Post
             )";
 
             $term = "%" . $search . "%";
-            array_push($params, $term, $term, $term, $term);
+
+            array_push(
+                $params,
+                $term,
+                $term,
+                $term,
+                $term
+            );
         }
 
         if ($topic !== "") {
@@ -534,13 +578,13 @@ class Post
                     SELECT 1
                     FROM post_like pl
                     WHERE pl.post_id = p.post_id
-                      AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
+                    AND pl.liked_at >= NOW() - INTERVAL 48 HOUR
                 )
                 OR EXISTS (
                     SELECT 1
                     FROM comment c
                     WHERE c.post_id = p.post_id
-                      AND c.created_at >= NOW() - INTERVAL 48 HOUR
+                    AND c.created_at >= NOW() - INTERVAL 48 HOUR
                 )
             )";
         }
@@ -554,5 +598,4 @@ class Post
 
         return (int) $stmt->fetchColumn();
     }
-  
 }

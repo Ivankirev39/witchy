@@ -8,19 +8,19 @@ class PostInteraction
     {
         $this->db = $db;
     }
-    
-     public function toggleLike(int $userId, int $postId): array
+
+    public function toggleLike(int $userId, int $postId): array
     {
         $this->db->beginTransaction();
 
         try {
-
             $stmt = $this->db->prepare("
                 SELECT post_id
                 FROM post
                 WHERE post_id = ?
                 FOR UPDATE
             ");
+
             $stmt->execute([$postId]);
 
             if ($stmt->fetchColumn() === false) {
@@ -32,6 +32,7 @@ class PostInteraction
                 FROM post_like
                 WHERE user_id = ? AND post_id = ?
             ");
+
             $stmt->execute([$userId, $postId]);
 
             $liked = $stmt->fetchColumn() !== false;
@@ -41,14 +42,18 @@ class PostInteraction
                     DELETE FROM post_like
                     WHERE user_id = ? AND post_id = ?
                 ");
+
                 $stmt->execute([$userId, $postId]);
+
                 $liked = false;
             } else {
                 $stmt = $this->db->prepare("
                     INSERT INTO post_like (user_id, post_id)
                     VALUES (?, ?)
                 ");
+
                 $stmt->execute([$userId, $postId]);
+
                 $liked = true;
             }
 
@@ -57,6 +62,7 @@ class PostInteraction
                 FROM post_like
                 WHERE post_id = ?
             ");
+
             $stmt->execute([$postId]);
 
             $likeCount = (int) $stmt->fetchColumn();
@@ -75,7 +81,8 @@ class PostInteraction
             throw $e;
         }
     }
-       public function toggleSave(int $userId, int $postId): bool
+
+    public function toggleSave(int $userId, int $postId): bool
     {
         $this->db->beginTransaction();
 
@@ -86,6 +93,7 @@ class PostInteraction
                 WHERE post_id = ?
                 FOR UPDATE
             ");
+
             $stmt->execute([$postId]);
 
             if ($stmt->fetchColumn() === false) {
@@ -97,6 +105,7 @@ class PostInteraction
                 FROM save
                 WHERE user_id = ? AND post_id = ?
             ");
+
             $stmt->execute([$userId, $postId]);
 
             if ($stmt->fetchColumn() !== false) {
@@ -104,14 +113,18 @@ class PostInteraction
                     DELETE FROM save
                     WHERE user_id = ? AND post_id = ?
                 ");
+
                 $stmt->execute([$userId, $postId]);
+
                 $saved = false;
             } else {
                 $stmt = $this->db->prepare("
                     INSERT INTO save (user_id, post_id)
                     VALUES (?, ?)
                 ");
+
                 $stmt->execute([$userId, $postId]);
+
                 $saved = true;
             }
 
@@ -126,12 +139,14 @@ class PostInteraction
             throw $e;
         }
     }
+
     public function removeLike(int $userId, int $postId): void
     {
         $stmt = $this->db->prepare("
             DELETE FROM post_like
             WHERE user_id = ? AND post_id = ?
         ");
+
         $stmt->execute([$userId, $postId]);
     }
 }
