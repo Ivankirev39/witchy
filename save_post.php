@@ -4,6 +4,7 @@ require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
+require_once __DIR__ . "/models/PostInteraction.php";
 
 $isAjax =
     isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&
@@ -40,10 +41,10 @@ if ($postId <= 0) {
 
 $connector = new \DataAccess\DB\DBConnector();
 $pdo = $connector->connectToDB();
-$postModel = new Post($pdo);
+$postInteraction = new PostInteraction($pdo);
 
 try {
-    $saved = $postModel->toggleSave($userId, $postId);
+    $saved = $postInteraction->toggleSave($userId, $postId);
 } catch (RuntimeException $e) {
     http_response_code(404);
 

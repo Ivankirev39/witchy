@@ -4,6 +4,7 @@ require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/includes/notifications.php";
+require_once __DIR__ . "/models/PostInteraction.php";
 
 // Only accept POST requests.
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -32,7 +33,9 @@ $pdo = $connector->connectToDB();
 
 // Pass the PDO connection to the Post model.
 $postModel = new Post($pdo);
-$likeData = $postModel->toggleLike($user_id, $post_id);
+$postInteraction = new PostInteraction($pdo);
+
+$likeData = $postInteraction->toggleLike($user_id, $post_id);
 
 $liked = $likeData["liked"];
 $likeCount = $likeData["like_count"];

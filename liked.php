@@ -3,10 +3,12 @@ require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/Post.php";
+require_once __DIR__ . "/models/PostInteraction.php";
 $pageTitle = "Liked Posts | Witchy";
 $pageCss = "liked.css";
 $user_id = (int) $_SESSION["user_id"];
 $postModel = new Post($conn);
+$postInteraction = new PostInteraction($conn);
 $topics = ["Spells", "Altars", "Tarot", "Herbs", "Crystals", "Books", "Artwork", "Occult Studies", "Others"];
 $sortOptions = [
     "newest_post" => "Newest posts",
@@ -28,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
     $post_id = (int) ($_POST["post_id"] ?? 0);
     if ($post_id > 0) {
-        $postModel->removeLike($user_id, $post_id);
+       $postInteraction->removeLike($user_id, $post_id);
     }
     $params = http_build_query(["sort" => $sort, "topic" => $topic]);
     header("Location: liked.php?" . $params);

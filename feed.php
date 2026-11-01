@@ -4,6 +4,7 @@ require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/models/Comment.php";
 require_once __DIR__ . "/includes/csrf.php";
+require_once __DIR__ . "/models/PostFeed.php";
 
 $pageTitle = "Home | Witchy";
 $user_id = (int) $_SESSION["user_id"];
@@ -11,7 +12,7 @@ $user_id = (int) $_SESSION["user_id"];
 $pdoConnector = new \DataAccess\DB\DBConnector();
 $pdo = $pdoConnector->connectToDB();
 
-$postModel = new Post($pdo);
+$postFeedModel = new PostFeed($pdo);
 $commentModel = new Comment($pdo);
 
 $feedMode = ($_GET["feed"] ?? "for_you") === "following"
@@ -20,7 +21,7 @@ $feedMode = ($_GET["feed"] ?? "for_you") === "following"
 
 $pageSize = 10;
 $page = max(1, (int) ($_GET["page"] ?? 1));
-$posts = $postModel->getFeedPosts(
+$posts = $postFeedModel->getFeedPosts(
     $user_id,
     $feedMode === "following",
     $pageSize + 1,
@@ -33,7 +34,7 @@ if ($hasNextPage) {
 }
 
 $postIds = array_column($posts, "post_id");
-$postMediaByPost = $postModel->getPostMediaForPosts($postIds);
+$postMediaByPost = $postFeedModel->getPostMediaForPosts($postIds);
 $commentsByPost = $commentModel->getCommentsForPosts($postIds, 5);
 
 require_once __DIR__ . "/includes/user_header.php";
