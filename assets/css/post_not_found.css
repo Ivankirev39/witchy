@@ -5,18 +5,20 @@
     justify-content: center;
     padding: 40px 20px;
 }
-
 .post-not-found-card {
     width: 100%;
     max-width: 500px;
     padding: 50px 40px;
     text-align: center;
-    background: #100e12;
+    background: var(--surface-soft);
     border: 1px solid #371446;
     border-radius: 16px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
 }
-
+.post-not-found-button:hover {
+    background: var(--brand-black);
+    transform: translateY(-1px);
+}
 .post-not-found-icon {
     width: 70px;
     height: 70px;
@@ -29,21 +31,43 @@
     color: #c6a4cf;
     font-size: 32px;
 }
-
 .post-not-found-card h1 {
     margin: 0 0 12px;
-    color: #ffffff;
+    color: var(--text-primary);
     font-size: 28px;
 }
-
 .post-not-found-card p {
     margin: 0 auto 30px;
     max-width: 380px;
-    color: #b8afb9;
+    color: var(--text-secondary);
     line-height: 1.6;
 }
-
 .post-not-found-button {
+    display: inline-block;
+    padding: 11px 22px;
+    border-radius: 8px;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.post-not-found-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+/* DARK MODE */
+html.dark-mode .post-not-found-card {
+    width: 100%;
+    max-width: 500px;
+    padding: 50px 40px;
+    text-align: center;
+    background: #100e12;
+    border: 1px solid #371446;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+}
+html.dark-mode .post-not-found-button {
     display: inline-block;
     padding: 11px 22px;
     border-radius: 8px;
@@ -52,9 +76,4 @@
     font-weight: 600;
     text-decoration: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.post-not-found-button:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
 }
