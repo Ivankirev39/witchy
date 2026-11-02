@@ -680,6 +680,22 @@ html.dark-mode .profile-pin-warning {
     color: #f1e8dc;
 }
 
+.profile-back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.profile-back-button:hover {
+    color: var(--focus);
+}
+
 
 /* DARK MODE */
 

@@ -138,6 +138,27 @@ class User
 
         return $user ?: null;
     }
+
+    // Search for users by username
+    public function searchUsers(string $search, int $currentUserId): array
+    {
+        $sql = "
+            SELECT user_id, username, profile_image
+            FROM users
+            WHERE username LIKE ?
+            AND user_id != ?
+            ORDER BY username ASC
+            LIMIT 12
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            "%" . $search . "%",
+            $currentUserId
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     
     // Delete an account and its related data
     public function deleteAccount(int $userId, string $password): ?array

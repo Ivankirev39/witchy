@@ -77,6 +77,32 @@ require_once __DIR__ . "/includes/user_header.php";
 
 <section class="profile-page">
 
+    <?php
+    $isOwnProfile = ($profile_id === (int) $user_id);
+
+    if (!$isOwnProfile):
+        $returnUrl = $_GET["return"] ?? "";
+        $backUrl = BASE_URL . "explore.php";
+
+        $parsedUrl = parse_url($returnUrl);
+
+        if (
+            !empty($parsedUrl["path"]) &&
+            str_starts_with($parsedUrl["path"], "/witchy/") &&
+            !isset($parsedUrl["host"])
+        ) {
+            $backUrl = $returnUrl;
+        }
+    ?>
+
+        <a
+            href="<?= htmlspecialchars($backUrl, ENT_QUOTES, "UTF-8") ?>"
+            class="profile-back-button">
+            &larr; Back to results
+        </a>
+
+    <?php endif; ?>
+
     <div class="profile-cover">
         <?php if (!empty($user["cover_image"])): ?>
             <img

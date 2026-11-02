@@ -772,6 +772,118 @@ html.dark-mode .explore-cards-engagement .engagement-count {
 }
 
 /* --------------------------------------------
+   PEOPLE SEARCH RESULTS
+   -------------------------------------------- */
+
+   .explore-people {
+    margin: 30px 0 36px;
+}
+
+.explore-section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.explore-section-heading h2 {
+    margin: 0;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 400;
+}
+
+.explore-section-heading > span {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.explore-people-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 14px;
+}
+
+.explore-person-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+    padding: 13px 15px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    transition: transform 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.explore-person-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--focus);
+    box-shadow: 0 7px 18px rgba(30, 20, 35, 0.07);
+}
+
+.explore-person-card img {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--brand-lavender);
+}
+
+.explore-person-card span {
+    overflow: hidden;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.explore-people-empty {
+    margin: 0;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+html.dark-mode .explore-person-card {
+    background: #29242f;
+    border-color: #403747;
+    color: #e8dfea;
+}
+
+html.dark-mode .explore-person-card:hover {
+    border-color: #806b84;
+}
+
+html.dark-mode .explore-people-empty {
+    background: #29242f;
+    border-color: #403747;
+    color: #c8bdcc;
+}
+
+@media (max-width: 650px) {
+    .explore-people {
+        margin: 24px 0 30px;
+    }
+
+    .explore-people-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+/* --------------------------------------------
    16. DARK MODE
    -------------------------------------------- */
 

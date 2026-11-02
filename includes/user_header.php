@@ -5,6 +5,15 @@ require_once __DIR__ . "/csrf.php";
 require_once __DIR__ . "/../config/db.php";
 
 $currentPage = basename($_SERVER["PHP_SELF"]);
+$isOwnProfile = false;
+
+if ($currentPage === "profile.php") {
+    $viewedProfileId = (int) ($_GET["id"] ?? $_SESSION["user_id"] ?? 0);
+    $loggedInUserId = (int) ($_SESSION["user_id"] ?? 0);
+
+    $isOwnProfile = ($viewedProfileId === $loggedInUserId);
+}
+
 $headerUser = null;
 $unreadNotificationCount = 0;
 
@@ -122,7 +131,7 @@ $profileImageUrl = BASE_URL . ltrim($profileImage, "/");
             <a href="<?= BASE_URL ?>explore.php" class="<?= $currentPage === "explore.php" ? "active" : "" ?>">Explore</a>
             <a href="<?= BASE_URL ?>rules.php" class="<?= $currentPage === "rules.php" ? "active" : "" ?>">Rules</a>
             <a href="<?= BASE_URL ?>saved.php" class="<?= $currentPage === "saved.php" ? "active" : "" ?>">Saved</a>
-            <a href="<?= BASE_URL ?>profile.php" class="<?= $currentPage === "profile.php" ? "active" : "" ?>">Profile</a>
+            <a href="<?= BASE_URL ?>profile.php" class="<?= $isOwnProfile ? "active" : "" ?>">Profile</a>
 
             <?php if (($_SESSION["rank"] ?? "") === "admin"): ?>
                 <a href="<?= BASE_URL ?>admin/index.php">Admin Dashboard</a>

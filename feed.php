@@ -8,6 +8,7 @@ require_once __DIR__ . "/models/PostFeed.php";
 
 $pageTitle = "Home | Witchy";
 $user_id = (int) $_SESSION["user_id"];
+$returnUrl = $_SERVER["REQUEST_URI"];
 
 $pdoConnector = new \DataAccess\DB\DBConnector();
 $pdo = $pdoConnector->connectToDB();
@@ -85,7 +86,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
                 <div class="post-author">
                     <a
-                        href="profile.php?id=<?= (int) $post["user_id"] ?>"
+                        href="profile.php?id=<?= (int) $post["user_id"] ?>&return=<?= urlencode($returnUrl) ?>"
                         class="post-author-avatar-link">
                         <img
                             src="<?= htmlspecialchars(
@@ -101,7 +102,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     <div>
                         <strong>
                             <a
-                                href="profile.php?id=<?= (int) $post["user_id"] ?>"
+                                href="profile.php?id=<?= (int) $post["user_id"] ?>&return=<?= urlencode($returnUrl) ?>"
                                 class="post-author-link">
                                 <?= htmlspecialchars($post["author_username"], ENT_QUOTES, "UTF-8") ?>
                             </a>
@@ -258,7 +259,7 @@ require_once __DIR__ . "/includes/user_header.php";
                             <div class="comment">
                                 <strong>
                                     <a
-                                        href="profile.php?id=<?= (int) $comment["user_id"] ?>"
+                                        href="profile.php?id=<?= (int) $comment["user_id"] ?>&return=<?= urlencode($returnUrl) ?>"
                                         class="comment-author-link">
                                         <?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>
                                     </a>
