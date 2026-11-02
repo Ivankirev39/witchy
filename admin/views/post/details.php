@@ -33,7 +33,7 @@
         <strong>Author:</strong>
 
         <?php if (!empty($post["user_id"])): ?>
-            <a href="/witchy/admin/view_user.php?id=<?= (int) $post["user_id"] ?>">
+            <a href="<?= BASE_URL ?>admin/view_user.php?id=<?= (int) $post["user_id"] ?>">
                 <?= htmlspecialchars($post["username"] ?? "Unknown", ENT_QUOTES, "UTF-8") ?>
             </a>
         <?php else: ?>
@@ -50,7 +50,7 @@
             <h4>Main image</h4>
 
             <img
-                src="/witchy/uploads/posts/<?= rawurlencode(basename($post["image"])) ?>"
+                src="<?= BASE_URL ?>uploads/posts/<?= rawurlencode(basename($post["image"])) ?>"
                 alt="Post image"
                 loading="lazy"
             >
@@ -65,7 +65,7 @@
                 <?php
                 $filename = basename($item["file"] ?? "");
                 $mediaType = strtolower($item["media_type"] ?? "");
-                $mediaPath = "/witchy/uploads/posts/" . rawurlencode($filename);
+                $mediaPath = BASE_URL . "uploads/posts/" . rawurlencode($filename);
                 ?>
 
                 <?php if ($filename !== "" && $mediaType === "image"): ?>

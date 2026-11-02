@@ -1,3 +1,4 @@
+
 <?php
 
 function csrf_token()
@@ -8,7 +9,6 @@ function csrf_token()
 
     return $_SESSION["csrf_token"];
 }
-
 
 function csrf_valid($token)
 {

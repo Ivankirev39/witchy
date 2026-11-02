@@ -35,7 +35,7 @@
         <?php
         $filename = basename($comment["media_file"]);
         $mediaType = strtolower($comment["media_type"] ?? "");
-        $mediaPath = "/witchy/uploads/comments/" . rawurlencode($filename);
+        $mediaPath = BASE_URL . "uploads/comments/" . rawurlencode($filename);
         ?>
 
         <div class="admin-post-media">

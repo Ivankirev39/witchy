@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . "/../config/bootstrap.php";
+
 $pageTitle = $pageTitle ?? "Witchy";
 $currentPage = basename($_SERVER["PHP_SELF"]);
 $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
@@ -10,44 +12,26 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>
-        <?= htmlspecialchars($pageTitle, ENT_QUOTES, "UTF-8") ?>
-    </title>
+    <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, "UTF-8") ?></title>
 
     <!-- MAIN STYLES -->
-    <link
-        rel="stylesheet"
-        href="/witchy/assets/css/style.css"
-    >
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css">
 
     <!-- PUBLIC HEADER STYLES -->
-    <link
-        rel="stylesheet"
-        href="/witchy/assets/css/header.css"
-    >
+    <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/header.css">
 
     <!-- PAGE-SPECIFIC STYLES -->
     <?php if (!empty($pageCss)): ?>
         <link
             rel="stylesheet"
-            href="/witchy/assets/css/<?= htmlspecialchars(
-                $pageCss,
-                ENT_QUOTES,
-                "UTF-8"
-            ) ?>"
+            href="<?= BASE_URL ?>assets/css/<?= htmlspecialchars($pageCss, ENT_QUOTES, "UTF-8") ?>"
         >
     <?php endif; ?>
 
     <!-- MOBILE NAVIGATION -->
-    <script
-        src="/witchy/assets/js/mobile-nav.js"
-        defer
-    ></script>
+    <script src="<?= BASE_URL ?>assets/js/mobile-nav.js" defer></script>
 
 </head>
 
@@ -57,18 +41,18 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
 
     <!-- LOGO -->
     <a
-        href="/witchy/index.php"
+        href="<?= BASE_URL ?>index.php"
         class="site-logo"
         aria-label="Witchy home"
     >
         <img
-            src="/witchy/images/horizontal_black.svg"
+            src="<?= BASE_URL ?>images/horizontal_black.svg"
             alt="Witchy"
             class="logo-light"
         >
 
         <img
-            src="/witchy/images/horizontal_white.svg"
+            src="<?= BASE_URL ?>images/horizontal_white.svg"
             alt=""
             class="logo-dark"
             aria-hidden="true"
@@ -76,17 +60,17 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
     </a>
 
     <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
-        <a href="/witchy/index.php"
-        class="<?= $currentPage === 'index.php' ? 'active' : '' ?>">Home</a>
+        <a href="<?= BASE_URL ?>index.php"
+           class="<?= $currentPage === 'index.php' ? 'active' : '' ?>">Home</a>
 
-        <a href="/witchy/about.php"
-        class="<?= $currentPage === 'about.php' ? 'active' : '' ?>">About</a>
+        <a href="<?= BASE_URL ?>about.php"
+           class="<?= $currentPage === 'about.php' ? 'active' : '' ?>">About</a>
 
-        <a href="/witchy/public-explore.php"
-        class="<?= $currentPage === 'public-explore.php' ? 'active' : '' ?>">Explore</a>
+        <a href="<?= BASE_URL ?>public-explore.php"
+           class="<?= $currentPage === 'public-explore.php' ? 'active' : '' ?>">Explore</a>
 
-        <a href="/witchy/community.php"
-        class="<?= $currentPage === 'community.php' ? 'active' : '' ?>">Community</a>
+        <a href="<?= BASE_URL ?>community.php"
+           class="<?= $currentPage === 'community.php' ? 'active' : '' ?>">Community</a>
     </nav>
 
     <!-- HEADER ACTIONS -->
@@ -104,12 +88,9 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
         </button>
 
         <!-- LOG IN -->
-        <?php if (
-            !$isLoggedIn &&
-            $currentPage !== "login.php"
-        ): ?>
+        <?php if (!$isLoggedIn && $currentPage !== "login.php"): ?>
             <a
-                href="/witchy/login.php"
+                href="<?= BASE_URL ?>login.php"
                 class="button button-secondary"
             >
                 Log in
@@ -117,12 +98,9 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
         <?php endif; ?>
 
         <!-- REGISTER -->
-        <?php if (
-            !$isLoggedIn &&
-            $currentPage !== "register.php"
-        ): ?>
+        <?php if (!$isLoggedIn && $currentPage !== "register.php"): ?>
             <a
-                href="/witchy/register.php"
+                href="<?= BASE_URL ?>register.php"
                 class="button button-primary"
             >
                 Join Witchy

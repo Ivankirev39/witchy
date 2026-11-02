@@ -49,7 +49,7 @@
 
             <form
                 method="POST"
-                action="/witchy/admin/delete_comment.php"
+                action="<?= BASE_URL ?>admin/delete_comment.php"
                 onsubmit="return confirm('Are you sure you want to permanently delete this comment? This cannot be undone.');"
             >
 

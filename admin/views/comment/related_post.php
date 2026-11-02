@@ -1,3 +1,4 @@
+
 <section class="admin-content-panel">
 
     <header class="admin-content-panel-header">
@@ -22,7 +23,7 @@
         </p>
 
         <?php
-        $relatedPostUrl = "/witchy/admin/view_post.php?id="
+        $relatedPostUrl = BASE_URL . "admin/view_post.php?id="
             . (int) $comment["post_id"];
 
         if ($returnFrom === "user" && $returnUserId !== null) {

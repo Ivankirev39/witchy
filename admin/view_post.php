@@ -31,11 +31,11 @@ $statusMessage = "";
 $returnFrom = $_GET["from"] ?? "";
 $returnUserId = filter_input(INPUT_GET, "return_user_id", FILTER_VALIDATE_INT);
 
-$returnUrl = "/witchy/admin/content.php?tab=posts";
+$returnUrl = BASE_URL . "admin/content.php?tab=posts";
 
 if ($returnFrom === "user" && $returnUserId && $returnUserId > 0) {
     $returnUserId = (int) $returnUserId;
-    $returnUrl = "/witchy/admin/view_user.php?id=" . $returnUserId;
+    $returnUrl = BASE_URL . "admin/view_user.php?id=" . $returnUserId;
 } else {
     $returnFrom = "";
     $returnUserId = null;
@@ -93,7 +93,7 @@ if (
                     "post_id" => $postId
                 ]);
 
-                $redirectUrl = "/witchy/admin/view_post.php?id=" . (int) $postId;
+                $redirectUrl = BASE_URL . "admin/view_post.php?id=" . (int) $postId;
 
                 if ($returnFrom === "user" && $returnUserId) {
                     $redirectUrl .= "&from=user&return_user_id=" . (int) $returnUserId;

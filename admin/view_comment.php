@@ -19,11 +19,11 @@ $statusMessage = "";
 $returnFrom = $_GET["from"] ?? "";
 $returnUserId = filter_input(INPUT_GET, "return_user_id", FILTER_VALIDATE_INT);
 
-$returnUrl = "/witchy/admin/content.php?tab=comments";
+$returnUrl = BASE_URL . "admin/content.php?tab=comments";
 
 if ($returnFrom === "user" && $returnUserId && $returnUserId > 0) {
     $returnUserId = (int) $returnUserId;
-    $returnUrl = "/witchy/admin/view_user.php?id=" . $returnUserId;
+    $returnUrl = BASE_URL . "admin/view_user.php?id=" . $returnUserId;
 } else {
     $returnFrom = "";
     $returnUserId = null;

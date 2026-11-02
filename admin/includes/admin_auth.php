@@ -1,10 +1,13 @@
 <?php
+
+require_once __DIR__ . "/../../config/bootstrap.php";
 require_once __DIR__ . "/../../includes/session.php";
 
 if (
     !isset($_SESSION["user_id"]) ||
-    ($_SESSION["rank"] ?? "") !== "admin"
+    !isset($_SESSION["rank"]) ||
+    $_SESSION["rank"] !== "admin"
 ) {
-    header("Location: /witchy/admin/login.php");
+    header("Location: " . BASE_URL . "admin/login.php");
     exit;
 }

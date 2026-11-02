@@ -16,7 +16,7 @@
             </span>
 
             <?php if (!empty($post["user_id"])): ?>
-                <a href="/witchy/admin/view_user.php?id=<?= (int) $post["user_id"] ?>">
+                <a href="<?= BASE_URL ?>admin/view_user.php?id=<?= (int) $post["user_id"] ?>">
                     Review member
                 </a>
             <?php endif; ?>
@@ -63,7 +63,7 @@
 
             <form
                 method="POST"
-                action="/witchy/admin/view_post.php?id=<?= (int) $post["post_id"] ?><?= $returnFrom === "user" && $returnUserId ? "&amp;from=user&amp;return_user_id=" . (int) $returnUserId : "" ?>"
+                action="<?= BASE_URL ?>admin/view_post.php?id=<?= (int) $post["post_id"] ?><?= $returnFrom === "user" && $returnUserId ? "&amp;from=user&amp;return_user_id=" . (int) $returnUserId : "" ?>"
                 onsubmit="return confirm('Are you sure you want to <?= $isPinned ? "unpin" : "pin" ?> this post?');"
             >
 
@@ -94,7 +94,7 @@
 
             <form
                 method="POST"
-                action="/witchy/admin/delete_post.php"
+                action="<?= BASE_URL ?>admin/delete_post.php"
                 onsubmit="return confirm('Are you sure you want to permanently delete this post and its comments? This cannot be undone.');"
             >
 
