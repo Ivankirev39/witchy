@@ -4,8 +4,9 @@
 class LoginRateLimiter
 {
     private PDO $db;
-    private int $maxAttempts = 5;
-    private int $windowMinutes = 15;
+
+    private int $maxLoginAttempts = 5;
+    private int $maxIpAttempts = 20;
 
     public function __construct(PDO $db)
     {
@@ -24,34 +25,47 @@ class LoginRateLimiter
     {
         [$loginKey, $ipKey] = $this->getKeys($login, $ip);
 
-        $sql = "
-            SELECT COUNT(*)
-            FROM login_attempt
-            WHERE login_key = ?
-              AND ip_key = ?
-              AND attempted_at >= DATE_SUB(
-                  UTC_TIMESTAMP(),
-                  INTERVAL 15 MINUTE
-              )
-        ";
+        // Count all failed attempts from this IP,
+        // including attempts using different usernames.
+        $stmt = $this->db->prepare("
+            SELECT
+                COUNT(*) AS ip_attempts,
 
-        $stmt = $this->db->prepare($sql);
+                SUM(
+                    CASE WHEN login_key = ?
+                    THEN 1 ELSE 0 END
+                ) AS login_attempts
+
+            FROM login_attempt
+
+            WHERE ip_key = ?
+              AND attempted_at >=
+                  UTC_TIMESTAMP() - INTERVAL 15 MINUTE
+        ");
+
         $stmt->execute([$loginKey, $ipKey]);
 
-        return (int) $stmt->fetchColumn() >= $this->maxAttempts;
+        $attempts = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $ipAttempts = (int) ($attempts["ip_attempts"] ?? 0);
+        $loginAttempts = (int) ($attempts["login_attempts"] ?? 0);
+
+        return (
+            $loginAttempts >= $this->maxLoginAttempts ||
+            $ipAttempts >= $this->maxIpAttempts
+        );
     }
 
     public function recordFailure(string $login, string $ip): void
     {
         [$loginKey, $ipKey] = $this->getKeys($login, $ip);
 
-        $sql = "
+        $stmt = $this->db->prepare("
             INSERT INTO login_attempt
                 (login_key, ip_key, attempted_at)
             VALUES (?, ?, UTC_TIMESTAMP())
-        ";
+        ");
 
-        $stmt = $this->db->prepare($sql);
         $stmt->execute([$loginKey, $ipKey]);
     }
 
@@ -59,13 +73,14 @@ class LoginRateLimiter
     {
         [$loginKey, $ipKey] = $this->getKeys($login, $ip);
 
-        $sql = "
+        // Clear only the successful login's failures.
+        // Other failed attempts from this IP remain.
+        $stmt = $this->db->prepare("
             DELETE FROM login_attempt
             WHERE login_key = ?
               AND ip_key = ?
-        ";
+        ");
 
-        $stmt = $this->db->prepare($sql);
         $stmt->execute([$loginKey, $ipKey]);
     }
 }

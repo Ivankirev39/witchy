@@ -394,7 +394,10 @@ CREATE TABLE login_attempt (
         DEFAULT CURRENT_TIMESTAMP,
 
     INDEX idx_login_ip_time
-        (login_key, ip_key, attempted_at),
+    (login_key, ip_key, attempted_at),
+
+    INDEX idx_login_attempt_ip_time
+    (ip_key, attempted_at),
 
     INDEX idx_attempted_at (attempted_at)
 
