@@ -2,6 +2,9 @@
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/models/ContactRateLimiter.php";
+
+$contactRateLimiter = new ContactRateLimiter($conn);
 
 $pageTitle = "Contact Support | Witchy";
 $pageCss = "contact.css";
@@ -56,23 +59,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (empty($errors)) {
         try {
-            $stmt = $conn->prepare("
-                INSERT INTO support_request
-                (user_id, name, email, category, subject, message)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ");
-            $stmt->execute([
+            $submitted = $contactRateLimiter->submitContactRequest(
                 $userId,
                 $name,
                 $email,
                 $category,
                 $subject,
-                $message
-            ]);
-            $_SESSION["contact_success"] = true;
-            header("Location: contact.php");
-            exit;
-        } catch (PDOException $e) {
+                $message,
+                $_SERVER["REMOTE_ADDR"] ?? ""
+            );
+
+            if (!$submitted) {
+                $errors[] = "You've sent too many messages. Please try again in 15 minutes.";
+            } else {
+                $_SESSION["contact_success"] = true;
+                header("Location: contact.php");
+                exit;
+            }
+        } catch (Throwable $e) {
             error_log("Support request failed: " . $e->getMessage());
             $errors[] = "Something went wrong. Please try again later.";
         }

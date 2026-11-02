@@ -2,6 +2,9 @@
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/models/ContactRateLimiter.php";
+
+$contactRateLimiter = new ContactRateLimiter($conn);
 
 $pageTitle = "Contact Support | Witchy";
 $pageCss = "contact.css";
@@ -35,8 +38,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Read only string values from the form.
     $fields = [
-        "name", "email", "category",
-        "subject", "message", "website"
+        "name",
+        "email",
+        "category",
+        "subject",
+        "message",
+        "website"
     ];
 
     $input = [];
@@ -113,29 +120,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (empty($errors)) {
 
         try {
-            $stmt = $conn->prepare("
-                INSERT INTO support_request
-                    (user_id, name, email, category, subject, message)
-                VALUES
-                    (NULL, ?, ?, ?, ?, ?)
-            ");
-
-            $stmt->execute([
+            $submitted = $contactRateLimiter->submitContactRequest(
+                null,
                 $name,
                 $email,
                 $category,
                 $subject,
-                $message
-            ]);
+                $message,
+                $_SERVER["REMOTE_ADDR"] ?? ""
+            );
 
-            $_SESSION["public_contact_last_sent"] = time();
-            $_SESSION["public_contact_success"] = true;
+            if (!$submitted) {
+                $errors[] = "You've sent too many messages. Please try again in 15 minutes.";
+            } else {
+                $_SESSION["public_contact_last_sent"] = time();
+                $_SESSION["public_contact_success"] = true;
 
-            // Avoid duplicate submissions on refresh.
-            header("Location: public-contact.php", true, 303);
-            exit;
-
-        } catch (PDOException $e) {
+                // Avoid duplicate submissions on refresh.
+                header("Location: public-contact.php", true, 303);
+                exit;
+            }
+        } catch (Throwable $e) {
 
             error_log(
                 "Public contact form error: " . $e->getMessage()
@@ -228,19 +233,17 @@ require_once __DIR__ . "/includes/public-header.php";
             <form
                 action="public-contact.php"
                 method="POST"
-                class="contact-form"
-            >
+                class="contact-form">
 
                 <!-- CSRF TOKEN -->
                 <input
                     type="hidden"
                     name="csrf_token"
                     value="<?= htmlspecialchars(
-                        csrf_token(),
-                        ENT_QUOTES,
-                        "UTF-8"
-                    ) ?>"
-                >
+                                csrf_token(),
+                                ENT_QUOTES,
+                                "UTF-8"
+                            ) ?>">
 
                 <!-- BOT HONEYPOT -->
                 <div class="contact-honeypot" aria-hidden="true">
@@ -254,8 +257,7 @@ require_once __DIR__ . "/includes/public-header.php";
                         id="contact-website"
                         name="website"
                         tabindex="-1"
-                        autocomplete="off"
-                    >
+                        autocomplete="off">
 
                 </div>
 
@@ -273,15 +275,14 @@ require_once __DIR__ . "/includes/public-header.php";
                             id="contact-name"
                             name="name"
                             value="<?= htmlspecialchars(
-                                $name,
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>"
+                                        $name,
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>"
                             placeholder="Your name"
                             maxlength="100"
                             autocomplete="name"
-                            required
-                        >
+                            required>
 
                     </div>
 
@@ -296,15 +297,14 @@ require_once __DIR__ . "/includes/public-header.php";
                             id="contact-email"
                             name="email"
                             value="<?= htmlspecialchars(
-                                $email,
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>"
+                                        $email,
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>"
                             placeholder="you@example.com"
                             maxlength="254"
                             autocomplete="email"
-                            required
-                        >
+                            required>
 
                     </div>
 
@@ -320,14 +320,12 @@ require_once __DIR__ . "/includes/public-header.php";
                     <select
                         id="contact-category"
                         name="category"
-                        required
-                    >
+                        required>
 
                         <option
                             value=""
                             disabled
-                            <?= $category === "" ? "selected" : "" ?>
-                        >
+                            <?= $category === "" ? "selected" : "" ?>>
                             Select a topic
                         </option>
 
@@ -335,12 +333,11 @@ require_once __DIR__ . "/includes/public-header.php";
 
                             <option
                                 value="<?= htmlspecialchars(
-                                    $value,
-                                    ENT_QUOTES,
-                                    "UTF-8"
-                                ) ?>"
-                                <?= $category === $value ? "selected" : "" ?>
-                            >
+                                            $value,
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        ) ?>"
+                                <?= $category === $value ? "selected" : "" ?>>
                                 <?= htmlspecialchars(
                                     $label,
                                     ENT_QUOTES,
@@ -366,14 +363,13 @@ require_once __DIR__ . "/includes/public-header.php";
                         id="contact-subject"
                         name="subject"
                         value="<?= htmlspecialchars(
-                            $subject,
-                            ENT_QUOTES,
-                            "UTF-8"
-                        ) ?>"
+                                    $subject,
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>"
                         placeholder="Briefly describe your question or issue"
                         maxlength="150"
-                        required
-                    >
+                        required>
 
                 </div>
 
@@ -390,12 +386,11 @@ require_once __DIR__ . "/includes/public-header.php";
                         rows="7"
                         maxlength="5000"
                         placeholder="Tell us a little more about what you need help with..."
-                        required
-                    ><?= htmlspecialchars(
-                        $message,
-                        ENT_QUOTES,
-                        "UTF-8"
-                    ) ?></textarea>
+                        required><?= htmlspecialchars(
+                                        $message,
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?></textarea>
 
                     <span class="contact-field-hint">
                         Please don't include passwords or other
