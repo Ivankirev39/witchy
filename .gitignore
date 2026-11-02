@@ -1,7 +1,7 @@
-
 # Database credentials
 /config/db.php
 /config/constants.php
+/config/constants.production.php
 
 # Environment secrets
 .env
