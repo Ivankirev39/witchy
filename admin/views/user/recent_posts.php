@@ -40,5 +40,6 @@
             </tbody>
         </table>
     </div>
+    </section>
 
 <?php endif; ?>
