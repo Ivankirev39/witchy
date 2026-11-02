@@ -138,6 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 }
+}
 
 $pageTitle = "Register | Witchy";
 require_once __DIR__ . "/includes/public-header.php";
