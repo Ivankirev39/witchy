@@ -120,7 +120,18 @@ if (isset($_SESSION["user_id"])) {
                     <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
                     <a href="/witchy/help.php" class="topbar-icon" aria-label="Help" title="Help">ⓘ</a>
                     <a href="/witchy/notifications.php" class="topbar-icon topbar-notification-link" aria-label="Notifications" title="Notifications">
-                        🕭
+                        <svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24"
+     fill="none"
+     stroke="currentColor"
+     stroke-width="1.3"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+
+    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/>
+    <path d="M10 21h4"/>
+
+</svg>
                         <?php if ($unreadNotificationCount > 0): ?>
                             <span class="notification-dot" aria-hidden="true"></span>
                         <?php endif; ?>

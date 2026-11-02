@@ -678,6 +678,12 @@ html.dark-mode .topbar-profile {
     text-decoration: none;
 }
 
+.topbar-icon svg {
+    width: 25px;
+    height: 25px;
+    display: block;
+}
+
 .topbar-notification-link {
     position: relative;
 }
