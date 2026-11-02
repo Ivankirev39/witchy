@@ -3,6 +3,7 @@ require_once __DIR__ . "/../includes/session.php";
 require_once __DIR__ . "/../includes/csrf.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../models/User.php";
+require_once __DIR__ . "/../models/LoginRateLimiter.php";
 
 if (
     isset($_SESSION["user_id"]) &&
@@ -39,28 +40,37 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             try {
                 $userModel = new User($conn);
-                $user = $userModel->findByLogin($login);
+                $limiter = new LoginRateLimiter($conn);
+                $ip = $_SERVER["REMOTE_ADDR"] ?? "";
 
-                if (
-                    !$user ||
-                    !password_verify($password, $user["password"])
-                ) {
-                    $error = "Incorrect username/email or password.";
-                } elseif (($user["rank"] ?? "") !== "admin") {
-                    $error = "You do not have administrator access.";
-                } elseif (
-                    $userModel->isBanned((int) $user["user_id"])
-                ) {
-                    $error = "This account is currently suspended.";
+                if ($limiter->isLimited($login, $ip)) {
+                    $error = "Too many login attempts. Please try again in 15 minutes.";
                 } else {
-                    session_regenerate_id(true);
+                    $user = $userModel->findByLogin($login);
 
-                    $_SESSION["user_id"] = (int) $user["user_id"];
-                    $_SESSION["username"] = $user["username"];
-                    $_SESSION["rank"] = $user["rank"];
+                    if (
+                        !$user ||
+                        !password_verify($password, $user["password"])
+                    ) {
+                        $limiter->recordFailure($login, $ip);
+                        $error = "Incorrect username/email or password.";
+                    } elseif (($user["rank"] ?? "") !== "admin") {
+                        $limiter->recordFailure($login, $ip);
+                        $error = "Incorrect username/email or password.";
+                    } elseif ($userModel->isBanned((int) $user["user_id"])) {
+                        $error = "This account is currently suspended.";
+                    } else {
+                        $limiter->clearAttempts($login, $ip);
 
-                    header("Location: index.php");
-                    exit;
+                        session_regenerate_id(true);
+
+                        $_SESSION["user_id"] = (int) $user["user_id"];
+                        $_SESSION["username"] = $user["username"];
+                        $_SESSION["rank"] = $user["rank"];
+
+                        header("Location: index.php");
+                        exit;
+                    }
                 }
             } catch (Throwable $e) {
                 error_log($e->getMessage());
@@ -70,6 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
