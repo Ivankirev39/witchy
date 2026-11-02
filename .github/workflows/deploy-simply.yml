@@ -1,0 +1,68 @@
+name: Deploy WITCHY to Simply.com
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview changes without uploading"
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: witchy-production-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/production'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout production branch
+        uses: actions/checkout@v4
+
+      - name: Prepare deployment files
+        shell: bash
+        run: |
+          mkdir -p deployment
+          git archive HEAD | tar -x -C deployment
+
+          rm -rf deployment/.github
+          rm -rf deployment/db
+          rm -f deployment/README.md
+          rm -f deployment/.gitignore
+
+          test -f deployment/index.php
+          test -f deployment/.htaccess
+          test -f deployment/uploads/.htaccess
+          test ! -f deployment/config/constants.php
+          test ! -f deployment/config/db.php
+
+      - name: Deploy via secure FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.4.0
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          security: strict
+          local-dir: ./deployment/
+          server-dir: ${{ vars.FTP_SERVER_DIR }}
+          dry-run: true
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            config/db.php
+            config/constants.php
+            config/constants.production.php
+            uploads/posts/**
+            uploads/comments/**
+            uploads/profiles/**
+            **/*.log
