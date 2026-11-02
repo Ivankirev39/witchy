@@ -429,7 +429,7 @@ require_once __DIR__ . "/includes/public-header.php";
                     the answer you're looking for in our Help Center.
                 </p>
 
-                <a href="public-help.php" class="contact-info-link">
+                <a href="public_help.php" class="contact-info-link">
                     <span>Help &amp; FAQ</span>
                     <span aria-hidden="true">→</span>
                 </a>
