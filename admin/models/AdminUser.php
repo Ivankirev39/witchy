@@ -18,7 +18,7 @@ class AdminUser
                 username,
                 email,
                 birthdate,
-                rank,
+                `rank`,
                 bio,
                 profile_image,
                 cover_image

@@ -13,7 +13,7 @@ class User
     public function findByLogin(string $login): ?array
     {
         $sql = "
-            SELECT user_id, username, password, rank
+            SELECT user_id, username, password, `rank` 
             FROM users
             WHERE email = ? OR username = ?
             LIMIT 1
@@ -47,7 +47,7 @@ class User
     public function createUser(string $username, string $email, string $password): int
     {
         $sql = "
-            INSERT INTO users (username, email, password, rank)
+            INSERT INTO users (username, email, password, `rank`)
             VALUES (?, ?, ?, ?)
         ";
 
@@ -126,7 +126,7 @@ class User
     public function getPublicProfile(int $userId): ?array
     {
         $sql = "
-            SELECT username, rank, bio, profile_image, cover_image
+            SELECT username, `rank`, bio, profile_image, cover_image
             FROM users
             WHERE user_id = ?
         ";

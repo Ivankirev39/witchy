@@ -46,7 +46,7 @@ try {
         SELECT
             user_id,
             username,
-            rank
+            `rank`
         FROM users
     ";
 
