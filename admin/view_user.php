@@ -144,7 +144,7 @@ if (!$userId || $userId < 1) {
                 }
 
                 header(
-                    "Location: view_user.php?id=" . $userId . "&status=banned"
+                    "Location: " . BASE_URL . "admin/view_user.php?id=" . $userId . "&status=banned"
                 );
                 exit;
 
@@ -191,7 +191,7 @@ if (!$userId || $userId < 1) {
                 }
 
                 header(
-                    "Location: view_user.php?id=" . $userId . "&status=unbanned"
+                    "Location: " . BASE_URL . "admin/view_user.php?id=" . $userId . "&status=unbanned"
                 );
                 exit;
 
@@ -238,7 +238,7 @@ require_once __DIR__ . "/includes/admin_header.php";
     </header>
 
     <p class="admin-user-back-link">
-        <a href="/witchy/admin/users.php">&larr; Back to users</a>
+        <a href="<?= BASE_URL ?>admin/users.php">&larr; Back to users</a>
     </p>
 
     <?php if ($successMessage !== ""): ?>
@@ -266,6 +266,6 @@ require_once __DIR__ . "/includes/admin_header.php";
 
 </section>
 
-<script src="js/view_user.js" defer></script>
+<script src="<?= BASE_URL ?>admin/js/view_user.js" defer></script>
 
 <?php require_once __DIR__ . "/includes/admin_footer.php"; ?>

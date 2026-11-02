@@ -1,9 +1,10 @@
+
 <section class="admin-content-panel admin-user-profile-card">
 
 <div class="admin-user-cover">
     <?php if (!empty($user["cover_image"])): ?>
         <img
-            src="/witchy/uploads/profiles/<?= rawurlencode(basename($user["cover_image"])) ?>"
+            src="<?= BASE_URL ?>uploads/profiles/<?= rawurlencode(basename($user["cover_image"])) ?>"
             alt="User cover image"
         >
     <?php else: ?>
@@ -18,7 +19,7 @@
         <div class="admin-user-avatar">
             <?php if (!empty($user["profile_image"])): ?>
                 <img
-                    src="/witchy/uploads/profiles/<?= rawurlencode(basename($user["profile_image"])) ?>"
+                    src="<?= BASE_URL ?>uploads/profiles/<?= rawurlencode(basename($user["profile_image"])) ?>"
                     alt="Profile picture of <?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>"
                 >
             <?php else: ?>

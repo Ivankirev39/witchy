@@ -45,7 +45,7 @@
 
             <form
                 method="POST"
-                action="view_user.php?id=<?= (int) $userId ?>"
+                action="<?= BASE_URL ?>admin/view_user.php?id=<?= (int) $userId ?>"
                 onsubmit="return confirm('Are you sure you want to revoke this ban?');"
                 class="admin-ban-form"
             >
@@ -99,7 +99,7 @@
 
                 <form
                     method="POST"
-                    action="view_user.php?id=<?= (int) $userId ?>"
+                    action="<?= BASE_URL ?>admin/view_user.php?id=<?= (int) $userId ?>"
                     class="admin-ban-form"
                 >
 

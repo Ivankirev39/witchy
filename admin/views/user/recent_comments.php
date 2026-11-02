@@ -48,7 +48,14 @@
                         class="admin-clickable-row"
                         tabindex="0"
                         role="link"
-                        data-href="view_comment.php?id=<?= (int) $comment["comment_id"] ?>&from=user&return_user_id=<?= (int) $user["user_id"] ?>"
+                        data-href="<?= htmlspecialchars(
+                            BASE_URL . "admin/view_comment.php?id="
+                            . (int) $comment["comment_id"]
+                            . "&from=user&return_user_id="
+                            . (int) $user["user_id"],
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
                         aria-label="Review comment <?= (int) $comment["comment_id"] ?>"
                     >
                         <td><?= (int) $comment["comment_id"] ?></td>

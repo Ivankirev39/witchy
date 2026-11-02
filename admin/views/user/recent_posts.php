@@ -1,3 +1,4 @@
+
 <section class="admin-content-panel">
 
 <header class="admin-content-panel-header">
@@ -28,7 +29,14 @@
                         class="admin-clickable-row"
                         tabindex="0"
                         role="link"
-                        data-href="view_post.php?id=<?= (int) $post["post_id"] ?>&from=user&return_user_id=<?= (int) $user["user_id"] ?>"
+                        data-href="<?= htmlspecialchars(
+                            BASE_URL . "admin/view_post.php?id="
+                            . (int) $post["post_id"]
+                            . "&from=user&return_user_id="
+                            . (int) $user["user_id"],
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
                         aria-label="Review post <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
                     >
                         <td><?= (int) $post["post_id"] ?></td>
@@ -40,6 +48,6 @@
             </tbody>
         </table>
     </div>
-    </section>
 
 <?php endif; ?>
+</section>
