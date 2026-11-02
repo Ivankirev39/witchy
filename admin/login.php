@@ -88,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Login | Witchy</title>
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="/witchy/admin/css/admin.css">
 </head>
 <body class="admin-login-page">
     <main class="admin-login-container">
