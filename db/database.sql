@@ -712,3 +712,147 @@ CROSS JOIN users b
 
 WHERE a.username = 'demo_learner'
 AND b.username = 'demo_practitioner';
+
+
+
+-- ============================================================
+--  REGISTRATION RATE LIMITING
+-- ============================================================
+
+CREATE TABLE registration_rate_limit (
+    ip_key CHAR(64)
+        CHARACTER SET ascii
+        COLLATE ascii_bin PRIMARY KEY,
+
+    window_started_at DATETIME NOT NULL,
+
+    attempts INT UNSIGNED NOT NULL DEFAULT 0
+
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+--  PROFILE PINNED POSTS
+-- ============================================================
+
+CREATE TABLE profile_pinned_post (
+    user_id INT NOT NULL,
+    post_id INT NOT NULL,
+
+    pinned_at DATETIME NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (user_id, post_id),
+
+    CONSTRAINT fk_profile_pinned_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_profile_pinned_post
+        FOREIGN KEY (post_id)
+        REFERENCES post(post_id)
+        ON DELETE CASCADE,
+
+    INDEX idx_profile_pinned_user_order
+        (user_id, pinned_at),
+
+    INDEX idx_profile_pinned_post (post_id)
+
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+--  UPLOAD HISTORY
+-- ============================================================
+
+CREATE TABLE upload_history (
+    upload_id INT AUTO_INCREMENT PRIMARY KEY,
+
+    user_id INT NOT NULL,
+
+    file_size BIGINT UNSIGNED NOT NULL,
+
+    uploaded_at DATETIME NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_upload_history_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE,
+
+    INDEX idx_upload_history_user_time
+        (user_id, uploaded_at)
+
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+--  MISSING ADMIN BAN COLUMNS AND RELATIONSHIPS
+-- ============================================================
+
+ALTER TABLE ban
+    ADD COLUMN banned_by INT DEFAULT NULL
+        AFTER user_id,
+
+    ADD COLUMN revoked_at DATETIME DEFAULT NULL
+        AFTER expires_at,
+
+    ADD COLUMN revoked_by INT DEFAULT NULL
+        AFTER revoked_at,
+
+    ADD COLUMN revocation_reason TEXT DEFAULT NULL
+        AFTER revoked_by,
+
+    ADD INDEX idx_ban_banned_by (banned_by),
+
+    ADD INDEX idx_ban_revoked_by (revoked_by),
+
+    ADD CONSTRAINT ban_banned_by_fk
+        FOREIGN KEY (banned_by)
+        REFERENCES users(user_id)
+        ON DELETE SET NULL,
+
+    ADD CONSTRAINT ban_revoked_by_fk
+        FOREIGN KEY (revoked_by)
+        REFERENCES users(user_id)
+        ON DELETE SET NULL;
+
+
+-- ============================================================
+--  MISSING POST MEDIA COLUMNS
+-- ============================================================
+
+ALTER TABLE post_media
+    ADD COLUMN file_size BIGINT UNSIGNED
+        NOT NULL DEFAULT 0
+        AFTER sort_order,
+
+    ADD COLUMN uploaded_at DATETIME
+        NOT NULL DEFAULT CURRENT_TIMESTAMP
+        AFTER file_size;
+
+
+-- ============================================================
+-- MISSING POST LIKE TIMESTAMP
+-- ============================================================
+
+ALTER TABLE post_like
+    ADD COLUMN liked_at DATETIME
+        NOT NULL DEFAULT CURRENT_TIMESTAMP
+        AFTER post_id;
+
+
+-- ============================================================
+--  PUBLIC CONTACT FORM DATABASE FIX
+-- ============================================================
+
+ALTER TABLE support_request
+    DROP FOREIGN KEY fk_support_user,
+
+    MODIFY COLUMN user_id INT DEFAULT NULL,
+
+    ADD CONSTRAINT fk_support_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE SET NULL;
