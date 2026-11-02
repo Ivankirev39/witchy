@@ -24,60 +24,128 @@ class Post
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function createPostWithMedia(
-        int $userId,
-        string $title,
-        string $description,
-        string $topic,
-        string $sources,
-        array $mediaRecords
-    ): int {
-        $this->db->beginTransaction();
+ public function createPostWithMedia(
+    int $userId,
+    string $title,
+    string $description,
+    string $topic,
+    string $sources,
+    array $mediaRecords
+): int {
+    $this->db->beginTransaction();
 
-        try {
-            $stmt = $this->db->prepare("
-                INSERT INTO post (user_id, title, description, topic, sources)
+    try {
+        // Lock the user's row to prevent simultaneous uploads from bypassing quotas.
+        $lockStmt = $this->db->prepare("
+            SELECT user_id
+            FROM users
+            WHERE user_id = ?
+            FOR UPDATE
+        ");
+
+        $lockStmt->execute([$userId]);
+
+        // Check the user's upload history from the last 24 hours.
+        $dailyStmt = $this->db->prepare("
+            SELECT COALESCE(SUM(file_size), 0)
+            FROM upload_history
+            WHERE user_id = ?
+            AND uploaded_at >= NOW() - INTERVAL 24 HOUR
+        ");
+
+        $dailyStmt->execute([$userId]);
+        $dailyUsage = (int) $dailyStmt->fetchColumn();
+
+        // Check the user's total stored post media.
+        $storageStmt = $this->db->prepare("
+            SELECT COALESCE(SUM(pm.file_size), 0)
+            FROM post_media pm
+            INNER JOIN post p ON p.post_id = pm.post_id
+            WHERE p.user_id = ?
+        ");
+
+        $storageStmt->execute([$userId]);
+        $storageUsage = (int) $storageStmt->fetchColumn();
+
+        // Calculate the size of the new upload.
+        $newUploadSize = array_sum(
+            array_column($mediaRecords, "file_size")
+        );
+
+        // Enforce the upload limits.
+        if ($dailyUsage + $newUploadSize > 100 * 1024 * 1024) {
+            throw new RuntimeException("Daily upload limit exceeded.");
+        }
+
+        if ($storageUsage + $newUploadSize > 500 * 1024 * 1024) {
+            throw new RuntimeException("Total storage limit exceeded.");
+        }
+
+        // Create the post.
+        $stmt = $this->db->prepare("
+            INSERT INTO post (user_id, title, description, topic, sources)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+
+        $stmt->execute([
+            $userId,
+            $title,
+            $description,
+            $topic,
+            $sources
+        ]);
+
+        $postId = (int) $this->db->lastInsertId();
+
+        // Insert the post's media.
+        if ($mediaRecords !== []) {
+            $mediaStmt = $this->db->prepare("
+                INSERT INTO post_media (
+                    post_id,
+                    file,
+                    media_type,
+                    sort_order,
+                    file_size
+                )
                 VALUES (?, ?, ?, ?, ?)
             ");
 
-            $stmt->execute([
-                $userId,
-                $title,
-                $description,
-                $topic,
-                $sources
-            ]);
-
-            $postId = (int) $this->db->lastInsertId();
-
-            if ($mediaRecords !== []) {
-                $mediaStmt = $this->db->prepare("
-                    INSERT INTO post_media (post_id, file, media_type, sort_order)
-                    VALUES (?, ?, ?, ?)
-                ");
-
-                foreach ($mediaRecords as $index => $media) {
-                    $mediaStmt->execute([
-                        $postId,
-                        $media["file"],
-                        $media["media_type"],
-                        $index + 1
-                    ]);
-                }
+            foreach ($mediaRecords as $index => $media) {
+                $mediaStmt->execute([
+                    $postId,
+                    $media["file"],
+                    $media["media_type"],
+                    $index + 1,
+                    $media["file_size"]
+                ]);
             }
-
-            $this->db->commit();
-
-            return $postId;
-        } catch (Throwable $e) {
-            if ($this->db->inTransaction()) {
-                $this->db->rollBack();
-            }
-
-            throw $e;
         }
-    }
 
+        // Record uploads so deleting a post does not restore daily allowance.
+        $historyStmt = $this->db->prepare("
+            INSERT INTO upload_history (user_id, file_size)
+            VALUES (?, ?)
+        ");
+
+        foreach ($mediaRecords as $media) {
+            $historyStmt->execute([
+                $userId,
+                $media["file_size"]
+            ]);
+        }
+
+        $this->db->commit();
+
+        return $postId;
+
+    } catch (Throwable $e) {
+        if ($this->db->inTransaction()) {
+            $this->db->rollBack();
+        }
+
+        throw $e;
+    }
+}
     public function getPostById(int $postId, int $viewerId): ?array
     {
         $stmt = $this->db->prepare("

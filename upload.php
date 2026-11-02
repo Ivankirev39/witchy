@@ -3,9 +3,11 @@ require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/Post.php";
+require_once __DIR__ . "/models/UploadQuota.php";
 
 $pdoConnector = new \DataAccess\DB\DBConnector();
 $pdo = $pdoConnector->connectToDB();
+$uploadQuota = new UploadQuota($pdo);   
 $pageTitle = "Create a post | Witchy";
 $postModel = new Post($pdo);
 
@@ -86,9 +88,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             "tmp_name" => $file["tmp_name"],
             "file_name" => $fileName,
             "upload_path" => $uploadDirectory . $fileName,
-            "media_type" => $mediaType
+            "media_type" => $mediaType,
+            "file_size" => (int) $file["size"]
         ];
     }
+
+     $newFileSize = array_sum(
+        array_column($validatedMedia, "file_size")
+    );
+    // Check upload quotas
+    if (!$uploadQuota->canUpload($userId, $newFileSize)) {
+        die("Your upload quota has been reached. Please try again later.");
+    }
+
     $movedFiles = [];
     $mediaRecords = [];
     
@@ -101,7 +113,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $movedFiles[] = $media["upload_path"];
             $mediaRecords[] = [
                 "file" => $media["file_name"],
-                "media_type" => $media["media_type"]
+                "media_type" => $media["media_type"],
+                "file_size" => $media["file_size"]
             ];
         }
 
