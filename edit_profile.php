@@ -113,12 +113,32 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 break;
             }
 
+            
             $imageInfo = @getimagesize($file["tmp_name"]);
 
             if ($imageInfo === false) {
                 $error = "The uploaded image is not valid.";
                 break;
             }
+
+            $width = (int) $imageInfo[0];
+            $height = (int) $imageInfo[1];
+
+            // Prevent extremely large image dimensions
+            $maxDimension = 6000;
+            $maxPixels = 24000000;
+
+            if (
+                $width < 1 ||
+                $height < 1 ||
+                $width > $maxDimension ||
+                $height > $maxDimension ||
+                $width * $height > $maxPixels
+            ) {
+                $error = "Image dimensions are too large. Maximum 6000px per side and 24 megapixels.";
+                break;
+            }
+
 
             $filename = $settings["prefix"] . $user_id . "_" .
                 bin2hex(random_bytes(8)) . "." . $allowedTypes[$mimeType];
