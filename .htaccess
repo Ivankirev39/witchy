@@ -1,0 +1,32 @@
+# ==================================================
+# WITCHY - ROOT SECURITY CONFIGURATION
+# ==================================================
+
+# Prevent directory browsing
+Options -Indexes
+
+# Set the default homepage
+DirectoryIndex index.php
+
+# Protect hidden files such as .env and .gitignore
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+# Protect configuration, database, and internal directories
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteRule ^(config|db|models|includes|scripts)(/|$) - [F,L,NC]
+    RewriteRule ^admin/(models|includes|views)(/|$) - [F,L,NC]
+</IfModule>
+
+# Block direct access to backups, SQL files and logs
+<FilesMatch "(?i)\.(sql|sqlite|bak|backup|log|ini|env|dist)$">
+    Require all denied
+</FilesMatch>
+
+# Disable content type sniffing
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>

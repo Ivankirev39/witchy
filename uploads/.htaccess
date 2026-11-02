@@ -1,0 +1,11 @@
+
+# Prevent uploaded files from being executed as scripts.
+SetHandler default-handler
+
+# Deny access to common executable file extensions.
+<FilesMatch "(?i)\.(php[0-9]*|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp)$">
+    Require all denied
+</FilesMatch>
+
+# Disable directory listing.
+Options -Indexes
