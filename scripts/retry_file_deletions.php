@@ -1,4 +1,3 @@
-
 <?php
 
 // This script can only run from the command line.

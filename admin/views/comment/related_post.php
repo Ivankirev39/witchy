@@ -1,4 +1,3 @@
-
 <section class="admin-content-panel">
 
     <header class="admin-content-panel-header">

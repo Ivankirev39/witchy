@@ -1,4 +1,3 @@
-
 <section class="admin-content-panel admin-user-profile-card">
 
 <div class="admin-user-cover">
