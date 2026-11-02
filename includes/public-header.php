@@ -16,14 +16,9 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
     >
 
     <title>
-        <?= htmlspecialchars(
-            $pageTitle,
-            ENT_QUOTES,
-            "UTF-8"
-        ) ?>
+        <?= htmlspecialchars($pageTitle, ENT_QUOTES, "UTF-8") ?>
     </title>
 
-    
     <!-- MAIN STYLES -->
     <link
         rel="stylesheet"
@@ -48,6 +43,12 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
         >
     <?php endif; ?>
 
+    <!-- MOBILE NAVIGATION -->
+    <script
+        src="/witchy/assets/js/mobile-nav.js"
+        defer
+    ></script>
+
 </head>
 
 <body>
@@ -59,7 +60,7 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
         href="/witchy/index.php"
         class="site-logo"
         aria-label="Witchy home"
-        >
+    >
         <img
             src="/witchy/images/horizontal_black.svg"
             alt="Witchy"
@@ -74,30 +75,19 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
         >
     </a>
 
+    <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
+        <a href="/witchy/index.php"
+        class="<?= $currentPage === 'index.php' ? 'active' : '' ?>">Home</a>
 
-    <!-- NAVIGATION -->
-    <nav
-        class="site-nav"
-        aria-label="Main navigation"
-    >
-    
-        <a href="/witchy/index.php">
-            Home
-        </a>
+        <a href="/witchy/about.php"
+        class="<?= $currentPage === 'about.php' ? 'active' : '' ?>">About</a>
 
-        <a href="/witchy/about.php">
-            About
-        </a>
+        <a href="/witchy/public-explore.php"
+        class="<?= $currentPage === 'public-explore.php' ? 'active' : '' ?>">Explore</a>
 
-        <a href="/witchy/public-explore.php">
-            Explore
-        </a>
-
-        <a href="/witchy/community.php">
-            Community
-        </a>
+        <a href="/witchy/community.php"
+        class="<?= $currentPage === 'community.php' ? 'active' : '' ?>">Community</a>
     </nav>
-
 
     <!-- HEADER ACTIONS -->
     <div class="site-header-actions">
@@ -113,38 +103,48 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
             ☾
         </button>
 
-
         <!-- LOG IN -->
         <?php if (
             !$isLoggedIn &&
             $currentPage !== "login.php"
         ): ?>
-
             <a
                 href="/witchy/login.php"
                 class="button button-secondary"
             >
                 Log in
             </a>
-
         <?php endif; ?>
-
 
         <!-- REGISTER -->
         <?php if (
             !$isLoggedIn &&
             $currentPage !== "register.php"
         ): ?>
-
             <a
                 href="/witchy/register.php"
                 class="button button-primary"
             >
                 Join Witchy
             </a>
-
         <?php endif; ?>
 
     </div>
 
+    <!-- MOBILE MENU BUTTON -->
+    <button
+        type="button"
+        class="mobile-menu-toggle"
+        id="mobile-menu-toggle"
+        aria-label="Open navigation menu"
+        aria-expanded="false"
+        aria-controls="site-navigation"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
 </header>
+</body>
+</html>
