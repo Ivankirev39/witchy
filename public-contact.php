@@ -131,7 +131,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             );
 
             if (!$submitted) {
-                $errors[] = "You've sent too many messages. Please try again in 15 minutes.";
+                http_response_code(429);
+                $errors[] = "You've sent too many messages. Please try again later.";
+            }
             } else {
                 $_SESSION["public_contact_last_sent"] = time();
                 $_SESSION["public_contact_success"] = true;

@@ -859,3 +859,42 @@ ALTER TABLE support_request
         FOREIGN KEY (user_id)
         REFERENCES users(user_id)
         ON DELETE SET NULL;
+
+
+
+-- ============================================================
+-- CONTACT FORM RATE LIMITING
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS contact_rate_limit_keys (
+    ip_hash CHAR(64)
+        CHARACTER SET ascii
+        COLLATE ascii_bin NOT NULL,
+
+    PRIMARY KEY (ip_hash)
+
+) ENGINE=InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS contact_rate_limit_events (
+    event_id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    ip_hash CHAR(64)
+        CHARACTER SET ascii
+        COLLATE ascii_bin NOT NULL,
+
+    submitted_at DATETIME NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_contact_events_ip_time
+        (ip_hash, submitted_at),
+
+    INDEX idx_contact_events_time
+        (submitted_at),
+
+    CONSTRAINT fk_contact_events_ip
+        FOREIGN KEY (ip_hash)
+        REFERENCES contact_rate_limit_keys(ip_hash)
+        ON DELETE CASCADE
+
+) ENGINE=InnoDB;
