@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . "/config/bootstrap.php";
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/models/DBConnector.php";
 
@@ -314,7 +315,7 @@ function publicExploreUrl(array $overrides = []): string
         static fn($value) => $value !== "" && $value !== null
     );
 
-    return "public-explore.php?" . http_build_query($parameters);
+    return BASE_URL . "public-explore.php?" . http_build_query($parameters);
 }
 
 require_once __DIR__ . "/includes/public-header.php";
@@ -339,7 +340,7 @@ require_once __DIR__ . "/includes/public-header.php";
         </p>
 
         <?php if ($search !== "" || $topic !== ""): ?>
-            <a href="public-explore.php" class="explore-clear-search">
+            <a href="<?= BASE_URL ?>public-explore.php" class="explore-clear-search">
                 Clear filters
             </a>
         <?php endif; ?>
@@ -387,7 +388,7 @@ require_once __DIR__ . "/includes/public-header.php";
     </nav>
 
     <!-- SEARCH -->
-    <form class="public-explore-search" action="public-explore.php" method="GET">
+    <form class="public-explore-search" action="<?= BASE_URL ?>public-explore.php" method="GET">
 
         <input
             type="hidden"
@@ -553,7 +554,7 @@ require_once __DIR__ . "/includes/public-header.php";
 
                     <?php endif; ?>
 
-                    <a href="public-explore.php">Browse all posts</a>
+                    <a href="<?= BASE_URL ?>public-explore.php">Browse all posts</a>
 
                 </div>
 
@@ -562,13 +563,13 @@ require_once __DIR__ . "/includes/public-header.php";
                 <?php foreach ($posts as $post): ?>
 
                     <?php
-                    $postUrl = "post.php?id=" . (int) $post["post_id"];
+                    $postUrl = BASE_URL . "post.php?id=" . (int) $post["post_id"];
 
                     $mediaFile = trim($post["media_file"] ?? "");
                     $mediaType = strtolower(trim($post["media_type"] ?? ""));
 
                     $mediaPath = $mediaFile !== ""
-                        ? "/witchy/uploads/posts/" . rawurlencode(basename($mediaFile))
+                        ? BASE_URL . "uploads/posts/" . rawurlencode(basename($mediaFile))
                         : "";
 
                     $isImage = $mediaPath !== ""
@@ -764,8 +765,8 @@ require_once __DIR__ . "/includes/public-header.php";
 
     <p class="public-explore-join">
         Want to like, save or discuss posts?
-        <a href="register.php">Join Witchy</a>
-        or <a href="login.php">Log in</a>.
+        <a href="<?= BASE_URL ?>register.php">Join Witchy</a>
+        or <a href="<?= BASE_URL ?>login.php">Log in</a>.
     </p>
 
 </main>

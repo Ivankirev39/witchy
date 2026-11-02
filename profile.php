@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/config/bootstrap.php";
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
@@ -79,7 +80,11 @@ require_once __DIR__ . "/includes/user_header.php";
     <div class="profile-cover">
         <?php if (!empty($user["cover_image"])): ?>
             <img
-                src="<?= htmlspecialchars($user["cover_image"], ENT_QUOTES, "UTF-8") ?>"
+                src="<?= htmlspecialchars(
+                    BASE_URL . ltrim($user["cover_image"], "/"),
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>"
                 alt=""
             >
         <?php else: ?>
@@ -92,9 +97,12 @@ require_once __DIR__ . "/includes/user_header.php";
         <div class="profile-avatar">
             <img
                 src="<?= htmlspecialchars(
-                    !empty($user["profile_image"])
-                        ? $user["profile_image"]
-                        : "images/default-profile.jpg",
+                    BASE_URL . ltrim(
+                        !empty($user["profile_image"])
+                            ? $user["profile_image"]
+                            : "images/default-profile.jpg",
+                        "/"
+                    ),
                     ENT_QUOTES,
                     "UTF-8"
                 ) ?>"
@@ -121,11 +129,11 @@ require_once __DIR__ . "/includes/user_header.php";
                 <?php if ($is_own_profile): ?>
 
                     <div class="profile-owner-actions">
-                        <a href="edit_profile.php" class="profile-edit-button">
+                        <a href="<?= BASE_URL ?>edit_profile.php" class="profile-edit-button">
                             Edit Profile
                         </a>
 
-                        <a href="settings.php" class="profile-settings-button">
+                        <a href="<?= BASE_URL ?>settings.php" class="profile-settings-button">
                             Account Settings
                         </a>
                     </div>
@@ -133,7 +141,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 <?php else: ?>
 
                     <form
-                        action="follow_user.php"
+                        action="<?= BASE_URL ?>follow_user.php"
                         method="POST"
                         class="profile-follow-form"
                     >
@@ -240,8 +248,6 @@ require_once __DIR__ . "/includes/user_header.php";
 
     </section>
 
-   
-
     <section class="profile-posts">
 
         <div class="profile-section-heading">
@@ -270,7 +276,7 @@ require_once __DIR__ . "/includes/user_header.php";
                         <?php if ($is_own_profile): ?>
 
                             <form
-                                action="profile_pin.php"
+                                action="<?= BASE_URL ?>profile_pin.php"
                                 method="POST"
                                 class="profile-pin-form"
                             >
@@ -302,7 +308,7 @@ require_once __DIR__ . "/includes/user_header.php";
                         <?php endif; ?>
 
                         <a
-                            href="post.php?id=<?= $postId ?>"
+                            href="<?= BASE_URL ?>post.php?id=<?= $postId ?>"
                             class="profile-post-card <?= !$firstMedia ? "profile-text-post" : "" ?>"
                             aria-label="View <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
                         >
@@ -311,7 +317,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
                                 <?php
                                 $mediaFile = basename($firstMedia["file"]);
-                                $mediaPath = "uploads/posts/" . rawurlencode($mediaFile);
+                                $mediaPath = BASE_URL . "uploads/posts/" . rawurlencode($mediaFile);
                                 ?>
 
                                 <?php if ($firstMedia["media_type"] === "image"): ?>
@@ -397,7 +403,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 <?php if ($is_own_profile): ?>
 
                     <p>Your creations will appear here.</p>
-                    <a href="upload.php">Create your first post</a>
+                    <a href="<?= BASE_URL ?>upload.php">Create your first post</a>
 
                 <?php else: ?>
 
@@ -439,7 +445,7 @@ require_once __DIR__ . "/includes/user_header.php";
     >
 </div>
 
-<script src="/witchy/assets/js/profile.js?v=2"></script>
+<script src="<?= BASE_URL ?>assets/js/profile.js?v=2"></script>
 
 <?php
 require_once __DIR__ . "/includes/user_footer.php";

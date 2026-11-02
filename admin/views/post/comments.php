@@ -53,7 +53,7 @@
 
                     <form
                         method="POST"
-                        action="/witchy/admin/delete_comment.php"
+                        action="<?= htmlspecialchars(BASE_URL . "admin/delete_comment.php", ENT_QUOTES, "UTF-8") ?>"
                         onsubmit="return confirm('Are you sure you want to permanently delete this comment?');"
                     >
 

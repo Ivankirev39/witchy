@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . "/../config/bootstrap.php";
 require_once __DIR__ . "/../includes/session.php";
 require_once __DIR__ . "/../includes/csrf.php";
 require_once __DIR__ . "/../config/db.php";
@@ -9,7 +10,7 @@ if (
     isset($_SESSION["user_id"]) &&
     ($_SESSION["rank"] ?? "") === "admin"
 ) {
-    header("Location: index.php");
+    header("Location: " . BASE_URL . "admin/index.php");
     exit;
 }
 
@@ -68,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         $_SESSION["username"] = $user["username"];
                         $_SESSION["rank"] = $user["rank"];
 
-                        header("Location: index.php");
+                        header("Location: " . BASE_URL . "admin/index.php");
                         exit;
                     }
                 }
@@ -81,14 +82,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Admin Login | Witchy</title>
-    <link rel="stylesheet" href="/witchy/admin/css/admin.css">
+    <link rel="stylesheet" href="<?= htmlspecialchars(BASE_URL . "admin/css/admin.css", ENT_QUOTES, "UTF-8") ?>">
 </head>
 <body class="admin-login-page">
     <main class="admin-login-container">
@@ -101,7 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </p>
         <?php endif; ?>
 
-        <form method="POST" action="login.php">
+        <form method="POST" action="<?= htmlspecialchars(BASE_URL . "admin/login.php", ENT_QUOTES, "UTF-8") ?>">
             <input
                 type="hidden"
                 name="csrf_token"
@@ -136,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <button type="submit">Log in</button>
         </form>
 
-        <p><a href="../index.php">Back to Witchy</a></p>
+        <p><a href="<?= htmlspecialchars(BASE_URL . "index.php", ENT_QUOTES, "UTF-8") ?>">Back to Witchy</a></p>
     </main>
 </body>
 </html>
