@@ -1,3 +1,4 @@
+
 # Database credentials
 /config/db.php
 /config/constants.php
@@ -6,9 +7,12 @@
 .env
 .env.*
 
-# User uploads
+# User uploads - ignore uploaded files
 /uploads/*
+
+# Keep upload security configuration
 !/uploads/.gitkeep
+!/uploads/.htaccess
 
 # Logs
 *.log
