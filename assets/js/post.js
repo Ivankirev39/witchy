@@ -398,6 +398,18 @@ document.querySelectorAll(
 
                 meta.append(author, date);
 
+                if (Number(comment.user_id) !== currentUserId) {
+                    const reportButton = document.createElement("button");
+
+                    reportButton.type = "button";
+                    reportButton.className = "report-button";
+                    reportButton.textContent = "Report";
+                    reportButton.dataset.reportType = "comment";
+                    reportButton.dataset.targetId = comment.comment_id;
+
+                    meta.appendChild(reportButton);
+                }
+
                 // DELETE BUTTON FOR OWN COMMENTS
                 if (Number(comment.user_id) === currentUserId) {
                     const form = document.createElement("form");
@@ -513,4 +525,136 @@ document.querySelector(
         button.disabled = false;
     }
 });
+// REPORT FUNCTION MODAL
+(() => {
+    const modal = document.getElementById("report-modal");
+    const form = document.getElementById("report-form");
+
+    if (!modal || !form) return;
+
+    const title = document.getElementById("report-modal-title");
+    const targetInput = document.getElementById("report-target-id");
+    const typeInput = document.getElementById("report-type");
+    const reasonInput = document.getElementById("report-reason");
+    const detailsInput = document.getElementById("report-details");
+    const message = document.getElementById("report-message");
+    const submitButton = form.querySelector('[type="submit"]');
+
+    function openReportModal(type, targetId) {
+        typeInput.value = type;
+        targetInput.value = targetId;
+
+        title.textContent = type === "comment"
+            ? "Report comment"
+            : "Report user";
+
+        form.reset();
+
+        // Restore the values after resetting
+        typeInput.value = type;
+        targetInput.value = targetId;
+
+        message.hidden = true;
+        message.textContent = "";
+        message.className = "report-message";
+
+        reasonInput.value = "";
+        detailsInput.value = "";
+
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit report";
+
+        modal.hidden = false;
+        reasonInput.focus();
+    }
+
+    function closeReportModal() {
+        modal.hidden = true;
+    }
+
+    // Open report modal
+    document.addEventListener("click", (event) => {
+        const button = event.target.closest(".report-button");
+
+        if (!button) return;
+
+        openReportModal(
+            button.dataset.reportType,
+            button.dataset.targetId
+        );
+    });
+
+    // Close buttons
+    modal.querySelector(".report-modal-close")
+        ?.addEventListener("click", closeReportModal);
+
+    modal.querySelector(".report-cancel-button")
+        ?.addEventListener("click", closeReportModal);
+
+    // Close when clicking outside the modal content
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            closeReportModal();
+        }
+    });
+
+    // Close with Escape
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !modal.hidden) {
+            closeReportModal();
+        }
+    });
+
+    // Submit report without reloading
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Submitting...";
+
+        message.hidden = true;
+
+        try {
+            const response = await fetch("report_submit.php", {
+                method: "POST",
+                body: new FormData(form),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                }
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(
+                    data.message || data.error || "Could not submit report."
+                );
+            }
+
+            message.textContent = data.message;
+            message.classList.add("success");
+            message.hidden = false;
+
+            form.querySelectorAll("input, select, textarea")
+                .forEach(input => {
+                    if (input.type !== "hidden") {
+                        input.disabled = true;
+                    }
+                });
+
+            submitButton.textContent = "Report submitted";
+
+        } catch (error) {
+            console.error("Report submission error:", error);
+
+            message.textContent = error.message;
+            message.classList.add("error");
+            message.hidden = false;
+
+            submitButton.disabled = false;
+            submitButton.textContent = "Submit report";
+        }
+    });
+})();
 

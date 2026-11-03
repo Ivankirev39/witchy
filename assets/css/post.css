@@ -486,6 +486,265 @@ button.post-detail-action:hover {
     stroke-linejoin: round;
     pointer-events: none;
 }
+/* REPORT BUTTON */
+.report-button {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: var(--brand-plum);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 5px;
+}
+
+.report-button:hover {
+    color: var(--brand-black);
+    transform: translateY(-1px);
+}
+
+.report-button:focus-visible {
+    outline: 2px solid #C6A4CF;
+    outline-offset: 2px;
+}
+/* REPORT MODAL */
+.report-modal[hidden] {
+    display: none;
+}
+
+.report-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: rgba(16, 14, 18, 0.85);
+    backdrop-filter: blur(5px);
+}
+
+.report-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    padding: 30px;
+    background: #1C1720;
+    border: 1px solid rgba(198, 164, 207, 0.2);
+    border-radius: 14px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5);
+    color: #f4f0f5;
+}
+
+.report-modal-content h2 {
+    margin: 0 0 10px;
+    color: #ffffff;
+    font-size: 22px;
+}
+
+.report-modal-content > p {
+    margin-bottom: 24px;
+    color: #b8abbc;
+    font-size: 14px;
+}
+/* ========================================
+   REPORT MODAL
+   ======================================== */
+
+.report-modal[hidden] {
+    display: none;
+}
+
+.report-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: rgba(16, 14, 18, 0.75);
+    backdrop-filter: blur(5px);
+}
+
+.report-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    padding: 30px;
+    background: #ffffff;
+    border: 1px solid #e5dce8;
+    border-radius: 14px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+    color: #100e12;
+}
+
+/* MODAL HEADING AND DESCRIPTION */
+
+.report-modal-content h2 {
+    margin: 0 0 10px;
+    color: #371446;
+    font-size: 22px;
+}
+
+.report-modal-content > p {
+    margin-bottom: 24px;
+    color: #716676;
+    font-size: 14px;
+}
+
+/* CLOSE BUTTON */
+
+.report-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: transparent;
+    border: none;
+    color: #716676;
+    font-size: 26px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.report-modal-close:hover {
+    color: #371446;
+}
+
+/* REPORT FORM */
+
+#report-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#report-form label {
+    color: #371446;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+#report-form select,
+#report-form textarea {
+    width: 100%;
+    padding: 12px;
+    background: #f8f5f9;
+    border: 1px solid #ded3e2;
+    border-radius: 7px;
+    color: #100e12;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#report-form select:focus,
+#report-form textarea:focus {
+    border-color: #a77bb2;
+    box-shadow: 0 0 0 3px rgba(198, 164, 207, 0.2);
+}
+
+#report-form select {
+    cursor: pointer;
+}
+
+#report-form textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+#report-form textarea::placeholder {
+    color: #99909d;
+}
+
+/* MODAL ACTION BUTTONS */
+
+.report-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.report-modal-actions button {
+    padding: 10px 18px;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.report-cancel-button {
+    background: transparent;
+    border: 1px solid #d2c5d6;
+    color: #5e5063;
+}
+
+.report-cancel-button:hover {
+    background: #f2edf4;
+    border-color: #bda9c4;
+}
+
+.report-submit-button {
+    background: #371446;
+    border: 1px solid #371446;
+    color: #ffffff;
+}
+
+.report-submit-button:hover {
+    background: #51205f;
+    border-color: #51205f;
+}
+
+.report-modal-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* SUCCESS AND ERROR MESSAGES */
+
+.report-message {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-top: 10px;
+}
+
+.report-message.success {
+    background: rgba(75, 160, 110, 0.12);
+    border: 1px solid rgba(75, 160, 110, 0.4);
+    color: #287a48;
+}
+
+.report-message.error {
+    background: rgba(210, 75, 75, 0.12);
+    border: 1px solid rgba(210, 75, 75, 0.4);
+    color: #b83232;
+}
+
+/* MOBILE RESPONSIVENESS */
+
+@media (max-width: 480px) {
+    .report-modal {
+        padding: 12px;
+    }
+
+    .report-modal-content {
+        padding: 24px 18px;
+    }
+
+    .report-modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .report-modal-actions button {
+        width: 100%;
+    }
+}
 /* DELETE */
 .delete-post-button {
     color: #d65b5b;
@@ -753,6 +1012,116 @@ html.dark-mode .delete-comment-button {
 }
 html.dark-mode .delete-comment-button:hover {
     background: #c5a6ca;
+}
+/* REPORT BUTTON */
+html.dark-mode .report-button {
+    color: #c084cc;
+}
+
+html.dark-mode .report-button:hover {
+    color: #e1c3e6;
+    background: rgba(192, 132, 204, 0.12);
+    transform: translateY(-1px);
+}
+
+html.dark-mode .report-button:focus-visible {
+    outline-color: #c084cc;
+}
+
+/* REPORT MODAL */
+html.dark-mode .report-modal {
+    background: rgba(10, 9, 12, 0.88);
+}
+
+html.dark-mode .report-modal-content {
+    background: #1f1d24;
+    border-color: #403b45;
+    color: #f1e8dc;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+}
+
+html.dark-mode .report-modal-content h2 {
+    color: #f1e8dc;
+}
+
+html.dark-mode .report-modal-content > p {
+    color: #aaa2aa;
+}
+
+/* CLOSE BUTTON */
+html.dark-mode .report-modal-close {
+    color: #aaa2aa;
+}
+
+html.dark-mode .report-modal-close:hover {
+    color: #e1c3e6;
+}
+
+/* FORM LABELS */
+html.dark-mode #report-form label {
+    color: #e1c3e6;
+}
+
+/* FORM INPUTS */
+html.dark-mode #report-form select,
+html.dark-mode #report-form textarea {
+    background: #242229;
+    border-color: #403b45;
+    color: #f1e8dc;
+}
+
+html.dark-mode #report-form select:focus,
+html.dark-mode #report-form textarea:focus {
+    border-color: #806b84;
+    box-shadow: 0 0 0 3px #493b4d;
+}
+
+html.dark-mode #report-form textarea::placeholder {
+    color: #8f8991;
+}
+
+/* CANCEL BUTTON */
+html.dark-mode .report-cancel-button {
+    background: transparent;
+    border-color: #55445d;
+    color: #c4bdc5;
+}
+
+html.dark-mode .report-cancel-button:hover {
+    background: #332f38;
+    color: #f1e8dc;
+}
+
+/* SUBMIT BUTTON */
+html.dark-mode .report-submit-button {
+    background: #c084cc;
+    border-color: #c084cc;
+    color: #100e12;
+}
+
+html.dark-mode .report-submit-button:hover {
+    background: #c5a6ca;
+    border-color: #c5a6ca;
+}
+
+/* DISABLED BUTTONS */
+html.dark-mode .report-modal-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* SUCCESS MESSAGE */
+html.dark-mode .report-message.success {
+    background: rgba(75, 160, 110, 0.12);
+    border-color: rgba(75, 160, 110, 0.4);
+    color: #8fdaa9;
+}
+
+/* ERROR MESSAGE */
+html.dark-mode .report-message.error {
+    background: rgba(210, 75, 75, 0.12);
+    border-color: rgba(210, 75, 75, 0.4);
+    color: #f19b9b;
 }
 /* ========================================
    TABLET

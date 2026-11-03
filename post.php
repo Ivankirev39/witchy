@@ -301,7 +301,21 @@ if ($isLoggedIn) {
                                                 </button>
                                             </form>
                                         <?php endif; ?>
+                                        <?php if (
+                                            $isLoggedIn &&
+                                            (int) $comment["user_id"] !== $user_id
+                                        ): ?>
+                                            <button
+                                                type="button"
+                                                class="report-button"
+                                                data-report-type="comment"
+                                                data-target-id="<?= (int) $comment["comment_id"] ?>">
+                                                Report
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
+
+
 
                                     <?php if ($comment["comment"] !== ""): ?>
                                         <p><?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?></p>
@@ -367,6 +381,89 @@ if ($isLoggedIn) {
     </div>
 </section>
 
+<!-- REPORT MODAL -->
+<div
+    id="report-modal"
+    class="report-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="report-modal-title"
+    hidden>
+
+    <div class="report-modal-content">
+
+        <button
+            type="button"
+            class="report-modal-close"
+            aria-label="Close report form">
+            &times;
+        </button>
+
+        <h2 id="report-modal-title">Report comment</h2>
+
+        <p>Why are you reporting this content?</p>
+
+        <form id="report-form">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+
+            <input
+                type="hidden"
+                name="report_type"
+                id="report-type"
+                value="comment">
+
+            <input
+                type="hidden"
+                name="target_id"
+                id="report-target-id">
+
+            <label for="report-reason">Reason</label>
+
+            <select name="reason" id="report-reason" required>
+                <option value="">Select a reason</option>
+                <option value="Harassment or bullying">Harassment or bullying</option>
+                <option value="Spam">Spam</option>
+                <option value="Hate speech">Hate speech</option>
+                <option value="Inappropriate content">Inappropriate content</option>
+                <option value="Misinformation">Misinformation</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="report-details">
+                Additional details (optional)
+            </label>
+
+            <textarea
+                name="details"
+                id="report-details"
+                maxlength="1000"
+                placeholder="Tell us more about the issue..."></textarea>
+
+            <div class="report-modal-actions">
+                <button type="button" class="report-cancel-button">
+                    Cancel
+                </button>
+
+                <button type="submit" class="report-submit-button">
+                    Submit report
+                </button>
+            </div>
+
+            <p
+                id="report-message"
+                class="report-message"
+                role="status"
+                aria-live="polite"
+                hidden>
+            </p>
+
+        </form>
+    </div>
+</div>
 <!-- IMAGE LIGHTBOX -->
 <div
     id="image-modal"
