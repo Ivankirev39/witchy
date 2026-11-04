@@ -52,41 +52,32 @@ require_once __DIR__ . "/../config/bootstrap.php";
 </div>
 
 <script>
-const themeToggle = document.getElementById("theme-toggle");
+const themeToggles = document.querySelectorAll(".theme-toggle");
 const root = document.documentElement;
 
-function updateThemeIcon() {
-    if (!themeToggle) {
-        return;
-    }
+function updateThemeIcons() {
+    const isDark = root.classList.contains("dark-mode");
+    const label = isDark ? "Switch to light mode" : "Switch to dark mode";
 
-    if (root.classList.contains("dark-mode")) {
-        themeToggle.textContent = "☀";
-        themeToggle.setAttribute("aria-label", "Switch to light mode");
-        themeToggle.setAttribute("title", "Switch to light mode");
-    } else {
-        themeToggle.textContent = "☾";
-        themeToggle.setAttribute("aria-label", "Switch to dark mode");
-        themeToggle.setAttribute("title", "Switch to dark mode");
-    }
-}
-
-updateThemeIcon();
-
-if (themeToggle) {
-    themeToggle.addEventListener("click", function () {
-
-        root.classList.toggle("dark-mode");
-
-        if (root.classList.contains("dark-mode")) {
-            localStorage.setItem("theme", "dark");
-        } else {
-            localStorage.setItem("theme", "light");
-        }
-
-        updateThemeIcon();
+    themeToggles.forEach(function (toggle) {
+        toggle.textContent = isDark ? "☀" : "☾";
+        toggle.setAttribute("aria-label", label);
+        toggle.setAttribute("title", label);
     });
 }
+
+updateThemeIcons();
+
+themeToggles.forEach(function (toggle) {
+    toggle.addEventListener("click", function () {
+        root.classList.toggle("dark-mode");
+        localStorage.setItem(
+            "theme",
+            root.classList.contains("dark-mode") ? "dark" : "light"
+        );
+        updateThemeIcons();
+    });
+});
 </script>
 
 </body>

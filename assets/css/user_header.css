@@ -273,6 +273,18 @@ html.dark-mode .create-post-button:hover {
     align-items: center;
     justify-content: center;
 }
+.mobile-header .theme-toggle {
+    position: static;
+    z-index: auto;
+    flex: 0 0 38px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    box-shadow: none;
+}
+.mobile-header .theme-toggle:hover {
+    transform: none;
+}
 /* ========================================
    MOBILE ELEMENTS - HIDDEN ON DESKTOP
    ======================================== */
