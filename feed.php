@@ -5,6 +5,7 @@ require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/models/Comment.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/PostFeed.php";
+require_once __DIR__ . "/models/Report.php";
 
 $pageTitle = "Home | Witchy";
 $user_id = (int) $_SESSION["user_id"];
@@ -73,13 +74,13 @@ require_once __DIR__ . "/includes/user_header.php";
             ?>
             <article class="post-card" id="post-<?= $postId ?>">
                 <!-- POST AUTHOR -->
-                
+
                 <?php if (!empty($post["is_sticky"])): ?>
                     <div class="admin-pinned-badge">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z"/>
-                        <path d="M12 14v7"/>
-                    </svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z" />
+                            <path d="M12 14v7" />
+                        </svg>
                         <span>Admin Pinned</span>
                     </div>
                 <?php endif; ?>
@@ -296,6 +297,15 @@ require_once __DIR__ . "/includes/user_header.php";
                                             </button>
                                         </form>
                                     <?php endif; ?>
+                                    <?php if ((int) $comment["user_id"] !== $user_id): ?>
+                                        <button
+                                            type="button"
+                                            class="report-button"
+                                            data-report-type="comment"
+                                            data-target-id="<?= (int) $comment["comment_id"] ?>">
+                                            Report
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                                 <small><?= htmlspecialchars($comment["created_at"], ENT_QUOTES, "UTF-8") ?></small>
                             </div>
@@ -357,6 +367,89 @@ require_once __DIR__ . "/includes/user_header.php";
 
     </section>
 </section>
+<!-- REPORT MODAL -->
+<div
+    id="report-modal"
+    class="report-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="report-modal-title"
+    hidden>
+
+    <div class="report-modal-content">
+
+        <button
+            type="button"
+            class="report-modal-close"
+            aria-label="Close report form">
+            &times;
+        </button>
+
+        <h2 id="report-modal-title">Report comment</h2>
+
+        <p>Why are you reporting this content?</p>
+
+        <form id="report-form">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+
+            <input
+                type="hidden"
+                name="report_type"
+                id="report-type"
+                value="comment">
+
+            <input
+                type="hidden"
+                name="target_id"
+                id="report-target-id">
+
+            <label for="report-reason">Reason</label>
+
+            <select name="reason" id="report-reason" required>
+                <option value="">Select a reason</option>
+                <option value="Harassment or bullying">Harassment or bullying</option>
+                <option value="Spam">Spam</option>
+                <option value="Hate speech">Hate speech</option>
+                <option value="Inappropriate content">Inappropriate content</option>
+                <option value="Misinformation">Misinformation</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="report-details">
+                Additional details (optional)
+            </label>
+
+            <textarea
+                name="details"
+                id="report-details"
+                maxlength="1000"
+                placeholder="Tell us more about the issue..."></textarea>
+
+            <div class="report-modal-actions">
+                <button type="button" class="report-cancel-button">
+                    Cancel
+                </button>
+
+                <button type="submit" class="report-submit-button">
+                    Submit report
+                </button>
+            </div>
+
+            <p
+                id="report-message"
+                class="report-message"
+                role="status"
+                aria-live="polite"
+                hidden>
+            </p>
+
+        </form>
+    </div>
+</div>
 <script src="assets/js/feed.js" defer></script>
 <?php
 require_once __DIR__ . "/includes/user_footer.php";
