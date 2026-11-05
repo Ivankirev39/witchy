@@ -39,6 +39,10 @@ require_once __DIR__ . "/../config/bootstrap.php";
 
         <a href="<?= BASE_URL ?>profile.php">Profile</a>
 
+        <a href="<?= BASE_URL ?>help.php">Help</a>
+
+        <a href="<?= BASE_URL ?>privacy.php">Privacy Policy</a>
+
     </nav>
 
     <p class="user-footer-copy">
