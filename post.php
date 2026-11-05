@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/models/DBConnector.php";
@@ -40,7 +41,6 @@ if (!empty($_SERVER["HTTP_REFERER"])) {
     }
 }
 
-// GET POST ID
 $post_id = (int) ($_GET["id"] ?? 0);
 
 if ($post_id <= 0) {
@@ -51,7 +51,6 @@ if ($post_id <= 0) {
     exit;
 }
 
-// GET POST + AUTHOR + COUNTS
 $post = $postModel->getPostById($post_id, $user_id);
 
 if (!$post) {
@@ -59,11 +58,9 @@ if (!$post) {
     exit;
 }
 
-// GET POST MEDIA
 $postMedia = $postModel->getPostMedia($post_id);
 $mediaCount = count($postMedia);
 
-// GET COMMENTS + COMMENT AUTHORS
 $comments = $commentModel->getCommentsByPostId($post_id);
 
 if ($isLoggedIn) {
@@ -132,7 +129,6 @@ if ($isLoggedIn) {
 
         <article class="post-detail-content">
 
-            <!-- POST AUTHOR -->
             <header class="post-detail-author-row">
 
                 <div class="post-detail-author">
@@ -211,7 +207,6 @@ if ($isLoggedIn) {
             </header>
 
 
-            <!-- POST INFORMATION -->
             <div class="post-detail-info">
 
                 <?php if ($mediaCount === 0 && !empty($post["topic"])): ?>
@@ -294,29 +289,62 @@ if ($isLoggedIn) {
 
                 <?php else: ?>
 
-                    <a href="login.php" class="post-detail-action">
-                        ♡ <span>Log in to like</span>
+                    <a
+                        href="register.php"
+                        class="post-detail-action"
+                        aria-label="Create an account to like this post">
+
+                        ♡
+
+                        <span><?= (int) $post["like_count"] ?></span>
+
                     </a>
 
                 <?php endif; ?>
 
 
-                <div class="post-detail-action">
+                <?php if ($isLoggedIn): ?>
 
-                    <svg
-                        class="comment-icon"
-                        viewBox="0 0 24 24"
-                        width="20"
-                        height="20"
-                        aria-hidden="true">
+                    <div class="post-detail-action">
 
-                        <path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.99L3 20l.99-4.5A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 1 1 20 11.5Z" />
+                        <svg
+                            class="comment-icon"
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            aria-hidden="true">
 
-                    </svg>
+                            <path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.99L3 20l.99-4.5A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 1 1 20 11.5Z" />
 
-                    <span><?= (int) $post["comment_count"] ?></span>
+                        </svg>
 
-                </div>
+                        <span><?= (int) $post["comment_count"] ?></span>
+
+                    </div>
+
+                <?php else: ?>
+
+                    <a
+                        href="register.php"
+                        class="post-detail-action"
+                        aria-label="Create an account to view and join the comments">
+
+                        <svg
+                            class="comment-icon"
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            aria-hidden="true">
+
+                            <path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 8.4 8.4 0 0 1-4-.99L3 20l.99-4.5A8.4 8.4 0 0 1 3 11.5 8.5 8.5 0 1 1 20 11.5Z" />
+
+                        </svg>
+
+                        <span><?= (int) $post["comment_count"] ?></span>
+
+                    </a>
+
+                <?php endif; ?>
 
 
                 <?php if ($isLoggedIn): ?>
@@ -361,14 +389,28 @@ if ($isLoggedIn) {
 
                 <?php else: ?>
 
-                    <a href="login.php" class="post-detail-action">
-                        Log in to save
+                    <a
+                        href="register.php"
+                        class="post-detail-action save-button"
+                        aria-label="Create an account to save this post"
+                        title="Save post">
+
+                        <svg
+                            class="save-icon"
+                            viewBox="0 0 24 24"
+                            width="20"
+                            height="20"
+                            aria-hidden="true">
+
+                            <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z" />
+
+                        </svg>
+
                     </a>
 
                 <?php endif; ?>
 
 
-                <!-- DELETE POST -->
                 <?php if (
                     $isLoggedIn &&
                     (int) $post["user_id"] === $user_id
@@ -417,248 +459,46 @@ if ($isLoggedIn) {
             </div>
 
 
-            
-<!-- COMMENTS -->
-<section class="post-detail-comments">
+            <!-- COMMENTS -->
+            <section class="post-detail-comments">
 
-<h2>Comments</h2>
+                <h2>Comments</h2>
 
-<div class="post-detail-comment-list">
+                <div class="post-detail-comment-list">
 
-    <?php if (!empty($comments)): ?>
+                    <?php if (!empty($comments)): ?>
 
-        <?php foreach ($comments as $comment): ?>
-
-            <?php
-            $commentId = (int) $comment["comment_id"];
-            $replies = $commentModel->getRepliesByCommentId($commentId);
-
-            $hasLiked = $isLoggedIn
-                ? $commentModel->hasUserLikedComment($commentId, $user_id)
-                : false;
-
-            $likeCount = $commentModel->getCommentLikeCount($commentId);
-            ?>
-
-            <article
-                class="post-detail-comment"
-                data-comment-id="<?= $commentId ?>">
-
-                <a
-                    href="profile.php?id=<?= (int) $comment["user_id"] ?>"
-                    class="comment-avatar-link">
-
-                    <img
-                        class="comment-avatar"
-                        src="<?= htmlspecialchars(
-                            !empty($comment["profile_image"])
-                                ? $comment["profile_image"]
-                                : "images/default-profile.jpg",
-                            ENT_QUOTES,
-                            "UTF-8"
-                        ) ?>"
-                        alt="<?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
-
-                </a>
-
-                <div class="comment-content">
-
-                    <!-- COMMENT META -->
-                    <div class="comment-meta">
-
-                        <strong>
-                            <a
-                                href="profile.php?id=<?= (int) $comment["user_id"] ?>"
-                                class="comment-author-link">
-
-                                <?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>
-
-                            </a>
-                        </strong>
-
-                        <span>
-                            <?= htmlspecialchars(date("j M", strtotime($comment["created_at"])), ENT_QUOTES, "UTF-8") ?>
-                        </span>
-
-                        <?php if (
-                            $isLoggedIn &&
-                            (int) $comment["user_id"] === $user_id
-                        ): ?>
-
-                            <form
-                                action="comment_delete.php"
-                                method="POST"
-                                class="delete-comment-form">
-
-                                <input type="hidden" name="comment_id" value="<?= $commentId ?>">
-                                <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-                                <input type="hidden" name="return_to" value="post">
-
-                                <button type="submit" class="delete-comment-button">
-                                    Delete
-                                </button>
-
-                            </form>
-
-                        <?php elseif ($isLoggedIn): ?>
-
-                            <button
-                                type="button"
-                                class="report-button"
-                                data-report-type="comment"
-                                data-target-id="<?= $commentId ?>">
-
-                                Report
-
-                            </button>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                    <!-- COMMENT TEXT -->
-                    <?php if ($comment["comment"] !== ""): ?>
-
-                        <p>
-                            <?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?>
-                        </p>
-
-                    <?php endif; ?>
-
-                    <!-- COMMENT MEDIA -->
-                    <?php if (!empty($comment["media_file"])): ?>
-
-                        <?php
-                        $commentImage = "uploads/comments/" .
-                            rawurlencode(basename($comment["media_file"]));
-                        ?>
-
-                        <a
-                            href="<?= htmlspecialchars($commentImage, ENT_QUOTES, "UTF-8") ?>"
-                            target="_blank"
-                            rel="noopener noreferrer">
-
-                            <img
-                                class="post-comment-media"
-                                src="<?= htmlspecialchars($commentImage, ENT_QUOTES, "UTF-8") ?>"
-                                alt="Comment attachment"
-                                loading="lazy">
-
-                        </a>
-
-                    <?php endif; ?>
-
-                    <!-- COMMENT ACTIONS -->
-                    <div class="comment-actions">
-
-                        <?php if ($isLoggedIn): ?>
-
-                            <form
-                                action="comment_like.php"
-                                method="POST"
-                                class="comment-like-form">
-
-                                <input type="hidden" name="comment_id" value="<?= $commentId ?>">
-                                <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                                <input type="hidden" name="return_to" value="post">
-                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-
-                                <button
-                                    type="submit"
-                                    class="comment-like-button <?= $hasLiked ? "active" : "" ?>"
-                                    aria-label="<?= $hasLiked ? "Unlike comment" : "Like comment" ?>"
-                                    aria-pressed="<?= $hasLiked ? "true" : "false" ?>">
-
-                                    <?= $hasLiked ? "♥" : "♡" ?>
-
-                                </button>
-
-                                <span class="comment-like-count"><?= $likeCount ?></span>
-
-                            </form>
-
-                            <button
-                                type="button"
-                                class="reply-toggle-button"
-                                data-comment-id="<?= $commentId ?>">
-
-                                Reply
-
-                            </button>
-
-                        <?php else: ?>
-
-                            <a href="login.php" class="comment-login-link">
-                                Log in to like or reply
-                            </a>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                    <!-- REPLY FORM -->
-                    <?php if ($isLoggedIn): ?>
-
-                        <form
-                            action="comment_post.php"
-                            method="POST"
-                            class="comment-reply-form"
-                            data-parent-comment-id="<?= $commentId ?>"
-                            hidden>
-
-                            <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                            <input type="hidden" name="parent_comment_id" value="<?= $commentId ?>">
-                            <input type="hidden" name="return_to" value="post">
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-
-                            <textarea
-                                name="comment"
-                                placeholder="Write a reply..."
-                                maxlength="1000"
-                                required></textarea>
-
-                            <button type="submit">
-                                Reply
-                            </button>
-
-                        </form>
-
-                    <?php endif; ?>
-
-                    <!-- EXISTING REPLIES -->
-                    <div class="comment-replies">
-
-                        <?php foreach ($replies as $reply): ?>
+                        <?php foreach ($comments as $comment): ?>
 
                             <?php
-                            $replyId = (int) $reply["comment_id"];
+                            $commentId = (int) $comment["comment_id"];
+                            $replies = $commentModel->getRepliesByCommentId($commentId);
 
-                            $replyHasLiked = $isLoggedIn
-                                ? $commentModel->hasUserLikedComment($replyId, $user_id)
+                            $hasLiked = $isLoggedIn
+                                ? $commentModel->hasUserLikedComment($commentId, $user_id)
                                 : false;
 
-                            $replyLikeCount = $commentModel->getCommentLikeCount($replyId);
+                            $likeCount = $commentModel->getCommentLikeCount($commentId);
                             ?>
 
                             <article
-                                class="post-detail-comment post-detail-reply"
-                                data-comment-id="<?= $replyId ?>">
+                                class="post-detail-comment"
+                                data-comment-id="<?= $commentId ?>">
 
                                 <a
-                                    href="profile.php?id=<?= (int) $reply["user_id"] ?>"
+                                    href="profile.php?id=<?= (int) $comment["user_id"] ?>"
                                     class="comment-avatar-link">
 
                                     <img
                                         class="comment-avatar"
                                         src="<?= htmlspecialchars(
-                                            !empty($reply["profile_image"])
-                                                ? $reply["profile_image"]
+                                            !empty($comment["profile_image"])
+                                                ? $comment["profile_image"]
                                                 : "images/default-profile.jpg",
                                             ENT_QUOTES,
                                             "UTF-8"
                                         ) ?>"
-                                        alt="<?= htmlspecialchars($reply["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
+                                        alt="<?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
 
                                 </a>
 
@@ -668,21 +508,21 @@ if ($isLoggedIn) {
 
                                         <strong>
                                             <a
-                                                href="profile.php?id=<?= (int) $reply["user_id"] ?>"
+                                                href="profile.php?id=<?= (int) $comment["user_id"] ?>"
                                                 class="comment-author-link">
 
-                                                <?= htmlspecialchars($reply["username"], ENT_QUOTES, "UTF-8") ?>
+                                                <?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>
 
                                             </a>
                                         </strong>
 
                                         <span>
-                                            <?= htmlspecialchars(date("j M", strtotime($reply["created_at"])), ENT_QUOTES, "UTF-8") ?>
+                                            <?= htmlspecialchars(date("j M", strtotime($comment["created_at"])), ENT_QUOTES, "UTF-8") ?>
                                         </span>
 
                                         <?php if (
                                             $isLoggedIn &&
-                                            (int) $reply["user_id"] === $user_id
+                                            (int) $comment["user_id"] === $user_id
                                         ): ?>
 
                                             <form
@@ -690,7 +530,7 @@ if ($isLoggedIn) {
                                                 method="POST"
                                                 class="delete-comment-form">
 
-                                                <input type="hidden" name="comment_id" value="<?= $replyId ?>">
+                                                <input type="hidden" name="comment_id" value="<?= $commentId ?>">
                                                 <input type="hidden" name="post_id" value="<?= $post_id ?>">
                                                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
                                                 <input type="hidden" name="return_to" value="post">
@@ -707,7 +547,7 @@ if ($isLoggedIn) {
                                                 type="button"
                                                 class="report-button"
                                                 data-report-type="comment"
-                                                data-target-id="<?= $replyId ?>">
+                                                data-target-id="<?= $commentId ?>">
 
                                                 Report
 
@@ -717,42 +557,244 @@ if ($isLoggedIn) {
 
                                     </div>
 
-                                    <p>
-                                        <?= nl2br(htmlspecialchars($reply["comment"], ENT_QUOTES, "UTF-8")) ?>
-                                    </p>
+                                    <?php if ($comment["comment"] !== ""): ?>
 
-                                    <!-- REPLY LIKE -->
-                                    <?php if ($isLoggedIn): ?>
+                                        <p>
+                                            <?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?>
+                                        </p>
 
-                                        <div class="comment-actions">
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($comment["media_file"])): ?>
+
+                                        <?php
+                                        $commentImage = "uploads/comments/" .
+                                            rawurlencode(basename($comment["media_file"]));
+                                        ?>
+
+                                        <a
+                                            href="<?= htmlspecialchars($commentImage, ENT_QUOTES, "UTF-8") ?>"
+                                            target="_blank"
+                                            rel="noopener noreferrer">
+
+                                            <img
+                                                class="post-comment-media"
+                                                src="<?= htmlspecialchars($commentImage, ENT_QUOTES, "UTF-8") ?>"
+                                                alt="Comment attachment"
+                                                loading="lazy">
+
+                                        </a>
+
+                                    <?php endif; ?>
+
+                                    <div class="comment-actions">
+
+                                        <?php if ($isLoggedIn): ?>
 
                                             <form
                                                 action="comment_like.php"
                                                 method="POST"
                                                 class="comment-like-form">
 
-                                                <input type="hidden" name="comment_id" value="<?= $replyId ?>">
+                                                <input type="hidden" name="comment_id" value="<?= $commentId ?>">
                                                 <input type="hidden" name="post_id" value="<?= $post_id ?>">
                                                 <input type="hidden" name="return_to" value="post">
                                                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
 
                                                 <button
                                                     type="submit"
-                                                    class="comment-like-button <?= $replyHasLiked ? "active" : "" ?>"
-                                                    aria-label="<?= $replyHasLiked ? "Unlike reply" : "Like reply" ?>"
-                                                    aria-pressed="<?= $replyHasLiked ? "true" : "false" ?>">
+                                                    class="comment-like-button <?= $hasLiked ? "active" : "" ?>"
+                                                    aria-label="<?= $hasLiked ? "Unlike comment" : "Like comment" ?>"
+                                                    aria-pressed="<?= $hasLiked ? "true" : "false" ?>">
 
-                                                    <?= $replyHasLiked ? "♥" : "♡" ?>
+                                                    <?= $hasLiked ? "♥" : "♡" ?>
 
                                                 </button>
 
-                                                <span class="comment-like-count"><?= $replyLikeCount ?></span>
+                                                <span class="comment-like-count"><?= $likeCount ?></span>
 
                                             </form>
 
-                                        </div>
+                                            <button
+                                                type="button"
+                                                class="reply-toggle-button"
+                                                data-comment-id="<?= $commentId ?>">
+
+                                                Reply
+
+                                            </button>
+
+                                        <?php else: ?>
+
+                                            <a href="login.php" class="comment-login-link">
+                                                Log in to like or reply
+                                            </a>
+
+                                        <?php endif; ?>
+
+                                    </div>
+
+                                    <?php if ($isLoggedIn): ?>
+
+                                        <form
+                                            action="comment_post.php"
+                                            method="POST"
+                                            class="comment-reply-form"
+                                            data-parent-comment-id="<?= $commentId ?>"
+                                            hidden>
+
+                                            <input type="hidden" name="post_id" value="<?= $post_id ?>">
+                                            <input type="hidden" name="parent_comment_id" value="<?= $commentId ?>">
+                                            <input type="hidden" name="return_to" value="post">
+                                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+
+                                            <textarea
+                                                name="comment"
+                                                placeholder="Write a reply..."
+                                                maxlength="1000"
+                                                required></textarea>
+
+                                            <button type="submit">
+                                                Reply
+                                            </button>
+
+                                        </form>
 
                                     <?php endif; ?>
+
+                                    <div class="comment-replies">
+
+                                        <?php foreach ($replies as $reply): ?>
+
+                                            <?php
+                                            $replyId = (int) $reply["comment_id"];
+
+                                            $replyHasLiked = $isLoggedIn
+                                                ? $commentModel->hasUserLikedComment($replyId, $user_id)
+                                                : false;
+
+                                            $replyLikeCount = $commentModel->getCommentLikeCount($replyId);
+                                            ?>
+
+                                            <article
+                                                class="post-detail-comment post-detail-reply"
+                                                data-comment-id="<?= $replyId ?>">
+
+                                                <a
+                                                    href="profile.php?id=<?= (int) $reply["user_id"] ?>"
+                                                    class="comment-avatar-link">
+
+                                                    <img
+                                                        class="comment-avatar"
+                                                        src="<?= htmlspecialchars(
+                                                            !empty($reply["profile_image"])
+                                                                ? $reply["profile_image"]
+                                                                : "images/default-profile.jpg",
+                                                            ENT_QUOTES,
+                                                            "UTF-8"
+                                                        ) ?>"
+                                                        alt="<?= htmlspecialchars($reply["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
+
+                                                </a>
+
+                                                <div class="comment-content">
+
+                                                    <div class="comment-meta">
+
+                                                        <strong>
+                                                            <a
+                                                                href="profile.php?id=<?= (int) $reply["user_id"] ?>"
+                                                                class="comment-author-link">
+
+                                                                <?= htmlspecialchars($reply["username"], ENT_QUOTES, "UTF-8") ?>
+
+                                                            </a>
+                                                        </strong>
+
+                                                        <span>
+                                                            <?= htmlspecialchars(date("j M", strtotime($reply["created_at"])), ENT_QUOTES, "UTF-8") ?>
+                                                        </span>
+
+                                                        <?php if (
+                                                            $isLoggedIn &&
+                                                            (int) $reply["user_id"] === $user_id
+                                                        ): ?>
+
+                                                            <form
+                                                                action="comment_delete.php"
+                                                                method="POST"
+                                                                class="delete-comment-form">
+
+                                                                <input type="hidden" name="comment_id" value="<?= $replyId ?>">
+                                                                <input type="hidden" name="post_id" value="<?= $post_id ?>">
+                                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                                                                <input type="hidden" name="return_to" value="post">
+
+                                                                <button type="submit" class="delete-comment-button">
+                                                                    Delete
+                                                                </button>
+
+                                                            </form>
+
+                                                        <?php elseif ($isLoggedIn): ?>
+
+                                                            <button
+                                                                type="button"
+                                                                class="report-button"
+                                                                data-report-type="comment"
+                                                                data-target-id="<?= $replyId ?>">
+
+                                                                Report
+
+                                                            </button>
+
+                                                        <?php endif; ?>
+
+                                                    </div>
+
+                                                    <p>
+                                                        <?= nl2br(htmlspecialchars($reply["comment"], ENT_QUOTES, "UTF-8")) ?>
+                                                    </p>
+
+                                                    <?php if ($isLoggedIn): ?>
+
+                                                        <div class="comment-actions">
+
+                                                            <form
+                                                                action="comment_like.php"
+                                                                method="POST"
+                                                                class="comment-like-form">
+
+                                                                <input type="hidden" name="comment_id" value="<?= $replyId ?>">
+                                                                <input type="hidden" name="post_id" value="<?= $post_id ?>">
+                                                                <input type="hidden" name="return_to" value="post">
+                                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+
+                                                                <button
+                                                                    type="submit"
+                                                                    class="comment-like-button <?= $replyHasLiked ? "active" : "" ?>"
+                                                                    aria-label="<?= $replyHasLiked ? "Unlike reply" : "Like reply" ?>"
+                                                                    aria-pressed="<?= $replyHasLiked ? "true" : "false" ?>">
+
+                                                                    <?= $replyHasLiked ? "♥" : "♡" ?>
+
+                                                                </button>
+
+                                                                <span class="comment-like-count"><?= $replyLikeCount ?></span>
+
+                                                            </form>
+
+                                                        </div>
+
+                                                    <?php endif; ?>
+
+                                                </div>
+
+                                            </article>
+
+                                        <?php endforeach; ?>
+
+                                    </div>
 
                                 </div>
 
@@ -760,104 +802,93 @@ if ($isLoggedIn) {
 
                         <?php endforeach; ?>
 
-                    </div>
+                    <?php else: ?>
+
+                        <p class="post-detail-no-comments">
+                            No comments yet. Be the first to comment.
+                        </p>
+
+                    <?php endif; ?>
 
                 </div>
 
-            </article>
+                <?php if ((int) $post["comment_count"] > count($comments)): ?>
 
-        <?php endforeach; ?>
+                    <button
+                        type="button"
+                        class="load-more-comments-button"
+                        data-post-id="<?= (int) $post_id ?>"
+                        data-offset="<?= count($comments) ?>">
 
-    <?php else: ?>
+                        Show more comments
 
-        <p class="post-detail-no-comments">
-            No comments yet. Be the first to comment.
-        </p>
+                    </button>
 
-    <?php endif; ?>
+                <?php endif; ?>
 
-</div>
+                <?php if ($isLoggedIn): ?>
 
-<!-- LOAD MORE COMMENTS -->
-<?php if ((int) $post["comment_count"] > count($comments)): ?>
+                    <form
+                        action="comment_post.php"
+                        method="POST"
+                        enctype="multipart/form-data"
+                        class="post-detail-comment-form">
 
-    <button
-        type="button"
-        class="load-more-comments-button"
-        data-post-id="<?= (int) $post_id ?>"
-        data-offset="<?= count($comments) ?>">
+                        <input type="hidden" name="post_id" value="<?= $post_id ?>">
+                        <input type="hidden" name="return_to" value="post">
+                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
 
-        Show more comments
+                        <input
+                            type="text"
+                            name="comment"
+                            placeholder="Add a comment..."
+                            maxlength="1000">
 
-    </button>
+                        <label class="comment-upload-button" title="Add image or GIF">
 
-<?php endif; ?>
+                            📷
 
-<!-- ADD COMMENT -->
-<?php if ($isLoggedIn): ?>
+                            <input
+                                type="file"
+                                name="comment_media"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                class="comment-media-input"
+                                hidden>
 
-    <form
-        action="comment_post.php"
-        method="POST"
-        enctype="multipart/form-data"
-        class="post-detail-comment-form">
+                        </label>
 
-        <input type="hidden" name="post_id" value="<?= $post_id ?>">
-        <input type="hidden" name="return_to" value="post">
-        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                        <button type="submit" aria-label="Post comment">
+                            ➤
+                        </button>
 
-        <input
-            type="text"
-            name="comment"
-            placeholder="Add a comment..."
-            maxlength="1000">
+                        <div class="comment-media-preview" hidden>
 
-        <label class="comment-upload-button" title="Add image or GIF">
+                            <img
+                                class="comment-preview-image"
+                                alt="Selected attachment">
 
-            📷
+                            <button
+                                type="button"
+                                class="comment-preview-remove"
+                                aria-label="Remove selected image">
 
-            <input
-                type="file"
-                name="comment_media"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                class="comment-media-input"
-                hidden>
+                                ×
 
-        </label>
+                            </button>
 
-        <button type="submit" aria-label="Post comment">
-            ➤
-        </button>
+                        </div>
 
-        <div class="comment-media-preview" hidden>
+                    </form>
 
-            <img
-                class="comment-preview-image"
-                alt="Selected attachment">
+                <?php else: ?>
 
-            <button
-                type="button"
-                class="comment-preview-remove"
-                aria-label="Remove selected image">
+                    <p>
+                        <a href="register.php">Create an account</a> to join the conversation.
+                    </p>
 
-                ×
+                <?php endif; ?>
 
-            </button>
-
-        </div>
-
-    </form>
-
-<?php else: ?>
-
-    <p>
-        <a href="login.php">Log in</a> to join the conversation.
-    </p>
-
-<?php endif; ?>
-
-</section>
-
+            </section>
 
         </article>
 

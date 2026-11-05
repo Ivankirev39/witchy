@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/config/bootstrap.php";
 require_once __DIR__ . "/includes/session.php";
@@ -71,15 +72,6 @@ $engagementCondition = "";
 $countJoins = "";
 $scoreSql = "0";
 
-/*
- * TRENDING:
- * Likes = 1 point.
- * Comments = 3 points.
- * Only engagement from the last 48 hours counts.
- *
- * Posts must have at least one recent like or comment.
- * Pinned posts do not bypass this requirement.
- */
 if ($tab === "hot") {
     $engagementJoins = "
         LEFT JOIN (
@@ -120,7 +112,6 @@ if ($tab === "hot") {
     ";
 }
 
-/* POPULAR: ALL-TIME ENGAGEMENT */
 elseif ($tab === "popular") {
     $engagementJoins = "
         LEFT JOIN (
@@ -203,6 +194,19 @@ $sql = "
         p.is_sticky,
         u.username,
         $scoreSql AS engagement_score,
+
+        (
+            SELECT COUNT(*)
+            FROM post_like pl
+            WHERE pl.post_id = p.post_id
+        ) AS like_count,
+
+        (
+            SELECT COUNT(*)
+            FROM comment c
+            WHERE c.post_id = p.post_id
+            AND c.deleted_at IS NULL
+        ) AS comment_count,
 
         (
             SELECT pm.file
@@ -345,7 +349,6 @@ require_once __DIR__ . "/includes/public-header.php";
         <?php endif; ?>
     </header>
 
-    <!-- DISCOVERY TABS -->
     <nav class="public-explore-tabs" aria-label="Explore post categories">
 
         <a
@@ -386,7 +389,6 @@ require_once __DIR__ . "/includes/public-header.php";
 
     </nav>
 
-    <!-- SEARCH -->
     <form class="public-explore-search" action="<?= BASE_URL ?>public-explore.php" method="GET">
 
         <input
@@ -420,7 +422,6 @@ require_once __DIR__ . "/includes/public-header.php";
 
     </form>
 
-    <!-- TOPIC FILTERS -->
     <nav class="explore-topics" aria-label="Browse topics">
 
         <a
@@ -468,7 +469,6 @@ require_once __DIR__ . "/includes/public-header.php";
 
     </nav>
 
-    <!-- SORT: ALL POSTS ONLY -->
     <?php if ($tab === "all"): ?>
 
         <div class="explore-sort">
@@ -513,7 +513,6 @@ require_once __DIR__ . "/includes/public-header.php";
 
     <?php endif; ?>
 
-    <!-- POSTS -->
     <section class="explore-content" aria-label="Explore posts">
 
         <div class="explore-grid">
@@ -668,7 +667,7 @@ require_once __DIR__ . "/includes/public-header.php";
 
                             <?php endif; ?>
 
-                            <div class="explore-cards-meta">
+                            <div class="explore-cards-topic-row">
 
                                 <?php if (!empty($post["topic"])): ?>
 
@@ -676,11 +675,51 @@ require_once __DIR__ . "/includes/public-header.php";
                                         <?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?>
                                     </span>
 
-                                <?php else: ?>
-
-                                    <span></span>
-
                                 <?php endif; ?>
+
+                            </div>
+
+                            <div class="explore-cards-meta">
+
+                                <div class="explore-cards-engagement">
+
+                                    <span
+                                        class="explore-engagement-item"
+                                        aria-label="<?= (int) $post["like_count"] ?> likes"
+                                    >
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke-width="1.8"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/>
+                                        </svg>
+
+                                        <?= (int) $post["like_count"] ?>
+                                    </span>
+
+                                    <span
+                                        class="explore-engagement-item"
+                                        aria-label="<?= (int) $post["comment_count"] ?> comments"
+                                    >
+                                        <svg
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke-width="1.8"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            aria-hidden="true"
+                                        >
+                                            <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/>
+                                        </svg>
+
+                                        <?= (int) $post["comment_count"] ?>
+                                    </span>
+
+                                </div>
 
                                 <time
                                     class="explore-cards-date"
@@ -703,7 +742,6 @@ require_once __DIR__ . "/includes/public-header.php";
 
     </section>
 
-    <!-- PAGINATION -->
     <?php if ($totalPages > 1): ?>
 
         <nav class="explore-pagination" aria-label="Explore pages">
