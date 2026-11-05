@@ -64,23 +64,24 @@ class Comment
 
     public function getCommentsForPosts(
         array $postIds,
-        int $perPost = 5
+        int $perPost = 5,
+        int $userId = 0
     ): array {
         $postIds = array_values(array_filter(
             array_map("intval", $postIds),
             static fn(int $postId): bool => $postId > 0
         ));
-
+    
         if ($postIds === []) {
             return [];
         }
-
+    
         $perPost = max(1, min($perPost, 50));
         $placeholders = implode(
             ",",
             array_fill(0, count($postIds), "?")
         );
-
+    
         $sql = "
             SELECT
                 comment_id,
@@ -90,7 +91,11 @@ class Comment
                 media_file,
                 media_type,
                 created_at,
-                username
+                username,
+                profile_image,
+                reply_count,
+                like_count,
+                user_liked
             FROM (
                 SELECT
                     v.comment_id,
@@ -101,27 +106,51 @@ class Comment
                     v.media_type,
                     v.created_at,
                     v.author_username AS username,
+                    u.profile_image,
+                    (
+                        SELECT COUNT(*)
+                        FROM comment replies
+                        WHERE replies.parent_comment_id = v.comment_id
+                          AND replies.deleted_at IS NULL
+                    ) AS reply_count,
+                    (
+                        SELECT COUNT(*)
+                        FROM comment_like cl
+                        WHERE cl.comment_id = v.comment_id
+                    ) AS like_count,
+                    (
+                        SELECT COUNT(*)
+                        FROM comment_like cl
+                        WHERE cl.comment_id = v.comment_id
+                          AND cl.user_id = ?
+                    ) AS user_liked,
                     ROW_NUMBER() OVER (
                         PARTITION BY v.post_id
                         ORDER BY v.created_at ASC, v.comment_id ASC
                     ) AS comment_rank
                 FROM v_latest_comments v
+                INNER JOIN comment c
+                    ON c.comment_id = v.comment_id
+                INNER JOIN users u
+                    ON u.user_id = v.user_id
                 WHERE v.post_id IN ($placeholders)
+                  AND c.parent_comment_id IS NULL
             ) ranked_comments
             WHERE comment_rank <= ?
             ORDER BY post_id ASC, created_at ASC, comment_id ASC
         ";
-
+    
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([...$postIds, $perPost]);
-
+        $stmt->execute([$userId, ...$postIds, $perPost]);
+    
         $commentsByPost = [];
-
+    
         foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $comment) {
             $commentsByPost[(int) $comment["post_id"]][] = $comment;
         }
-
+    
         return $commentsByPost;
+    
     }
 
     public function createComment(
@@ -343,6 +372,60 @@ class Comment
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$parentCommentId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getReplyCountByCommentId(int $parentCommentId): int
+    {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*)
+            FROM comment
+            WHERE parent_comment_id = ?
+            AND deleted_at IS NULL
+        ");
+
+        $stmt->execute([$parentCommentId]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    public function getRepliesByCommentIdPaginated(
+        int $parentCommentId,
+        int $limit = 3,
+        int $offset = 0
+    ): array {
+        $limit = max(1, min($limit, 20));
+        $offset = max(0, $offset);
+
+        $sql = "
+            SELECT
+                c.comment_id,
+                c.post_id,
+                c.user_id,
+                c.parent_comment_id,
+                c.comment,
+                c.media_file,
+                c.media_type,
+                c.created_at,
+                u.username,
+                u.profile_image
+            FROM comment c
+            INNER JOIN users u
+                ON u.user_id = c.user_id
+            WHERE c.parent_comment_id = ?
+            AND c.deleted_at IS NULL
+            ORDER BY c.created_at ASC, c.comment_id ASC
+            LIMIT ? OFFSET ?
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->bindValue(1, $parentCommentId, PDO::PARAM_INT);
+        $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+        $stmt->bindValue(3, $offset, PDO::PARAM_INT);
+
+        $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
