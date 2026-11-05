@@ -1185,3 +1185,329 @@ html.dark-mode .report-message.error {
     opacity: 0.6;
     cursor: wait;
 }
+
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 9px;
+}
+
+.comment-like-form {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+}
+
+.comment-like-button {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.comment-like-button:hover {
+    background: var(--accent-soft);
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.comment-like-button.active {
+    color: #b64d72;
+}
+
+.comment-like-button:active {
+    transform: scale(0.92);
+}
+
+.comment-like-count {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.reply-toggle-button {
+    padding: 5px 9px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--brand-plum);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.reply-toggle-button:hover {
+    background: var(--accent-soft);
+    color: var(--primary);
+}
+
+.reply-toggle-button:focus-visible,
+.comment-like-button:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+}
+
+.comment-login-link {
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-decoration: none;
+}
+
+.comment-login-link:hover {
+    color: var(--primary);
+}
+
+.comment-replies {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 12px;
+    margin-left: 2px;
+    padding-left: 16px;
+    border-left: 2px solid var(--accent-soft);
+}
+
+.post-detail-reply {
+    gap: 9px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.post-detail-reply:last-child {
+    padding-bottom: 2px;
+    border-bottom: none;
+}
+
+.post-detail-reply .comment-avatar {
+    width: 30px;
+    height: 30px;
+}
+
+.post-detail-reply .comment-meta {
+    margin-bottom: 4px;
+}
+
+.post-detail-reply .comment-meta strong {
+    font-size: 11px;
+}
+
+.post-detail-reply .comment-content p {
+    font-size: 12px;
+}
+
+.post-detail-reply .comment-actions {
+    margin-top: 5px;
+}
+
+.comment-reply-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 9px;
+    margin-top: 12px;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+}
+
+.comment-reply-form[hidden] {
+    display: none;
+}
+
+.comment-reply-form textarea {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    max-height: 120px;
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    background: var(--input-background);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.5;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.comment-reply-form textarea::placeholder {
+    color: var(--placeholder);
+}
+
+.comment-reply-form textarea:focus {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.comment-reply-form button {
+    min-height: 38px;
+    flex-shrink: 0;
+    padding: 0 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.comment-reply-form button:hover {
+    background: var(--brand-black);
+    transform: translateY(-1px);
+}
+
+.comment-reply-form button:active {
+    transform: translateY(0);
+}
+
+.comment-reply-form button:disabled,
+.comment-like-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.post-detail-reply .delete-comment-form {
+    margin-left: auto;
+}
+
+.post-detail-reply .delete-comment-button {
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+}
+
+.post-detail-reply .report-button {
+    padding: 4px 6px;
+    font-size: 10px;
+}
+
+html.dark-mode .comment-like-button {
+    color: #aaa2aa;
+}
+
+html.dark-mode .comment-like-button:hover {
+    background: #332f38;
+    color: #e1c3e6;
+}
+
+html.dark-mode .comment-like-button.active {
+    color: #e58aa9;
+}
+
+html.dark-mode .comment-like-count {
+    color: #aaa2aa;
+}
+
+html.dark-mode .reply-toggle-button {
+    color: #d9b7df;
+}
+
+html.dark-mode .reply-toggle-button:hover {
+    background: #332f38;
+    color: #f1e8dc;
+}
+
+html.dark-mode .comment-login-link {
+    color: #aaa2aa;
+}
+
+html.dark-mode .comment-login-link:hover {
+    color: #e1c3e6;
+}
+
+html.dark-mode .comment-replies {
+    border-left-color: #493b4d;
+}
+
+html.dark-mode .post-detail-reply {
+    border-bottom-color: #343039;
+}
+
+html.dark-mode .comment-reply-form {
+    border-color: #403b45;
+    background: #242229;
+}
+
+html.dark-mode .comment-reply-form textarea {
+    border-color: #403b45;
+    background: #1f1d24;
+    color: #f1e8dc;
+}
+
+html.dark-mode .comment-reply-form textarea::placeholder {
+    color: #8f8991;
+}
+
+html.dark-mode .comment-reply-form textarea:focus {
+    border-color: #806b84;
+    box-shadow: 0 0 0 3px #493b4d;
+}
+
+html.dark-mode .comment-reply-form button {
+    background: #c084cc;
+    color: #100e12;
+}
+
+html.dark-mode .comment-reply-form button:hover {
+    background: #c5a6ca;
+}
+
+@media (max-width: 500px) {
+    .comment-replies {
+        margin-left: 0;
+        padding-left: 11px;
+    }
+
+    .post-detail-reply {
+        gap: 8px;
+    }
+
+    .post-detail-reply .comment-avatar {
+        width: 27px;
+        height: 27px;
+    }
+
+    .comment-reply-form {
+        gap: 7px;
+        padding: 8px;
+    }
+
+    .comment-reply-form textarea {
+        min-height: 40px;
+        padding: 9px;
+        font-size: 12px;
+    }
+
+    .comment-reply-form button {
+        min-height: 36px;
+        padding: 0 11px;
+    }
+
+    .comment-actions {
+        gap: 10px;
+    }
+}

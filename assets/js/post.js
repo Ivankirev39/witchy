@@ -658,3 +658,257 @@ document.querySelector(
     });
 })();
 
+// LIKE / UNLIKE COMMENTS WITHOUT RELOADING
+document.addEventListener("submit", async (event) => {
+    const form = event.target.closest(".comment-like-form");
+
+    if (!form) return;
+
+    event.preventDefault();
+
+    const button = form.querySelector(".comment-like-button");
+    const count = form.querySelector(".comment-like-count");
+
+    if (!button || !count || button.disabled) return;
+
+    button.disabled = true;
+
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(
+                data.message || "Could not update comment like."
+            );
+        }
+
+        // Update the button state.
+        button.classList.toggle("active", data.liked);
+        button.setAttribute("aria-pressed", String(data.liked));
+
+        // Update the heart icon.
+        button.textContent = data.liked ? "♥" : "♡";
+
+        // Update the like count.
+        count.textContent = data.like_count;
+
+    } catch (error) {
+        console.error("Comment like error:", error);
+        alert(error.message || "Something went wrong. Please try again.");
+    } finally {
+        button.disabled = false;
+    }
+});
+
+
+
+// REPLY TO COMMENTS
+document.addEventListener("click", (event) => {
+    const button = event.target.closest(".reply-toggle-button");
+
+    if (!button) return;
+
+    const comment = button.closest(".post-detail-comment");
+    const form = comment?.querySelector(":scope > .comment-content > .comment-reply-form");
+
+    if (!form) return;
+
+    form.hidden = !form.hidden;
+
+    if (!form.hidden) {
+        form.querySelector("textarea")?.focus();
+    }
+});
+
+
+// SUBMIT REPLY WITHOUT RELOADING
+document.addEventListener("submit", async (event) => {
+    const form = event.target.closest(".comment-reply-form");
+
+    if (!form) return;
+
+    event.preventDefault();
+
+    const button = form.querySelector('button[type="submit"]');
+    const textarea = form.querySelector("textarea");
+    const comment = form.closest(".post-detail-comment");
+    const repliesContainer = comment?.querySelector(":scope > .comment-content > .comment-replies");
+
+    if (!button || !textarea || !repliesContainer) return;
+
+    if (!textarea.value.trim()) {
+        textarea.focus();
+        return;
+    }
+
+    button.disabled = true;
+
+    try {
+        const response = await fetch(form.action, {
+            method: "POST",
+            body: new FormData(form),
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "Accept": "application/json"
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Could not post reply.");
+        }
+
+        const reply = document.createElement("article");
+        reply.className = "post-detail-comment post-detail-reply";
+        reply.dataset.commentId = data.comment_id;
+
+        // AVATAR
+        const avatarLink = document.createElement("a");
+        avatarLink.href = `profile.php?id=${data.user_id}`;
+        avatarLink.className = "comment-avatar-link";
+
+        const avatar = document.createElement("img");
+        avatar.className = "comment-avatar";
+        avatar.src = data.profile_image || "images/default-profile.jpg";
+        avatar.alt = `${data.username}'s profile picture`;
+
+        avatarLink.appendChild(avatar);
+
+        // REPLY CONTENT
+        const content = document.createElement("div");
+        content.className = "comment-content";
+
+        // META
+        const meta = document.createElement("div");
+        meta.className = "comment-meta";
+
+        const author = document.createElement("strong");
+        const authorLink = document.createElement("a");
+
+        authorLink.href = `profile.php?id=${data.user_id}`;
+        authorLink.className = "comment-author-link";
+        authorLink.textContent = data.username;
+
+        author.appendChild(authorLink);
+
+        const date = document.createElement("span");
+        const parsedDate = new Date(data.created_at.replace(" ", "T"));
+
+        date.textContent = parsedDate.toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short"
+        });
+
+        meta.append(author, date);
+
+        // DELETE FORM
+        const deleteForm = document.createElement("form");
+        deleteForm.action = "comment_delete.php";
+        deleteForm.method = "POST";
+        deleteForm.className = "delete-comment-form";
+
+        const fields = {
+            comment_id: data.comment_id,
+            post_id: form.querySelector('[name="post_id"]').value,
+            csrf_token: form.querySelector('[name="csrf_token"]').value,
+            return_to: "post"
+        };
+
+        Object.entries(fields).forEach(([name, value]) => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = value;
+            deleteForm.appendChild(input);
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "submit";
+        deleteButton.className = "delete-comment-button";
+        deleteButton.textContent = "Delete";
+
+        deleteForm.appendChild(deleteButton);
+        meta.appendChild(deleteForm);
+
+        content.appendChild(meta);
+
+        // REPLY TEXT
+        const text = document.createElement("p");
+        text.textContent = data.comment;
+        text.style.whiteSpace = "pre-line";
+
+        content.appendChild(text);
+
+        // LIKE BUTTON
+        const actions = document.createElement("div");
+        actions.className = "comment-actions";
+
+        const likeForm = document.createElement("form");
+        likeForm.action = "comment_like.php";
+        likeForm.method = "POST";
+        likeForm.className = "comment-like-form";
+
+        const likeFields = {
+            comment_id: data.comment_id,
+            post_id: form.querySelector('[name="post_id"]').value,
+            return_to: "post",
+            csrf_token: form.querySelector('[name="csrf_token"]').value
+        };
+
+        Object.entries(likeFields).forEach(([name, value]) => {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            input.value = value;
+            likeForm.appendChild(input);
+        });
+
+        const likeButton = document.createElement("button");
+        likeButton.type = "submit";
+        likeButton.className = "comment-like-button";
+        likeButton.setAttribute("aria-label", "Like reply");
+        likeButton.setAttribute("aria-pressed", "false");
+        likeButton.textContent = "♡";
+
+        const likeCount = document.createElement("span");
+        likeCount.className = "comment-like-count";
+        likeCount.textContent = "0";
+
+        likeForm.append(likeButton, likeCount);
+        actions.appendChild(likeForm);
+
+        content.appendChild(actions);
+
+        reply.append(avatarLink, content);
+        repliesContainer.appendChild(reply);
+
+        // UPDATE TOTAL COMMENT COUNT
+        const commentCount = document.querySelector(
+            ".post-detail-actions .comment-icon + span"
+        );
+
+        if (commentCount) {
+            commentCount.textContent = data.comment_count;
+        }
+
+        // CLEAR AND CLOSE REPLY FORM
+        textarea.value = "";
+        form.hidden = true;
+
+    } catch (error) {
+        console.error("Reply submission error:", error);
+        alert(error.message || "Something went wrong.");
+    } finally {
+        button.disabled = false;
+    }
+});
