@@ -978,6 +978,7 @@ async function loadCommentReplies(comment, button) {
     const parentCommentId = comment.dataset.commentId;
     const csrfToken = getCommentCsrfToken(comment);
     const offset = Number(repliesContainer.dataset.offset || 0);
+    const isLoadMoreButton = button.classList.contains("load-more-replies-button");
 
     button.disabled = true;
     button.textContent = "Loading...";
@@ -1004,13 +1005,11 @@ async function loadCommentReplies(comment, button) {
         }
 
         data.replies.forEach((reply) => {
-            const replyElement = createReplyElement(
-                reply,
-                postId,
-                csrfToken
+            const replyElement = createReplyElement(reply, postId, csrfToken);
+            repliesContainer.insertBefore(
+                replyElement,
+                repliesContainer.querySelector(".load-more-replies-button")
             );
-
-            repliesContainer.appendChild(replyElement);
         });
 
         repliesContainer.dataset.loaded = "1";
@@ -1033,17 +1032,34 @@ async function loadCommentReplies(comment, button) {
             loadMoreButton.remove();
         }
 
-        button.textContent = "Hide replies";
         repliesContainer.hidden = false;
+
+        const viewButton = comment.querySelector(".view-replies-button");
+
+        if (viewButton) {
+            viewButton.textContent = "Hide replies";
+        }
 
     } catch (error) {
         console.error("Load replies error:", error);
-        button.textContent = "Try again";
-        alert(error.message);
-    } finally {
+
+        button.textContent = isLoadMoreButton
+            ? "Try again"
+            : "Try again";
+
         button.disabled = false;
+        alert(error.message);
+        return;
     }
+
+    if (!isLoadMoreButton) {
+        if (button.classList.contains("view-replies-button")) {
+            button.textContent = "Hide replies";
+        }
+    }
+    button.disabled = false;
 }
+
 
 document.addEventListener("click", async (event) => {
     const viewButton = event.target.closest(".view-replies-button");
@@ -1059,9 +1075,13 @@ document.addEventListener("click", async (event) => {
         }
 
         if (repliesContainer.dataset.loaded === "1") {
-            repliesContainer.hidden = false;
-            viewButton.textContent = "Hide replies";
-            return;
+            repliesContainer.querySelectorAll(".comment-reply").forEach(reply => reply.remove());
+
+            const loadMoreButton = repliesContainer.querySelector(".load-more-replies-button");
+            if (loadMoreButton) loadMoreButton.remove();
+
+            repliesContainer.dataset.offset = "0";
+            repliesContainer.dataset.loaded = "0";
         }
 
         await loadCommentReplies(comment, viewButton);
@@ -1075,3 +1095,4 @@ document.addEventListener("click", async (event) => {
         await loadCommentReplies(comment, moreButton);
     }
 });
+
