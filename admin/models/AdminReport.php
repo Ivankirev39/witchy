@@ -1,4 +1,3 @@
-
 <?php
 
 class AdminReport
@@ -178,8 +177,12 @@ class AdminReport
         return (int) $stmt->fetchColumn();
     }
 
-    /* Retrieve one report with its related user or comment information */
-
+    /**
+     * Retrieve one report with its related user or comment information.
+     *
+     * Deleted comments are intentionally included so administrators
+     * can still see their original content and report history.
+     */
     public function getReportById(int $reportId): array|false
     {
         $stmt = $this->conn->prepare("
@@ -206,6 +209,7 @@ class AdminReport
                 c.media_file AS comment_media_file,
                 c.media_type AS comment_media_type,
                 c.post_id,
+                c.deleted_at AS comment_deleted_at,
 
                 comment_author.user_id AS comment_author_id,
                 comment_author.username AS comment_author_username,
@@ -238,43 +242,42 @@ class AdminReport
         ");
 
         $stmt->execute([
-            "report_id" => $reportId
+            ":report_id" => $reportId
         ]);
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     /**
- * Update a pending report's moderation status.
- */
-public function updateReportStatus(
-    int $reportId,
-    string $status,
-    int $adminId
-): bool {
+     * Update a pending report's moderation status.
+     */
+    public function updateReportStatus(
+        int $reportId,
+        string $status,
+        int $adminId
+    ): bool {
 
-    // Only allow these final report statuses.
-    if (!in_array($status, ["reviewed", "dismissed"], true)) {
-        return false;
+        // Only allow these final report statuses.
+        if (!in_array($status, ["reviewed", "dismissed"], true)) {
+            return false;
+        }
+
+        $stmt = $this->conn->prepare("
+            UPDATE reports
+            SET
+                status = :status,
+                reviewed_at = NOW(),
+                reviewed_by = :reviewed_by
+            WHERE report_id = :report_id
+              AND status = 'pending'
+        ");
+
+        $stmt->execute([
+            ":status" => $status,
+            ":reviewed_by" => $adminId,
+            ":report_id" => $reportId
+        ]);
+
+        return $stmt->rowCount() === 1;
     }
-
-    $stmt = $this->conn->prepare("
-        UPDATE reports
-        SET
-            status = :status,
-            reviewed_at = NOW(),
-            reviewed_by = :reviewed_by
-        WHERE report_id = :report_id
-          AND status = 'pending'
-    ");
-
-    $stmt->execute([
-        ":status" => $status,
-        ":reviewed_by" => $adminId,
-        ":report_id" => $reportId
-    ]);
-
-    return $stmt->rowCount() === 1;
-}
-
 }

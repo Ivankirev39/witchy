@@ -1,17 +1,12 @@
-/* =========================================================
-   WITCHY ADMIN — REPORT MANAGEMENT
-   ========================================================= */
+/* ADMIN — REPORT MANAGEMENT*/
 
    .admin-reports {
     display: flex;
     flex-direction: column;
     gap: 24px;
+
     color: var(--text);
 }
-
-/* =========================================================
-   PAGE HEADING
-   ========================================================= */
 
 .reports-heading {
     display: flex;
@@ -21,6 +16,7 @@
 
 .reports-heading h2 {
     margin: 0;
+
     color: var(--text);
     font-size: 1.8rem;
     font-weight: 750;
@@ -29,6 +25,7 @@
 
 .reports-heading p {
     margin: 0;
+
     color: var(--muted);
     font-size: 0.94rem;
     line-height: 1.6;
@@ -48,12 +45,18 @@
     display: flex;
     flex-direction: column;
     gap: 9px;
+
     padding: 22px;
+
     border: 1px solid var(--border);
     border-radius: var(--radius);
+
     background: var(--surface);
     box-shadow: var(--shadow);
-    transition: border-color 0.2s ease, transform 0.2s ease;
+
+    transition:
+        border-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .report-stat-card:hover {
@@ -74,18 +77,19 @@
     letter-spacing: -0.035em;
 }
 
-/* =========================================================
-   REPORT FILTERS
-   ========================================================= */
+/* REPORT FILTERS */
 
 .reports-filters {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
     gap: 14px;
+
     padding: 20px;
+
     border: 1px solid var(--border);
     border-radius: var(--radius);
+
     background: var(--surface);
     box-shadow: var(--shadow);
 }
@@ -94,6 +98,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
+
     min-width: 150px;
     gap: 7px;
 }
@@ -110,13 +115,19 @@
     width: 100%;
     min-height: 44px;
     padding: 10px 13px;
+
     border: 1px solid var(--border);
     border-radius: 10px;
+
     background: var(--surface);
     color: var(--text);
+
     font: inherit;
     font-size: 0.88rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .filter-group select:focus,
@@ -128,13 +139,17 @@
 .reports-filters button {
     min-height: 44px;
     padding: 10px 19px;
+
     border: 0;
     border-radius: 10px;
+
     background: var(--primary);
     color: #fff;
+
     font-size: 0.88rem;
     font-weight: 650;
     cursor: pointer;
+
     transition: background 0.2s ease;
 }
 
@@ -145,8 +160,10 @@
 .reports-filters > a {
     display: inline-flex;
     align-items: center;
+
     min-height: 44px;
     padding: 0 8px;
+
     color: var(--primary-dark);
     font-size: 0.87rem;
     font-weight: 600;
@@ -157,14 +174,14 @@
     text-decoration: underline;
 }
 
-/* =========================================================
-   REPORTS TABLE
-   ========================================================= */
+/* REPORTS TABLE */
 
 .reports-table-container {
     overflow: hidden;
+
     border: 1px solid var(--border);
     border-radius: var(--radius);
+
     background: var(--surface);
     box-shadow: var(--shadow);
 }
@@ -174,13 +191,16 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+
     padding: 20px 22px;
+
     border-bottom: 1px solid var(--border);
     background: var(--surface-soft);
 }
 
 .reports-table-heading h3 {
     margin: 0;
+
     color: var(--text);
     font-size: 1.08rem;
     font-weight: 700;
@@ -201,6 +221,7 @@
 .reports-table td {
     box-sizing: border-box;
     padding: 15px 16px;
+
     text-align: left;
     vertical-align: middle;
 }
@@ -208,6 +229,7 @@
 .reports-table th {
     background: var(--surface-soft);
     color: var(--muted);
+
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.055em;
@@ -217,6 +239,7 @@
 
 .reports-table td {
     border-top: 1px solid #f0ebf3;
+
     color: var(--text);
     font-size: 0.87rem;
 }
@@ -239,31 +262,38 @@
     overflow-wrap: anywhere;
 }
 
+/* Report type label */
+
 .report-type {
     display: inline-flex;
     align-items: center;
+
     margin-right: 5px;
     padding: 4px 9px;
+
     border: 1px solid var(--border);
     border-radius: 7px;
+
     background: var(--primary-soft);
     color: var(--primary-dark);
+
     font-size: 0.72rem;
     font-weight: 700;
 }
 
-/* =========================================================
-   REPORT STATUS
-   ========================================================= */
+/* REPORT STATUS */
 
 .report-status {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     width: fit-content;
     padding: 5px 11px;
+
     border: 1px solid;
     border-radius: 20px;
+
     font-size: 0.76rem;
     font-weight: 700;
     line-height: 1.4;
@@ -288,24 +318,29 @@
     color: #806c8b;
 }
 
-/* =========================================================
-   VIEW REPORT LINK
-   ========================================================= */
+/* VIEW REPORT LINK */
 
 .view-report-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     padding: 8px 13px;
+
     border: 1px solid var(--border);
     border-radius: 9px;
+
     background: var(--surface-soft);
     color: var(--primary-dark);
+
     font-size: 0.81rem;
     font-weight: 650;
     text-decoration: none;
     white-space: nowrap;
-    transition: background 0.2s ease, border-color 0.2s ease;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
 }
 
 .view-report-link:hover {
@@ -314,12 +349,11 @@
     color: var(--primary-dark);
 }
 
-/* =========================================================
-   EMPTY AND ERROR STATES
-   ========================================================= */
+/* EMPTY AND ERROR STATES */
 
 .no-reports {
     padding: 40px 20px;
+
     color: var(--muted);
     text-align: center;
     font-size: 0.9rem;
@@ -327,17 +361,18 @@
 
 .reports-error {
     padding: 15px 17px;
+
     border: 1px solid #f0d6db;
     border-radius: 10px;
+
     background: #fff6f7;
     color: var(--danger);
+
     font-size: 0.9rem;
     line-height: 1.5;
 }
 
-/* =========================================================
-   PAGINATION
-   ========================================================= */
+/* REPORT PAGINATION */
 
 .reports-pagination {
     display: flex;
@@ -345,7 +380,9 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
+
     padding: 20px;
+
     border-top: 1px solid var(--border);
 }
 
@@ -353,15 +390,21 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     min-height: 36px;
     padding: 8px 14px;
+
     border: 1px solid var(--border);
     border-radius: 9px;
+
     color: var(--primary-dark);
     font-size: 0.84rem;
     font-weight: 600;
     text-decoration: none;
-    transition: background 0.2s ease;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
 }
 
 .reports-pagination a:hover {
@@ -374,9 +417,7 @@
     font-size: 0.84rem;
 }
 
-/* =========================================================
-   REPORT DETAILS PAGE
-   ========================================================= */
+/* REPORT DETAILS PAGE */
 
 .admin-report-details {
     width: 100%;
@@ -389,6 +430,7 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 20px;
+
     margin-bottom: 28px;
 }
 
@@ -403,6 +445,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
+
     color: var(--primary-dark);
     font-size: 0.88rem;
     font-weight: 650;
@@ -416,6 +459,7 @@
 
 .report-details-heading h2 {
     margin: 0;
+
     color: var(--text);
     font-size: clamp(1.7rem, 3vw, 2.1rem);
     font-weight: 750;
@@ -424,11 +468,12 @@
 
 .report-details-heading p {
     margin: 0;
+
     color: var(--muted);
     font-size: 0.94rem;
 }
 
-/* Main layout */
+/* REPORT DETAILS LAYOUT */
 
 .report-details-layout {
     display: grid;
@@ -445,19 +490,22 @@
     gap: 20px;
 }
 
-/* Panels */
+/* Content panels */
 
 .report-details-panel {
     min-width: 0;
     padding: 24px;
+
     border: 1px solid var(--border);
     border-radius: var(--radius);
+
     background: var(--surface);
     box-shadow: var(--shadow);
 }
 
 .report-details-panel h3 {
     margin: 0;
+
     color: var(--text);
     font-size: 1.05rem;
     font-weight: 700;
@@ -465,18 +513,23 @@
 
 .report-details-panel > p {
     margin: 12px 0 17px;
+
     color: var(--muted);
     font-size: 0.88rem;
     line-height: 1.6;
 }
+
+/* Panel heading */
 
 .report-details-panel-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
+
     padding-bottom: 18px;
     margin-bottom: 20px;
+
     border-bottom: 1px solid var(--border);
 }
 
@@ -493,16 +546,18 @@
 
 .report-details-panel-header p {
     margin: 0;
+
     color: var(--muted);
     font-size: 0.82rem;
 }
 
-/* Report information */
+/* REPORT INFORMATION */
 
 .report-information {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
+
     margin-bottom: 23px;
 }
 
@@ -512,15 +567,18 @@
 
 .report-information strong {
     display: block;
+
     color: var(--text);
     font-size: 0.95rem;
     font-weight: 650;
+
     overflow-wrap: anywhere;
 }
 
 .report-info-label {
     display: block;
     margin-bottom: 7px;
+
     color: var(--muted);
     font-size: 0.76rem;
     font-weight: 700;
@@ -528,12 +586,15 @@
     text-transform: uppercase;
 }
 
+/* Additional report details */
+
 .report-details-section {
     margin-top: 22px;
 }
 
 .report-details-section h4 {
     margin: 0 0 11px;
+
     color: var(--text);
     font-size: 0.91rem;
     font-weight: 700;
@@ -541,9 +602,11 @@
 
 .report-details-section p {
     margin: 0;
+
     color: var(--text);
     font-size: 0.9rem;
     line-height: 1.7;
+
     overflow-wrap: anywhere;
 }
 
@@ -553,18 +616,18 @@
     font-style: italic;
 }
 
-/* Additional report details */
-
 .report-user-details {
     color: var(--text);
     font-size: 0.9rem;
     line-height: 1.7;
+
     overflow-wrap: anywhere;
 }
 
 .report-context-date {
     display: block;
     margin-top: 7px !important;
+
     color: var(--muted) !important;
     font-size: 0.82rem !important;
 }
@@ -575,16 +638,19 @@
     font-style: italic;
 }
 
-/* Reported profile and comment author */
+/* REPORTED PROFILE AND COMMENT AUTHOR */
 
 .reported-target {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 7px;
+
     padding: 15px;
+
     border: 1px solid var(--border);
     border-radius: 11px;
+
     background: var(--surface-soft);
 }
 
@@ -596,6 +662,7 @@
     color: var(--text);
     font-size: 0.95rem;
     font-weight: 700;
+
     overflow-wrap: anywhere;
 }
 
@@ -604,7 +671,9 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
+
     margin-top: 3px;
+
     color: var(--primary-dark);
     font-size: 0.86rem;
     font-weight: 650;
@@ -617,14 +686,16 @@
     text-decoration: underline;
 }
 
-/* Sidebar */
+/* REPORT DETAILS SIDEBAR */
 
 .report-sidebar-item {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 5px;
+
     padding: 15px 0;
+
     border-bottom: 1px solid var(--border);
 }
 
@@ -646,6 +717,7 @@
     color: var(--text);
     font-size: 0.9rem;
     font-weight: 650;
+
     overflow-wrap: anywhere;
 }
 
@@ -661,20 +733,22 @@
     text-decoration: underline;
 }
 
-/* =========================================================
-   REPORTED COMMENT PREVIEW
-   ========================================================= */
+/* REPORTED COMMENT PREVIEW */
 
 .reported-comment-content {
     margin-top: 18px;
     padding: 20px;
+
     border: 1px solid var(--border);
     border-left: 4px solid var(--primary);
     border-radius: 12px;
+
     background: var(--surface-soft);
     color: var(--text);
+
     font-size: 0.92rem;
     line-height: 1.75;
+
     overflow-wrap: anywhere;
 }
 
@@ -683,6 +757,7 @@
     justify-content: space-between;
     align-items: flex-start;
     gap: 12px;
+
     margin-bottom: 16px;
 }
 
@@ -705,6 +780,7 @@
 .reported-comment-text {
     color: var(--text);
     line-height: 1.7;
+
     overflow-wrap: anywhere;
 }
 
@@ -714,21 +790,23 @@
 
 .reported-comment-media img {
     display: block;
+
     max-width: 100%;
     max-height: 360px;
+
     object-fit: contain;
     border-radius: 10px;
 }
 
-/* =========================================================
-   ORIGINAL POST PREVIEW
-   ========================================================= */
+/* ORIGINAL POST PREVIEW */
 
 .reported-original-post {
     margin-top: 24px;
     padding: 20px;
+
     border: 1px solid var(--border);
     border-radius: 12px;
+
     background: var(--surface-soft);
 }
 
@@ -751,6 +829,7 @@
 
 .reported-original-post-heading a {
     flex-shrink: 0;
+
     color: var(--primary-dark);
     font-size: 0.85rem;
     font-weight: 600;
@@ -765,15 +844,19 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px 16px;
+
     margin-top: 14px;
+
     color: var(--muted);
     font-size: 0.8rem;
 }
 
 .reported-original-post-description {
     margin-top: 18px;
+
     color: var(--text);
     line-height: 1.7;
+
     overflow-wrap: anywhere;
 }
 
@@ -782,6 +865,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 12px;
+
     margin-top: 18px;
 }
 
@@ -789,66 +873,114 @@
 .reported-original-post-gallery img,
 .reported-original-post-gallery video {
     display: block;
+
     width: 100%;
     max-height: 280px;
+
     object-fit: contain;
+
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
 }
 
-/* =========================================================
-   MODERATION ACTIONS
-   ========================================================= */
+/* xREPORT MODERATION ACTIONS */
 
-.report-details-sidebar .report-details-panel form {
+.report-comment-moderation {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+
+    padding: 20px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: var(--surface);
+    box-shadow: var(--shadow);
+}
+
+.report-comment-moderation h4 {
+    margin: 0;
+
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.report-comment-moderation p {
+    margin: 0;
+
+    color: var(--muted);
+    font-size: 0.86rem;
+    line-height: 1.6;
+}
+
+.report-comment-moderation form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-top: 17px;
+
+    margin: 0;
 }
 
-.report-details-sidebar .report-details-panel form button {
+.report-comment-moderation button {
     width: 100%;
     min-height: 44px;
     padding: 11px 15px;
+
+    border: 1px solid transparent;
     border-radius: 10px;
-    font-size: 0.87rem;
+
+    font-size: 0.86rem;
     font-weight: 650;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
 }
 
-.report-details-sidebar .report-details-panel form .admin-button {
-    border: 1px solid var(--primary);
+/* Mark as reviewed */
+
+.report-comment-moderation button.admin-button {
+    border-color: var(--primary);
     background: var(--primary);
     color: #fff;
 }
 
-.report-details-sidebar .report-details-panel form .admin-button:hover {
+.report-comment-moderation button.admin-button:hover {
     border-color: var(--primary-dark);
     background: var(--primary-dark);
 }
 
-.report-details-sidebar .report-details-panel form .admin-button-secondary {
-    border: 1px solid #e8d5d9;
+/* Dismiss report / remove comment */
+
+.report-comment-moderation button.admin-button-secondary {
+    border-color: #e8d5d9;
     background: #fff7f8;
-    color: #a94455;
+    color: var(--danger);
 }
 
-.report-details-sidebar .report-details-panel form .admin-button-secondary:hover {
+.report-comment-moderation button.admin-button-secondary:hover {
     border-color: #e5bfc7;
     background: #fcebed;
 }
 
-/* =========================================================
-   FEEDBACK MESSAGES
-   ========================================================= */
+.report-comment-moderation button:focus-visible {
+    outline: 3px solid #c7a7e0;
+    outline-offset: 3px;
+}
+
+/* FEEDBACK MESSAGES */
 
 .admin-content-success,
 .admin-content-error {
     padding: 14px 17px;
+
     border: 1px solid;
     border-radius: 11px;
+
     font-size: 0.9rem;
     line-height: 1.5;
 }
@@ -865,27 +997,30 @@
     color: var(--danger);
 }
 
-/* =========================================================
-   EMPTY REPORT STATE
-   ========================================================= */
+/* EMPTY REPORT DETAILS STATE */
 
 .report-details-empty {
     padding: 40px 25px;
+
     border: 1px solid var(--border);
     border-radius: var(--radius);
+
     background: var(--surface);
     box-shadow: var(--shadow);
+
     text-align: center;
 }
 
 .report-details-empty h3 {
     margin: 0 0 9px;
+
     color: var(--text);
     font-size: 1.1rem;
 }
 
 .report-details-empty p {
     margin: 0 0 18px;
+
     color: var(--muted);
     font-size: 0.9rem;
 }
@@ -894,10 +1029,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     padding: 10px 16px;
+
     border-radius: 10px;
+
     background: var(--primary);
     color: #fff;
+
     font-size: 0.87rem;
     font-weight: 650;
     text-decoration: none;
@@ -907,9 +1046,7 @@
     background: var(--primary-dark);
 }
 
-/* =========================================================
-   ACCESSIBILITY
-   ========================================================= */
+/* ACCESSIBILITY*/
 
 .reports-filters button:focus-visible,
 .reports-filters a:focus-visible,
@@ -923,9 +1060,7 @@
     outline-offset: 3px;
 }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
+/* RESPONSIVE — TABLET */
 
 @media (max-width: 1000px) {
     .report-stats {
@@ -957,6 +1092,8 @@
         align-items: start;
     }
 }
+
+/* RESPONSIVE — MOBILE */
 
 @media (max-width: 650px) {
     .reports-heading h2 {
@@ -1006,7 +1143,13 @@
     .report-information {
         gap: 15px;
     }
+
+    .report-comment-moderation {
+        padding: 17px;
+    }
 }
+
+/* RESPONSIVE — SMALL MOBILE */
 
 @media (max-width: 450px) {
     .report-stats {
@@ -1051,7 +1194,8 @@
     .report-stat-card,
     .view-report-link,
     .reports-pagination a,
-    .reports-table tbody tr {
+    .reports-table tbody tr,
+    .report-comment-moderation button {
         transition: none;
     }
 }

@@ -72,16 +72,17 @@ class Comment
     }
 
     public function getCommentCountByPostId(int $postId): int
-    {
-        $stmt = $this->db->prepare("
-            SELECT COUNT(*)
-            FROM comment
-            WHERE post_id = ?
-        ");
-        $stmt->execute([$postId]);
+{
+    $stmt = $this->db->prepare("
+        SELECT COUNT(*)
+        FROM comment
+        WHERE post_id = ?
+          AND deleted_at IS NULL
+    ");
+    $stmt->execute([$postId]);
 
-        return (int) $stmt->fetchColumn();
-    }
+    return (int) $stmt->fetchColumn();
+}
 
     public function getUsernameByUserId(int $userId): ?string
     {
