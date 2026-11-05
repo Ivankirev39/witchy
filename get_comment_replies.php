@@ -1,6 +1,5 @@
 <?php
-
-require_once __DIR__ . "/includes/auth.php";
+require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/models/Comment.php";
@@ -48,23 +47,29 @@ $replies = $commentModel->getRepliesByCommentIdPaginated(
 
 $replyCount = $commentModel->getReplyCountByCommentId($parentCommentId);
 
+$userId = (int) ($_SESSION["user_id"] ?? 0);
+
 $formattedReplies = [];
 
 foreach ($replies as $reply) {
+    $replyId = (int) $reply["comment_id"];
+    $replyUserId = (int) $reply["user_id"];
+
     $formattedReplies[] = [
-        "comment_id" => (int) $reply["comment_id"],
+        "comment_id" => $replyId,
         "post_id" => (int) $reply["post_id"],
-        "user_id" => (int) $reply["user_id"],
+        "user_id" => $replyUserId,
         "username" => $reply["username"],
         "profile_image" => $reply["profile_image"],
         "comment" => $reply["comment"],
         "created_at" => $reply["created_at"],
-        "like_count" => $commentModel->getCommentLikeCount((int) $reply["comment_id"]),
-        "user_liked" => $commentModel->hasUserLikedComment(
-            (int) $reply["comment_id"],
-            (int) $_SESSION["user_id"]
-        ),
-        "can_delete" => (int) $reply["user_id"] === (int) $_SESSION["user_id"]
+        "like_count" => $userId > 0
+            ? $commentModel->getCommentLikeCount($replyId)
+            : 0,
+        "user_liked" => $userId > 0
+            ? $commentModel->hasUserLikedComment($replyId, $userId)
+            : false,
+        "can_delete" => $userId > 0 && $replyUserId === $userId
     ];
 }
 

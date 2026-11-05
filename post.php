@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . "/includes/session.php";
 require_once __DIR__ . "/models/DBConnector.php";
@@ -70,7 +69,10 @@ if ($isLoggedIn) {
 }
 ?>
 
-<section class="post-detail-page" data-user-id="<?= (int) $user_id ?>">
+<section
+    class="post-detail-page"
+    data-user-id="<?= (int) $user_id ?>"
+    data-replies-csrf="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
 
     <a
         href="<?= htmlspecialchars($backUrl, ENT_QUOTES, "UTF-8") ?>"
@@ -82,11 +84,9 @@ if ($isLoggedIn) {
 
         <?php if ($mediaCount > 0): ?>
             <div class="post-detail-media">
-
                 <div class="post-detail-media-gallery post-detail-media-count-<?= $mediaCount ?>">
 
                     <?php foreach ($postMedia as $media): ?>
-
                         <?php
                         $mediaFile = basename($media["file"]);
                         $mediaPath = "uploads/posts/" . rawurlencode($mediaFile);
@@ -95,7 +95,6 @@ if ($isLoggedIn) {
                         <div class="post-detail-media-item">
 
                             <?php if ($media["media_type"] === "image"): ?>
-
                                 <img
                                     class="post-detail-image"
                                     src="<?= $mediaPath ?>"
@@ -103,7 +102,6 @@ if ($isLoggedIn) {
                                     loading="lazy">
 
                             <?php elseif ($media["media_type"] === "video"): ?>
-
                                 <video
                                     class="post-detail-video"
                                     controls
@@ -113,19 +111,15 @@ if ($isLoggedIn) {
                                     <source src="<?= $mediaPath ?>">
 
                                     Your browser does not support video playback.
-
                                 </video>
-
                             <?php endif; ?>
 
                         </div>
-
                     <?php endforeach; ?>
 
                 </div>
             </div>
         <?php endif; ?>
-
 
         <article class="post-detail-content">
 
@@ -151,30 +145,25 @@ if ($isLoggedIn) {
                     </a>
 
                     <div>
-
                         <strong>
                             <a
                                 href="profile.php?id=<?= (int) $post["user_id"] ?>"
                                 class="post-author-link">
-
                                 <?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
-
                             </a>
                         </strong>
 
                         <span class="post-detail-date">
                             <?= htmlspecialchars(date("j M Y", strtotime($post["created_at"])), ENT_QUOTES, "UTF-8") ?>
                         </span>
-
                     </div>
-                </div>
 
+                </div>
 
                 <?php if (
                     $isLoggedIn &&
                     (int) $post["user_id"] !== $user_id
                 ): ?>
-
                     <form action="follow_user.php" method="POST">
 
                         <input
@@ -195,74 +184,53 @@ if ($isLoggedIn) {
                         <button
                             type="submit"
                             class="post-detail-follow <?= $post["user_follows"] ? "active" : "" ?>">
-
                             <?= $post["user_follows"] ? "Following" : "Follow" ?>
-
                         </button>
 
                     </form>
-
                 <?php endif; ?>
 
             </header>
 
-
             <div class="post-detail-info">
 
                 <?php if ($mediaCount === 0 && !empty($post["topic"])): ?>
-
                     <div class="post-detail-topics text-only-topic">
                         <span>#<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?></span>
                     </div>
-
                 <?php endif; ?>
-
 
                 <h1>
                     <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
                 </h1>
 
-
                 <?php if (!empty($post["description"])): ?>
-
                     <p class="post-detail-description">
                         <?= nl2br(htmlspecialchars($post["description"], ENT_QUOTES, "UTF-8")) ?>
                     </p>
-
                 <?php endif; ?>
 
-
                 <?php if ($mediaCount > 0 && !empty($post["topic"])): ?>
-
                     <div class="post-detail-topics">
                         <span>#<?= htmlspecialchars($post["topic"], ENT_QUOTES, "UTF-8") ?></span>
                     </div>
-
                 <?php endif; ?>
 
-
                 <?php if (!empty($post["sources"])): ?>
-
                     <div class="post-detail-sources">
-
                         <strong>Sources</strong>
 
                         <p>
                             <?= nl2br(htmlspecialchars($post["sources"], ENT_QUOTES, "UTF-8")) ?>
                         </p>
-
                     </div>
-
                 <?php endif; ?>
 
             </div>
 
-
-            <!-- POST ACTIONS -->
             <div class="post-detail-actions">
 
                 <?php if ($isLoggedIn): ?>
-
                     <form action="like_post.php" method="POST" class="post-like-form">
 
                         <input
@@ -282,13 +250,10 @@ if ($isLoggedIn) {
                             <?= $post["user_liked"] ? "♥" : "♡" ?>
 
                             <span><?= (int) $post["like_count"] ?></span>
-
                         </button>
 
                     </form>
-
                 <?php else: ?>
-
                     <a
                         href="register.php"
                         class="post-detail-action"
@@ -297,14 +262,10 @@ if ($isLoggedIn) {
                         ♡
 
                         <span><?= (int) $post["like_count"] ?></span>
-
                     </a>
-
                 <?php endif; ?>
 
-
                 <?php if ($isLoggedIn): ?>
-
                     <div class="post-detail-action">
 
                         <svg
@@ -319,11 +280,8 @@ if ($isLoggedIn) {
                         </svg>
 
                         <span><?= (int) $post["comment_count"] ?></span>
-
                     </div>
-
                 <?php else: ?>
-
                     <a
                         href="register.php"
                         class="post-detail-action"
@@ -341,14 +299,10 @@ if ($isLoggedIn) {
                         </svg>
 
                         <span><?= (int) $post["comment_count"] ?></span>
-
                     </a>
-
                 <?php endif; ?>
 
-
                 <?php if ($isLoggedIn): ?>
-
                     <form action="save_post.php" method="POST">
 
                         <input
@@ -384,11 +338,8 @@ if ($isLoggedIn) {
                             </svg>
 
                         </button>
-
                     </form>
-
                 <?php else: ?>
-
                     <a
                         href="register.php"
                         class="post-detail-action save-button"
@@ -405,17 +356,13 @@ if ($isLoggedIn) {
                             <path d="M6 3.75A1.75 1.75 0 0 1 7.75 2h8.5A1.75 1.75 0 0 1 18 3.75v17l-6-3.75-6 3.75v-17Z" />
 
                         </svg>
-
                     </a>
-
                 <?php endif; ?>
-
 
                 <?php if (
                     $isLoggedIn &&
                     (int) $post["user_id"] === $user_id
                 ): ?>
-
                     <form
                         action="delete_post.php"
                         method="POST"
@@ -449,17 +396,12 @@ if ($isLoggedIn) {
                             </svg>
 
                             <span>Delete</span>
-
                         </button>
-
                     </form>
-
                 <?php endif; ?>
 
             </div>
 
-
-            <!-- COMMENTS -->
             <section class="post-detail-comments">
 
                 <h2>Comments</h2>
@@ -472,7 +414,8 @@ if ($isLoggedIn) {
 
                             <?php
                             $commentId = (int) $comment["comment_id"];
-                            $replies = $commentModel->getRepliesByCommentId($commentId);
+
+                            $replyCount = $commentModel->getReplyCountByCommentId($commentId);
 
                             $hasLiked = $isLoggedIn
                                 ? $commentModel->hasUserLikedComment($commentId, $user_id)
@@ -510,9 +453,7 @@ if ($isLoggedIn) {
                                             <a
                                                 href="profile.php?id=<?= (int) $comment["user_id"] ?>"
                                                 class="comment-author-link">
-
                                                 <?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>
-
                                             </a>
                                         </strong>
 
@@ -524,7 +465,6 @@ if ($isLoggedIn) {
                                             $isLoggedIn &&
                                             (int) $comment["user_id"] === $user_id
                                         ): ?>
-
                                             <form
                                                 action="comment_delete.php"
                                                 method="POST"
@@ -538,35 +478,27 @@ if ($isLoggedIn) {
                                                 <button type="submit" class="delete-comment-button">
                                                     Delete
                                                 </button>
-
                                             </form>
 
                                         <?php elseif ($isLoggedIn): ?>
-
                                             <button
                                                 type="button"
                                                 class="report-button"
                                                 data-report-type="comment"
                                                 data-target-id="<?= $commentId ?>">
-
                                                 Report
-
                                             </button>
-
                                         <?php endif; ?>
 
                                     </div>
 
                                     <?php if ($comment["comment"] !== ""): ?>
-
                                         <p>
                                             <?= nl2br(htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8")) ?>
                                         </p>
-
                                     <?php endif; ?>
 
                                     <?php if (!empty($comment["media_file"])): ?>
-
                                         <?php
                                         $commentImage = "uploads/comments/" .
                                             rawurlencode(basename($comment["media_file"]));
@@ -584,13 +516,11 @@ if ($isLoggedIn) {
                                                 loading="lazy">
 
                                         </a>
-
                                     <?php endif; ?>
 
                                     <div class="comment-actions">
 
                                         <?php if ($isLoggedIn): ?>
-
                                             <form
                                                 action="comment_like.php"
                                                 method="POST"
@@ -619,23 +549,23 @@ if ($isLoggedIn) {
                                                 type="button"
                                                 class="reply-toggle-button"
                                                 data-comment-id="<?= $commentId ?>">
-
                                                 Reply
-
                                             </button>
 
                                         <?php else: ?>
-
-                                            <a href="login.php" class="comment-login-link">
-                                                Log in to like or reply
+                                            <a
+                                                href="register.php"
+                                                class="comment-like-button"
+                                                aria-label="Create an account to like this comment">
+                                                ♡
                                             </a>
 
+                                            <span class="comment-like-count"><?= $likeCount ?></span>
                                         <?php endif; ?>
 
                                     </div>
 
                                     <?php if ($isLoggedIn): ?>
-
                                         <form
                                             action="comment_post.php"
                                             method="POST"
@@ -657,144 +587,54 @@ if ($isLoggedIn) {
                                             <button type="submit">
                                                 Reply
                                             </button>
-
                                         </form>
 
+                                        <?php if ($replyCount > 0): ?>
+                                            <button
+                                                type="button"
+                                                class="view-replies-button post-detail-view-replies"
+                                                data-comment-id="<?= $commentId ?>"
+                                                data-reply-count="<?= $replyCount ?>"
+                                                aria-expanded="false">
+
+                                                View <?= $replyCount ?> <?= $replyCount === 1 ? "reply" : "replies" ?>
+
+                                            </button>
+                                        <?php endif; ?>
+
+                                        <div
+                                            class="comment-replies"
+                                            data-comment-id="<?= $commentId ?>"
+                                            data-post-id="<?= $post_id ?>"
+                                            data-loaded="0"
+                                            data-offset="0"
+                                            hidden>
+                                        </div>
+
+                                    <?php elseif ($replyCount > 0): ?>
+                                        <div class="post-detail-reply-section">
+
+                                            <button
+                                                type="button"
+                                                class="view-replies-button post-detail-view-replies"
+                                                data-comment-id="<?= $commentId ?>"
+                                                data-reply-count="<?= $replyCount ?>"
+                                                aria-expanded="false">
+
+                                                View <?= $replyCount ?> <?= $replyCount === 1 ? "reply" : "replies" ?>
+
+                                            </button>
+
+                                            <div
+                                                class="post-detail-replies"
+                                                data-comment-id="<?= $commentId ?>"
+                                                data-loaded="0"
+                                                data-offset="0"
+                                                hidden>
+                                            </div>
+
+                                        </div>
                                     <?php endif; ?>
-
-                                    <div class="comment-replies">
-
-                                        <?php foreach ($replies as $reply): ?>
-
-                                            <?php
-                                            $replyId = (int) $reply["comment_id"];
-
-                                            $replyHasLiked = $isLoggedIn
-                                                ? $commentModel->hasUserLikedComment($replyId, $user_id)
-                                                : false;
-
-                                            $replyLikeCount = $commentModel->getCommentLikeCount($replyId);
-                                            ?>
-
-                                            <article
-                                                class="post-detail-comment post-detail-reply"
-                                                data-comment-id="<?= $replyId ?>">
-
-                                                <a
-                                                    href="profile.php?id=<?= (int) $reply["user_id"] ?>"
-                                                    class="comment-avatar-link">
-
-                                                    <img
-                                                        class="comment-avatar"
-                                                        src="<?= htmlspecialchars(
-                                                            !empty($reply["profile_image"])
-                                                                ? $reply["profile_image"]
-                                                                : "images/default-profile.jpg",
-                                                            ENT_QUOTES,
-                                                            "UTF-8"
-                                                        ) ?>"
-                                                        alt="<?= htmlspecialchars($reply["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
-
-                                                </a>
-
-                                                <div class="comment-content">
-
-                                                    <div class="comment-meta">
-
-                                                        <strong>
-                                                            <a
-                                                                href="profile.php?id=<?= (int) $reply["user_id"] ?>"
-                                                                class="comment-author-link">
-
-                                                                <?= htmlspecialchars($reply["username"], ENT_QUOTES, "UTF-8") ?>
-
-                                                            </a>
-                                                        </strong>
-
-                                                        <span>
-                                                            <?= htmlspecialchars(date("j M", strtotime($reply["created_at"])), ENT_QUOTES, "UTF-8") ?>
-                                                        </span>
-
-                                                        <?php if (
-                                                            $isLoggedIn &&
-                                                            (int) $reply["user_id"] === $user_id
-                                                        ): ?>
-
-                                                            <form
-                                                                action="comment_delete.php"
-                                                                method="POST"
-                                                                class="delete-comment-form">
-
-                                                                <input type="hidden" name="comment_id" value="<?= $replyId ?>">
-                                                                <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-                                                                <input type="hidden" name="return_to" value="post">
-
-                                                                <button type="submit" class="delete-comment-button">
-                                                                    Delete
-                                                                </button>
-
-                                                            </form>
-
-                                                        <?php elseif ($isLoggedIn): ?>
-
-                                                            <button
-                                                                type="button"
-                                                                class="report-button"
-                                                                data-report-type="comment"
-                                                                data-target-id="<?= $replyId ?>">
-
-                                                                Report
-
-                                                            </button>
-
-                                                        <?php endif; ?>
-
-                                                    </div>
-
-                                                    <p>
-                                                        <?= nl2br(htmlspecialchars($reply["comment"], ENT_QUOTES, "UTF-8")) ?>
-                                                    </p>
-
-                                                    <?php if ($isLoggedIn): ?>
-
-                                                        <div class="comment-actions">
-
-                                                            <form
-                                                                action="comment_like.php"
-                                                                method="POST"
-                                                                class="comment-like-form">
-
-                                                                <input type="hidden" name="comment_id" value="<?= $replyId ?>">
-                                                                <input type="hidden" name="post_id" value="<?= $post_id ?>">
-                                                                <input type="hidden" name="return_to" value="post">
-                                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-
-                                                                <button
-                                                                    type="submit"
-                                                                    class="comment-like-button <?= $replyHasLiked ? "active" : "" ?>"
-                                                                    aria-label="<?= $replyHasLiked ? "Unlike reply" : "Like reply" ?>"
-                                                                    aria-pressed="<?= $replyHasLiked ? "true" : "false" ?>">
-
-                                                                    <?= $replyHasLiked ? "♥" : "♡" ?>
-
-                                                                </button>
-
-                                                                <span class="comment-like-count"><?= $replyLikeCount ?></span>
-
-                                                            </form>
-
-                                                        </div>
-
-                                                    <?php endif; ?>
-
-                                                </div>
-
-                                            </article>
-
-                                        <?php endforeach; ?>
-
-                                    </div>
 
                                 </div>
 
@@ -803,31 +643,24 @@ if ($isLoggedIn) {
                         <?php endforeach; ?>
 
                     <?php else: ?>
-
                         <p class="post-detail-no-comments">
                             No comments yet. Be the first to comment.
                         </p>
-
                     <?php endif; ?>
 
                 </div>
 
                 <?php if ((int) $post["comment_count"] > count($comments)): ?>
-
                     <button
                         type="button"
                         class="load-more-comments-button"
                         data-post-id="<?= (int) $post_id ?>"
                         data-offset="<?= count($comments) ?>">
-
                         Show more comments
-
                     </button>
-
                 <?php endif; ?>
 
                 <?php if ($isLoggedIn): ?>
-
                     <form
                         action="comment_post.php"
                         method="POST"
@@ -845,7 +678,6 @@ if ($isLoggedIn) {
                             maxlength="1000">
 
                         <label class="comment-upload-button" title="Add image or GIF">
-
                             📷
 
                             <input
@@ -854,7 +686,6 @@ if ($isLoggedIn) {
                                 accept="image/jpeg,image/png,image/webp,image/gif"
                                 class="comment-media-input"
                                 hidden>
-
                         </label>
 
                         <button type="submit" aria-label="Post comment">
@@ -862,7 +693,6 @@ if ($isLoggedIn) {
                         </button>
 
                         <div class="comment-media-preview" hidden>
-
                             <img
                                 class="comment-preview-image"
                                 alt="Selected attachment">
@@ -871,21 +701,15 @@ if ($isLoggedIn) {
                                 type="button"
                                 class="comment-preview-remove"
                                 aria-label="Remove selected image">
-
                                 ×
-
                             </button>
-
                         </div>
 
                     </form>
-
                 <?php else: ?>
-
-                    <p>
-                        <a href="register.php">Create an account</a> to join the conversation.
+                    <p class="post-detail-register-prompt">
+                        <a href="register.php" class="post-detail-register-link">Create an account</a> to join the conversation.
                     </p>
-
                 <?php endif; ?>
 
             </section>
@@ -896,8 +720,6 @@ if ($isLoggedIn) {
 
 </section>
 
-
-<!-- REPORT MODAL -->
 <div
     id="report-modal"
     class="report-modal"
@@ -912,9 +734,7 @@ if ($isLoggedIn) {
             type="button"
             class="report-modal-close"
             aria-label="Close report form">
-
             &times;
-
         </button>
 
         <h2 id="report-modal-title">
@@ -943,7 +763,6 @@ if ($isLoggedIn) {
                 name="target_id"
                 id="report-target-id">
 
-
             <label for="report-reason">
                 Reason
             </label>
@@ -963,7 +782,6 @@ if ($isLoggedIn) {
 
             </select>
 
-
             <label for="report-details">
                 Additional details (optional)
             </label>
@@ -974,27 +792,21 @@ if ($isLoggedIn) {
                 maxlength="1000"
                 placeholder="Tell us more about the issue..."></textarea>
 
-
             <div class="report-modal-actions">
 
                 <button
                     type="button"
                     class="report-cancel-button">
-
                     Cancel
-
                 </button>
 
                 <button
                     type="submit"
                     class="report-submit-button">
-
                     Submit report
-
                 </button>
 
             </div>
-
 
             <p
                 id="report-message"
@@ -1010,8 +822,6 @@ if ($isLoggedIn) {
 
 </div>
 
-
-<!-- IMAGE LIGHTBOX -->
 <div
     id="image-modal"
     class="image-modal"
@@ -1021,9 +831,7 @@ if ($isLoggedIn) {
         type="button"
         class="image-modal-close"
         aria-label="Close image">
-
         &times;
-
     </button>
 
     <img
@@ -1034,10 +842,12 @@ if ($isLoggedIn) {
 
 </div>
 
-
 <script src="assets/js/main.js"></script>
 <script src="assets/js/post.js"></script>
 
+<?php if (!$isLoggedIn): ?>
+    <script src="assets/js/post-replies.js" defer></script>
+<?php endif; ?>
 
 <?php
 if ($isLoggedIn) {
