@@ -32,6 +32,7 @@ $pageTitle = $pageTitle ?? "Admin | Witchy";
             <a href="<?= BASE_URL ?>admin/index.php">Dashboard</a>
             <a href="<?= BASE_URL ?>admin/users.php">Users</a>
             <a href="<?= BASE_URL ?>admin/content.php">Content</a>
+            <a href="<?= BASE_URL ?>admin/reports.php">Reports</a>
             <a href="<?= BASE_URL ?>admin/rules.php">Rules</a>
             <a href="<?= BASE_URL ?>feed.php">Back to Witchy</a>
 

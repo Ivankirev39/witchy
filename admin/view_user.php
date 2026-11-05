@@ -11,6 +11,18 @@ $pageCss = "admin_users.css";
 
 $userId = filter_input(INPUT_GET, "id", FILTER_VALIDATE_INT);
 
+// Determine where the administrator should return after reviewing the user.
+$returnTo = $_GET["return_to"] ?? "";
+
+// Only allow known internal admin destinations.
+if (
+    !preg_match('/^view_report\.php\?id=[1-9][0-9]*$/D', $returnTo)
+) {
+    $returnTo = "users.php";
+}
+
+$returnUrl = BASE_URL . "admin/" . $returnTo;
+
 // Initialize page data
 $user = null;
 $posts = [];
@@ -144,9 +156,13 @@ if (!$userId || $userId < 1) {
                 }
 
                 header(
-                    "Location: " . BASE_URL . "admin/view_user.php?id=" . $userId . "&status=banned"
+                    "Location: " . BASE_URL . "admin/view_user.php?"
+                    . http_build_query([
+                        "id" => $userId,
+                        "return_to" => $returnTo,
+                        "status" => "banned"
+                    ])
                 );
-                exit;
 
             } elseif ($action === "unban") {
 
@@ -191,9 +207,13 @@ if (!$userId || $userId < 1) {
                 }
 
                 header(
-                    "Location: " . BASE_URL . "admin/view_user.php?id=" . $userId . "&status=unbanned"
+                    "Location: " . BASE_URL . "admin/view_user.php?"
+                    . http_build_query([
+                        "id" => $userId,
+                        "return_to" => $returnTo,
+                        "status" => "unbanned"
+                    ])
                 );
-                exit;
 
             } else {
                 throw new RuntimeException("Invalid moderation action.");
@@ -238,7 +258,9 @@ require_once __DIR__ . "/includes/admin_header.php";
     </header>
 
     <p class="admin-user-back-link">
-        <a href="<?= BASE_URL ?>admin/users.php">&larr; Back to users</a>
+        <a href="<?= htmlspecialchars($returnUrl, ENT_QUOTES, "UTF-8") ?>">
+            &larr; Back
+        </a>
     </p>
 
     <?php if ($successMessage !== ""): ?>

@@ -376,7 +376,7 @@ require_once __DIR__ . "/includes/public-header.php";
                 conversation when you feel like it.
             </p>
 
-            <a href="#topics" class="text-link">
+            <a href="public-explore.php" class="text-link">
                 Start exploring →
             </a>
         </article>
@@ -432,7 +432,7 @@ require_once __DIR__ . "/includes/public-header.php";
                 </a>
 
                 <a
-                    href="#topics"
+                    href="public-explore.php"
                     class="button button-secondary button-large"
                 >
                     Explore first
