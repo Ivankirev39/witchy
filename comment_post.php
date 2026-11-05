@@ -75,13 +75,31 @@ if ($hasMedia) {
     } else {
         $mime = (new finfo(FILEINFO_MIME_TYPE))
             ->file($file["tmp_name"]);
+        $imageInfo = @getimagesize($file["tmp_name"]);
 
         if (
             !isset($allowedTypes[$mime]) ||
-            @getimagesize($file["tmp_name"]) === false
+            $imageInfo === false
         ) {
-            $error = "Only JPG, PNG, WEBP and GIF images are allowed.";
+            $error = "Only valid JPG, PNG, WEBP and GIF images are allowed.";
+        } else {
+            $width = (int) $imageInfo[0];
+            $height = (int) $imageInfo[1];
+
+            $maxDimension = 6000;
+            $maxPixels = 24000000;
+
+            if (
+                $width < 1 ||
+                $height < 1 ||
+                $width > $maxDimension ||
+                $height > $maxDimension ||
+                $width * $height > $maxPixels
+            ) {
+                $error = "Image dimensions are too large. Maximum 6000px per side and 24 megapixels.";
+            }
         }
+
     }
 
     if ($error === null) {

@@ -83,6 +83,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         $extension = $allowedTypes[$mimeType]["extension"];
         $mediaType = $allowedTypes[$mimeType]["type"];
+        if ($mediaType === "image") {
+            $imageInfo = @getimagesize($file["tmp_name"]);
+
+            if ($imageInfo === false) {
+                die("Invalid image.");
+            }
+
+            $width = (int) $imageInfo[0];
+            $height = (int) $imageInfo[1];
+
+            if (
+                $width < 1 ||
+                $height < 1 ||
+                $width > 6000 ||
+                $height > 6000 ||
+                $width * $height > 24000000
+            ) {
+                die("Image dimensions are too large. Maximum 6000px per side and 24 megapixels.");
+            }
+        }
+
         $fileName = bin2hex(random_bytes(16)) . "." . $extension;
         $validatedMedia[] = [
             "tmp_name" => $file["tmp_name"],
