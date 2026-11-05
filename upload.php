@@ -4,6 +4,7 @@ require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/models/UploadQuota.php";
+require_once __DIR__ . "/models/KeywordFilter.php";
 
 $pdoConnector = new \DataAccess\DB\DBConnector();
 $pdo = $pdoConnector->connectToDB();
@@ -28,6 +29,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
     if ($topic === "") {
         die("Please select a topic.");
+    }
+    $keywordFilter = new KeywordFilter();
+    $fieldsToCheck = [
+        "Title" => $title,
+        "Description" => $description,
+        "Sources" => $sources
+    ];
+    foreach ($fieldsToCheck as $fieldName => $fieldValue) {
+        if ($keywordFilter->containsBlockedContent($fieldValue)) {
+            http_response_code(400);
+            exit(
+                "Your " . strtolower($fieldName) .
+                " contains inappropriate language. Please edit it and try again."
+            );
+        }
     }
     $mediaFiles = [];
     if (isset($_FILES["media"])) {
