@@ -5,6 +5,7 @@ require_once __DIR__ . "/models/Comment.php";
 require_once __DIR__ . "/includes/notifications.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/Post.php";
+require_once __DIR__ . "/models/KeywordFilter.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
@@ -47,6 +48,32 @@ if ($commentText === "" && !$hasMedia) {
     header("Location: " . $returnUrl);
     exit;
 }
+
+// Check comment for prohibited words and phrases
+$keywordFilter = new KeywordFilter();
+
+if (
+    $commentText !== "" &&
+    $keywordFilter->containsBlockedContent($commentText)
+) 
+{
+    $errorMessage = "Your comment contains inappropriate language. Please edit it and try again.";
+
+    if ($isAjax) {
+        header("Content-Type: application/json");
+
+        echo json_encode([
+            "success" => false,
+            "message" => $errorMessage
+        ]);
+
+        exit;
+    }
+
+    http_response_code(400);
+    exit($errorMessage);
+}
+
 
 $mediaFile = null;
 $mediaType = null;
@@ -99,7 +126,6 @@ if ($hasMedia) {
                 $error = "Image dimensions are too large. Maximum 6000px per side and 24 megapixels.";
             }
         }
-
     }
 
     if ($error === null) {
