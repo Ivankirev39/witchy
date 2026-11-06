@@ -1,7 +1,6 @@
-/* ========================================
-   FEED
-   ======================================== */
-   .feed-page {
+/* FEED */
+
+.feed-page {
     max-width: 760px;
     margin: 0 auto;
 }
@@ -18,9 +17,8 @@
 .feed-page p {
     color: var(--text-secondary);
 }
-/* ========================================
-   FEED TABS
-   ======================================== */
+/* FEED TABS */
+
 .feed-tabs {
     display: flex;
     gap: 14px;
@@ -44,9 +42,8 @@
 }
 
 
-/* ========================================
-   POST CARD
-   ======================================== */
+/* POST CARD */
+
    .post-card {
     width: 100%;
     margin-bottom: 28px;
@@ -122,9 +119,9 @@
     background: var(--surface);
     color: var(--text);
 }
-/* ========================================
-   POST MEDIA - GENERAL
-   ======================================== */
+
+/* POST MEDIA - GENERAL */
+
 .post-media {
     width: 100%;
     display: grid;
@@ -1607,4 +1604,8 @@ html.dark-mode .comment-reply-form button:hover {
         min-height: 36px;
         padding: 0 11px;
     }
+}
+
+html.feed-restoring body {
+    visibility: hidden;
 }

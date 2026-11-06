@@ -1103,3 +1103,31 @@ document.addEventListener("submit", async (event) => {
         button.disabled = false;
     }
 });
+
+
+document.addEventListener("click", (event) => {
+    document.querySelectorAll(".post-owner-menu[open]").forEach(menu => {
+        if (!menu.contains(event.target)) {
+            menu.open = false;
+        }
+    });
+});
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+        document.querySelectorAll(".post-owner-menu[open]").forEach(menu => {
+            menu.open = false;
+            menu.querySelector("summary").focus();
+        });
+    }
+});
+
+document.addEventListener("submit", (event) => {
+    const form = event.target.closest(".delete-post-form");
+
+    if (!form) return;
+
+    if (!confirm("Are you sure you want to delete this post?")) {
+        event.preventDefault();
+    }
+});

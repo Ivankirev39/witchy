@@ -1,0 +1,246 @@
+
+.edit-page {
+    width: min(100% - 40px, 900px);
+    margin: 0 auto;
+    padding: 35px 0 60px;
+}
+
+.edit-header {
+    margin-bottom: 30px;
+}
+
+.edit-header h1 {
+    margin: 0;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.edit-subtitle {
+    margin: 10px 0 0;
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.edit-card {
+    padding: 26px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px var(--shadow);
+}
+
+.edit-card .card-header {
+    margin-bottom: 22px;
+}
+
+.edit-card .card-header h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.edit-card .card-header p {
+    margin: 6px 0 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.edit-card .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.edit-card .form-group + .form-group {
+    margin-top: 22px;
+}
+
+.edit-card .form-group label {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.edit-card .form-group input[type="text"],
+.edit-card .form-group textarea,
+.edit-card .form-group select {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--input-background);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.edit-card .form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.edit-card .form-group select {
+    cursor: pointer;
+}
+
+.edit-card .form-group input:focus,
+.edit-card .form-group textarea:focus,
+.edit-card .form-group select:focus {
+    outline: none;
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.edit-card .form-group small {
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+.edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding-top: 5px;
+}
+
+.edit-actions .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.edit-actions .button:hover {
+    transform: translateY(-1px);
+}
+
+.edit-actions .button-primary {
+    background: var(--primary);
+    color: var(--brand-white);
+    border: 1px solid var(--primary);
+}
+
+.edit-actions .button-primary:hover {
+    background: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.edit-actions .button-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.edit-actions .button-secondary:hover {
+    background: var(--surface-soft);
+    border-color: var(--focus);
+}
+
+.form-error {
+    margin: 0 0 20px;
+    padding: 13px 16px;
+    background: var(--danger-background);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+html.dark-mode .edit-header h1 {
+    color: #f1e8dc;
+}
+
+html.dark-mode .edit-subtitle {
+    color: #aaa2aa;
+}
+
+html.dark-mode .edit-card {
+    background: #1f1d24;
+    border-color: #343039;
+}
+
+html.dark-mode .edit-card .card-header h2,
+html.dark-mode .edit-card .form-group label {
+    color: #f1e8dc;
+}
+
+html.dark-mode .edit-card .card-header p,
+html.dark-mode .edit-card .form-group small {
+    color: #aaa2aa;
+}
+
+html.dark-mode .edit-card .form-group input[type="text"],
+html.dark-mode .edit-card .form-group textarea,
+html.dark-mode .edit-card .form-group select {
+    background: #1f1d24;
+    color: #f1e8dc;
+    border-color: #343039;
+}
+
+html.dark-mode .edit-actions .button-primary {
+    background: #c084cc;
+    color: var(--brand-black);
+    border-color: #c084cc;
+}
+
+html.dark-mode .edit-actions .button-primary:hover {
+    background: var(--brand-lavender);
+    border-color: var(--brand-lavender);
+}
+
+html.dark-mode .edit-actions .button-secondary {
+    color: #f1e8dc;
+    border-color: #343039;
+}
+
+html.dark-mode .edit-actions .button-secondary:hover {
+    background: #29262f;
+    border-color: #806b84;
+}
+
+@media (max-width: 650px) {
+    .edit-page {
+        width: min(100% - 24px, 900px);
+        padding: 30px 0 50px;
+    }
+
+    .edit-header h1 {
+        font-size: 27px;
+    }
+
+    .edit-card {
+        padding: 20px;
+    }
+
+    .edit-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .edit-actions .button {
+        width: 100%;
+    }
+}

@@ -5,6 +5,48 @@ require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/Comment.php";
 require_once __DIR__ . "/models/Post.php";
 
+function getSafeReturnUrl($url)
+{
+    if (!is_string($url) || $url === "" || preg_match('/[\r\n\\\\]/', $url)) {
+        return null;
+    }
+
+    $parts = parse_url($url);
+
+    if (
+        $parts === false ||
+        isset($parts["scheme"]) ||
+        isset($parts["host"]) ||
+        isset($parts["user"]) ||
+        isset($parts["pass"])
+    ) {
+        return null;
+    }
+
+    $path = $parts["path"] ?? "";
+
+    if (
+        $path === "" ||
+        $path[0] !== "/" ||
+        str_starts_with($path, "//") ||
+        in_array(basename($path), ["post.php", "edit_post.php"], true)
+    ) {
+        return null;
+    }
+
+    $returnUrl = $path;
+
+    if (!empty($parts["query"])) {
+        $returnUrl .= "?" . $parts["query"];
+    }
+
+    if (!empty($parts["fragment"])) {
+        $returnUrl .= "#" . $parts["fragment"];
+    }
+
+    return $returnUrl;
+}
+
 $pdoConnector = new \DataAccess\DB\DBConnector();
 $pdo = $pdoConnector->connectToDB();
 
@@ -24,18 +66,31 @@ $backUrl = $isLoggedIn
     ? "feed.php"
     : "public-explore.php";
 
-if (!empty($_SERVER["HTTP_REFERER"])) {
+$returnUrl = getSafeReturnUrl($_GET["return"] ?? "");
+
+if ($returnUrl !== null) {
+    $backUrl = $returnUrl;
+} elseif (!empty($_SERVER["HTTP_REFERER"])) {
     $referer = parse_url($_SERVER["HTTP_REFERER"]);
 
     if (
         isset($referer["host"], $referer["path"]) &&
-        $referer["host"] === $_SERVER["HTTP_HOST"] &&
-        basename($referer["path"]) !== "post.php"
+        strtolower($referer["host"]) === strtolower($_SERVER["HTTP_HOST"])
     ) {
-        $backUrl = $referer["path"];
+        $refererUrl = $referer["path"];
 
         if (!empty($referer["query"])) {
-            $backUrl .= "?" . $referer["query"];
+            $refererUrl .= "?" . $referer["query"];
+        }
+
+        if (!empty($referer["fragment"])) {
+            $refererUrl .= "#" . $referer["fragment"];
+        }
+
+        $safeReferer = getSafeReturnUrl($refererUrl);
+
+        if ($safeReferer !== null) {
+            $backUrl = $safeReferer;
         }
     }
 }
@@ -123,42 +178,32 @@ if ($isLoggedIn) {
 
         <article class="post-detail-content">
 
-            <header class="post-detail-author-row">
+            <div class="post-detail-author-row">
 
-                <div class="post-detail-author">
+                <a
+                    href="profile.php?id=<?= (int) $post["user_id"] ?>"
+                    class="post-detail-avatar-link">
 
-                    <a
-                        href="profile.php?id=<?= (int) $post["user_id"] ?>"
-                        class="post-detail-avatar-link">
+                    <img
+                        class="post-detail-avatar"
+                        src="<?= htmlspecialchars(
+                            !empty($post["profile_image"])
+                                ? $post["profile_image"]
+                                : "images/default-profile.jpg",
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                        alt="<?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
 
-                        <img
-                            class="post-detail-avatar"
-                            src="<?= htmlspecialchars(
-                                !empty($post["profile_image"])
-                                    ? $post["profile_image"]
-                                    : "images/default-profile.jpg",
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>"
-                            alt="<?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
+                </a>
 
-                    </a>
+                <a
+                    href="profile.php?id=<?= (int) $post["user_id"] ?>"
+                    class="post-detail-author">
 
-                    <div>
-                        <strong>
-                            <a
-                                href="profile.php?id=<?= (int) $post["user_id"] ?>"
-                                class="post-author-link">
-                                <?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
-                            </a>
-                        </strong>
+                    <?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>
 
-                        <span class="post-detail-date">
-                            <?= htmlspecialchars(date("j M Y", strtotime($post["created_at"])), ENT_QUOTES, "UTF-8") ?>
-                        </span>
-                    </div>
-
-                </div>
+                </a>
 
                 <?php if (
                     $isLoggedIn &&
@@ -183,14 +228,27 @@ if ($isLoggedIn) {
 
                         <button
                             type="submit"
-                            class="post-detail-follow <?= $post["user_follows"] ? "active" : "" ?>">
-                            <?= $post["user_follows"] ? "Following" : "Follow" ?>
-                        </button>
+                            class="post-detail-follow <?= $post["user_follows"] ? "active" : "" ?>"
+                            aria-label="<?= $post["user_follows"] ? "Unfollow user" : "Follow user" ?>"
+                            title="<?= $post["user_follows"] ? "Following" : "Follow" ?>">
 
+                            <?php if ($post["user_follows"]): ?>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="m5 12 4 4L19 6" />
+                                </svg>
+                            <?php else: ?>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M15 19a6 6 0 0 0-12 0" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M19 8v6M16 11h6" />
+                                </svg>
+                            <?php endif; ?>
+
+                        </button>
                     </form>
                 <?php endif; ?>
 
-            </header>
+            </div>
 
             <div class="post-detail-info">
 
@@ -200,9 +258,61 @@ if ($isLoggedIn) {
                     </div>
                 <?php endif; ?>
 
-                <h1>
-                    <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
-                </h1>
+                <div class="post-detail-heading">
+                    <h1>
+                        <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
+                    </h1>
+
+                    <?php if (
+                        $isLoggedIn &&
+                        (int) $post["user_id"] === $user_id
+                    ): ?>
+                        <details class="post-owner-menu">
+                            <summary aria-label="Post options" title="Post options">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                    <circle cx="5" cy="12" r="1.5" />
+                                    <circle cx="12" cy="12" r="1.5" />
+                                    <circle cx="19" cy="12" r="1.5" />
+                                </svg>
+                            </summary>
+
+                            <div class="post-owner-menu-dropdown">
+                                <a
+                                    href="edit_post.php?id=<?= $post_id ?>&return=<?= rawurlencode($backUrl) ?>"
+                                    class="post-owner-menu-item">
+
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                                        <path d="m16 4 4 4L9 19H5v-4L16 4Z M14 6l4 4" />
+                                    </svg>
+                                    <span>Edit post</span>
+                                </a>
+
+                                <form
+                                    action="delete_post.php"
+                                    method="POST"
+                                    class="delete-post-form">
+
+                                    <input
+                                        type="hidden"
+                                        name="csrf_token"
+                                        value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+
+                                    <input
+                                        type="hidden"
+                                        name="post_id"
+                                        value="<?= $post_id ?>">
+
+                                    <button type="submit" class="post-owner-menu-item delete-post-button">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-1 6h2v8H8v-8Zm6 0h2v8h-2v-8ZM6 8h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8Z" />
+                                        </svg>
+                                        <span>Delete post</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </details>
+                    <?php endif; ?>
+                </div>
 
                 <?php if (!empty($post["description"])): ?>
                     <p class="post-detail-description">
@@ -357,47 +467,6 @@ if ($isLoggedIn) {
 
                         </svg>
                     </a>
-                <?php endif; ?>
-
-                <?php if (
-                    $isLoggedIn &&
-                    (int) $post["user_id"] === $user_id
-                ): ?>
-                    <form
-                        action="delete_post.php"
-                        method="POST"
-                        onsubmit="return confirm('Are you sure you want to delete this post?');">
-
-                        <input
-                            type="hidden"
-                            name="csrf_token"
-                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-
-                        <input
-                            type="hidden"
-                            name="post_id"
-                            value="<?= $post_id ?>">
-
-                        <button
-                            type="submit"
-                            class="post-detail-action delete-post-button"
-                            aria-label="Delete post"
-                            title="Delete">
-
-                            <svg
-                                class="delete-icon"
-                                viewBox="0 0 24 24"
-                                width="18"
-                                height="18"
-                                aria-hidden="true">
-
-                                <path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-1 6h2v8H8v-8Zm6 0h2v8h-2v-8ZM6 8h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8Z" />
-
-                            </svg>
-
-                            <span>Delete</span>
-                        </button>
-                    </form>
                 <?php endif; ?>
 
             </div>

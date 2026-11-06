@@ -219,6 +219,62 @@ class Post
         return $ownerId === false ? null : (int) $ownerId;
     }
 
+    public function updatePost(
+        int $postId,
+        int $userId,
+        string $title,
+        string $description,
+        string $topic,
+        string $sources
+    ): bool {
+        $this->db->beginTransaction();
+
+        try {
+            $stmt = $this->db->prepare("
+                SELECT post_id
+                FROM post
+                WHERE post_id = ? AND user_id = ?
+                FOR UPDATE
+            ");
+
+            $stmt->execute([$postId, $userId]);
+
+            if ($stmt->fetchColumn() === false) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            $stmt = $this->db->prepare("
+                UPDATE post
+                SET title = ?,
+                    description = ?,
+                    topic = ?,
+                    sources = ?
+                WHERE post_id = ? AND user_id = ?
+            ");
+
+            $stmt->execute([
+                $title,
+                $description,
+                $topic,
+                $sources,
+                $postId,
+                $userId
+            ]);
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
+    }
+
     public function getLikedPosts(
         int $userId,
         string $topic,

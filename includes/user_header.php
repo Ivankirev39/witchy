@@ -247,3 +247,5 @@ $profileImageUrl = BASE_URL . ltrim($profileImage, "/");
             </div>
 
         </header>
+
+        <script src="/witchy/assets/js/feed-scroll.js"></script>
