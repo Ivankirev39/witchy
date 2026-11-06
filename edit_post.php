@@ -90,6 +90,7 @@ $title = $post["title"];
 $description = $post["description"];
 $topic = $post["topic"];
 $sources = $post["sources"];
+$postMedia = $postModel->getPostMedia($postId);
 
 $errorMessage = "";
 
@@ -146,34 +147,278 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
+    $removeMediaIds = [];
+
+    if ($errorMessage === "" && isset($_POST["remove_media"])) {
+        if (!is_array($_POST["remove_media"])) {
+            $errorMessage = "Invalid media selection.";
+        } else {
+            foreach ($_POST["remove_media"] as $mediaId) {
+                $validatedId = filter_var($mediaId, FILTER_VALIDATE_INT);
+
+                if ($validatedId === false || $validatedId <= 0) {
+                    $errorMessage = "Invalid media selection.";
+                    break;
+                }
+
+                $removeMediaIds[] = $validatedId;
+            }
+
+            $removeMediaIds = array_values(array_unique($removeMediaIds));
+
+            $existingIds = array_map(
+                "intval",
+                array_column($postMedia, "media_id")
+            );
+
+            foreach ($removeMediaIds as $mediaId) {
+                if (!in_array($mediaId, $existingIds, true)) {
+                    $errorMessage = "Invalid media selection.";
+                    break;
+                }
+            }
+        }
+    }
+
+    $mediaFiles = [];
+    $validatedMedia = [];
+    $movedFiles = [];
+
+    if (
+        $errorMessage === "" &&
+        isset($_FILES["media"]) &&
+        is_array($_FILES["media"]["name"])
+    ) {
+        $fileCount = count($_FILES["media"]["name"]);
+
+        for ($i = 0; $i < $fileCount; $i++) {
+            if ($_FILES["media"]["error"][$i] === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            $mediaFiles[] = [
+                "name" => $_FILES["media"]["name"][$i],
+                "tmp_name" => $_FILES["media"]["tmp_name"][$i],
+                "size" => $_FILES["media"]["size"][$i],
+                "error" => $_FILES["media"]["error"][$i]
+            ];
+        }
+    }
+
+    $allowedTypes = [
+        "image/jpeg" => ["extension" => "jpg", "type" => "image"],
+        "image/png" => ["extension" => "png", "type" => "image"],
+        "image/gif" => ["extension" => "gif", "type" => "image"],
+        "image/webp" => ["extension" => "webp", "type" => "image"],
+        "video/mp4" => ["extension" => "mp4", "type" => "video"],
+        "video/webm" => ["extension" => "webm", "type" => "video"]
+    ];
+
+    $uploadDirectory = __DIR__ . "/uploads/posts/";
+    $maxTotalMediaSize = 35 * 1024 * 1024;
+    $totalMediaSize = 0;
+
+    if ($errorMessage === "") {
+        $remainingMedia = array_filter(
+            $postMedia,
+            function ($media) use ($removeMediaIds) {
+                return !in_array(
+                    (int) $media["media_id"],
+                    $removeMediaIds,
+                    true
+                );
+            }
+        );
+
+        if (count($remainingMedia) + count($mediaFiles) > 5) {
+            $errorMessage = "A post can have a maximum of 5 images or videos.";
+        }
+    }
+
+    if ($errorMessage === "" && count($mediaFiles) > 0) {
+        if (
+            !is_dir($uploadDirectory) &&
+            !mkdir($uploadDirectory, 0755, true) &&
+            !is_dir($uploadDirectory)
+        ) {
+            $errorMessage = "The upload directory could not be created.";
+        }
+    }
+
+    if ($errorMessage === "" && count($mediaFiles) > 0) {
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+
+        foreach ($mediaFiles as $media) {
+            if ($media["error"] !== UPLOAD_ERR_OK) {
+                $errorMessage = "One of your files could not be uploaded.";
+                break;
+            }
+
+            if (!is_uploaded_file($media["tmp_name"])) {
+                $errorMessage = "An invalid upload was detected.";
+                break;
+            }
+
+            $fileSize = (int) $media["size"];
+
+            if ($fileSize <= 0) {
+                $errorMessage = "Empty files cannot be uploaded.";
+                break;
+            }
+
+            $totalMediaSize += $fileSize;
+
+            if ($totalMediaSize > $maxTotalMediaSize) {
+                $errorMessage = "The total media size cannot exceed 35 MB.";
+                break;
+            }
+
+            $mimeType = $finfo->file($media["tmp_name"]);
+
+            if (!isset($allowedTypes[$mimeType])) {
+                $errorMessage = "One of your files has an unsupported file type.";
+                break;
+            }
+
+            $typeInfo = $allowedTypes[$mimeType];
+
+            if ($typeInfo["type"] === "image") {
+                $imageInfo = getimagesize($media["tmp_name"]);
+
+                if ($imageInfo === false) {
+                    $errorMessage = "One of your images is invalid.";
+                    break;
+                }
+
+                $width = $imageInfo[0];
+                $height = $imageInfo[1];
+
+                if (
+                    $width < 1 ||
+                    $height < 1 ||
+                    $width > 6000 ||
+                    $height > 6000 ||
+                    ($width * $height) > 24000000
+                ) {
+                    $errorMessage = "One of your images exceeds the allowed dimensions.";
+                    break;
+                }
+            }
+
+            $fileName = bin2hex(random_bytes(16)) . "." . $typeInfo["extension"];
+
+            $validatedMedia[] = [
+                "tmp_name" => $media["tmp_name"],
+                "file" => $fileName,
+                "upload_path" => $uploadDirectory . $fileName,
+                "media_type" => $typeInfo["type"],
+                "file_size" => $fileSize
+            ];
+        }
+    }
+
+    if ($errorMessage === "") {
+        $remainingMedia = array_filter(
+            $postMedia,
+            function ($media) use ($removeMediaIds) {
+                return !in_array(
+                    (int) $media["media_id"],
+                    $removeMediaIds,
+                    true
+                );
+            }
+        );
+
+        $remainingSize = array_sum(
+            array_column($remainingMedia, "file_size")
+        );
+
+        if ($remainingSize + $totalMediaSize > $maxTotalMediaSize) {
+            $errorMessage = "The total media size cannot exceed 35 MB.";
+        }
+    }
+
     if ($errorMessage === "") {
         try {
-            $updated = $postModel->updatePost(
+            foreach ($validatedMedia as $media) {
+                if (!move_uploaded_file(
+                    $media["tmp_name"],
+                    $media["upload_path"]
+                )) {
+                    throw new RuntimeException("A media file could not be saved.");
+                }
+
+                $movedFiles[] = $media["upload_path"];
+            }
+
+            $mediaRecords = [];
+
+            foreach ($validatedMedia as $media) {
+                $mediaRecords[] = [
+                    "file" => $media["file"],
+                    "media_type" => $media["media_type"],
+                    "file_size" => $media["file_size"]
+                ];
+            }
+
+            $removedFiles = $postModel->updatePostWithMedia(
                 $postId,
                 $userId,
                 $title,
                 $description,
                 $topic,
-                $sources
+                $sources,
+                $mediaRecords,
+                $removeMediaIds
             );
 
-            if ($updated) {
-                $redirectUrl = "post.php?id=" . $postId . "&updated=1";
-
-                if ($returnUrl !== null) {
-                    $redirectUrl .= "&return=" . rawurlencode($returnUrl);
-                }
-
-                header("Location: " . $redirectUrl);
-                exit;
+            if ($removedFiles === null) {
+                throw new RuntimeException("Post could not be updated.");
             }
 
-            $errorMessage = "The post could not be updated.";
+            foreach ($removedFiles as $removedFile) {
+                $removedPath = $uploadDirectory . basename($removedFile);
+
+                if (is_file($removedPath)) {
+                    unlink($removedPath);
+                }
+            }
+
+            $redirectUrl = "post.php?id=" . $postId . "&updated=1";
+
+            if ($returnUrl !== null) {
+                $redirectUrl .= "&return=" . rawurlencode($returnUrl);
+            }
+
+            header("Location: " . $redirectUrl);
+            exit;
+
         } catch (Throwable $e) {
+            foreach ($movedFiles as $filePath) {
+                if (is_file($filePath)) {
+                    unlink($filePath);
+                }
+            }
+
             error_log("Post update failed: " . $e->getMessage());
-            $errorMessage = "Something went wrong. Please try again.";
+
+            if ($e->getMessage() === "Daily upload limit exceeded.") {
+                $errorMessage = "Your daily upload limit has been reached.";
+            } elseif ($e->getMessage() === "Total storage limit exceeded.") {
+                $errorMessage = "Your total storage limit has been reached.";
+            } elseif ($e->getMessage() === "Post media limit exceeded.") {
+                $errorMessage = "A post can have a maximum of 5 images or videos.";
+            } elseif ($e->getMessage() === "Post media size limit exceeded.") {
+                $errorMessage = "The total media size cannot exceed 35 MB.";
+            } elseif ($e->getMessage() === "Invalid media selection.") {
+                $errorMessage = "One of the selected media files is invalid.";
+            } else {
+                $errorMessage = "Something went wrong. Please try again.";
+            }
         }
     }
+
+    $postMedia = $postModel->getPostMedia($postId);
 }
 
 require_once __DIR__ . "/includes/user_header.php";
@@ -197,7 +442,8 @@ require_once __DIR__ . "/includes/user_header.php";
     <form
         class="edit-form"
         action="edit_post.php?id=<?= $postId ?>"
-        method="POST">
+        method="POST"
+        enctype="multipart/form-data">
 
         <input
             type="hidden"
@@ -235,6 +481,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     value="<?= htmlspecialchars($title, ENT_QUOTES, "UTF-8") ?>"
                     required
                 >
+
                 <small>Maximum 150 characters.</small>
             </div>
 
@@ -247,6 +494,77 @@ require_once __DIR__ . "/includes/user_header.php";
                     rows="7"
                 ><?= htmlspecialchars($description, ENT_QUOTES, "UTF-8") ?></textarea>
             </div>
+
+        </section>
+
+        <section class="edit-card">
+
+            <div class="card-header">
+                <h2>Media</h2>
+                <p>Remove individual files or add new images and videos.</p>
+            </div>
+
+            <?php if ($postMedia !== []): ?>
+                <div class="current-media">
+                    <h3>Current media</h3>
+
+                    <div class="media-preview">
+                        <?php foreach ($postMedia as $media): ?>
+                            <?php
+                            $mediaPath = "uploads/posts/" . rawurlencode(basename($media["file"]));
+                            ?>
+
+                            <div
+                                class="current-media-item"
+                                data-media-id="<?= (int) $media["media_id"] ?>">
+
+                                <?php if ($media["media_type"] === "image"): ?>
+                                    <img
+                                        src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
+                                        alt="Current post media"
+                                    >
+                                <?php else: ?>
+                                    <video controls>
+                                        <source
+                                            src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
+                                        >
+                                    </video>
+                                <?php endif; ?>
+
+                                <button
+                                    type="button"
+                                    class="media-remove"
+                                    data-remove-existing="<?= (int) $media["media_id"] ?>"
+                                    aria-label="Remove this media">
+                                    ×
+                                </button>
+
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <p>This post currently has no media.</p>
+            <?php endif; ?>
+
+            <div class="form-group">
+                <label for="media">Add media</label>
+
+                <input
+                    type="file"
+                    id="media"
+                    name="media[]"
+                    accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+                    multiple
+                >
+
+                <small>
+                    Keep your current media, remove individual files, or add more.
+                    Maximum 5 files and 35 MB in total per post.
+                </small>
+            </div>
+
+            <div id="mediaPreview" class="media-preview"></div>
 
         </section>
 
@@ -311,6 +629,8 @@ require_once __DIR__ . "/includes/user_header.php";
     </form>
 
 </section>
+
+<script src="assets/js/upload.js" defer></script>
 
 <?php
 require_once __DIR__ . "/includes/user_footer.php";
