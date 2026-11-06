@@ -63,9 +63,6 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
         <a href="<?= BASE_URL ?>index.php"
            class="<?= $currentPage === 'index.php' ? 'active' : '' ?>">Home</a>
 
-        <a href="<?= BASE_URL ?>about.php"
-           class="<?= $currentPage === 'about.php' ? 'active' : '' ?>">About</a>
-
         <a href="<?= BASE_URL ?>public-explore.php"
            class="<?= $currentPage === 'public-explore.php' ? 'active' : '' ?>">Explore</a>
 

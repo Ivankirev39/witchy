@@ -291,6 +291,43 @@ require_once __DIR__ . "/includes/public-header.php";
 
     </section>
 
+        <!-- ========================================
+         3b. WHAT YOU'LL FIND HERE (from About)
+         ======================================== -->
+
+    <section class="community-features">
+        <div class="community-container">
+
+            <div class="community-section-heading">
+                <p class="community-eyebrow">WHAT YOU'LL FIND HERE</p>
+                <h2>Explore. Learn. Connect.</h2>
+                <p>Make Witchy your own, whatever brings you here.</p>
+            </div>
+
+            <div class="community-feature-grid">
+
+                <article class="community-member-card">
+                    <div class="community-member-symbol" aria-hidden="true">✦</div>
+                    <h3>Explore</h3>
+                    <p>Discover posts, creative ideas and perspectives across topics that interest you.</p>
+                </article>
+
+                <article class="community-member-card">
+                    <div class="community-member-symbol" aria-hidden="true">◇</div>
+                    <h3>Learn &amp; share</h3>
+                    <p>Find inspiration in others' experiences and, as a member, contribute your own knowledge.</p>
+                </article>
+
+                <article class="community-member-card">
+                    <div class="community-member-symbol" aria-hidden="true">☾</div>
+                    <h3>Connect</h3>
+                    <p>Join conversations, follow people who inspire you and save posts to revisit later.</p>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
 
     <!-- ========================================
          4. COMMUNITY POSTS
