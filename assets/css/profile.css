@@ -1199,3 +1199,62 @@ html.dark-mode .profile-no-posts {
         transition: none;
     }
 }
+
+
+/* WITCHY PROFILE BADGES */
+
+.profile-badges {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.profile-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    text-align: center;
+    padding: 12px 6px;
+    border-radius: 14px;
+    transition: transform 0.2s ease;
+}
+
+.profile-badge:hover {
+    transform: translateY(-4px);
+}
+
+.profile-badge img {
+    width: 100%;
+    max-width: 115px;
+    height: 115px;
+    object-fit: contain;
+}
+
+.profile-badge-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: inherit;
+    line-height: 1.4;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .profile-badges {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .profile-badge img {
+        height: 95px;
+        max-width: 95px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .profile-badge {
+        transition: none;
+    }
+}

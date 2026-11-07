@@ -6,6 +6,7 @@ require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/models/PostInteraction.php";
 require_once __DIR__ . "/includes/notifications.php";
+require_once __DIR__ . "/models/Badge.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: feed.php");
@@ -56,10 +57,13 @@ try {
 $liked = $likeData["liked"];
 $likeCount = $likeData["like_count"];
 
+
 if ($liked) {
     $postOwnerId = $postModel->getPostOwnerId($postId);
 
     if ($postOwnerId !== null && $postOwnerId !== $userId) {
+
+        // Notify the post owner
         createNotification(
             $pdo,
             $postOwnerId,
@@ -67,8 +71,23 @@ if ($liked) {
             "like",
             $postId
         );
+
+        // Check Community Favorite achievement
+        try {
+            $badgeModel = new Badge($pdo);
+
+            $badgeModel->checkCommunityFavorite(
+                $postOwnerId
+            );
+
+        } catch (Throwable $e) {
+            error_log(
+                "Badge award error: " . $e->getMessage()
+            );
+        }
     }
 }
+
 
 if (
     isset($_SERVER["HTTP_X_REQUESTED_WITH"]) &&

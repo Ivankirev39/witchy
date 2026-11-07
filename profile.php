@@ -6,6 +6,7 @@ require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/User.php";
 require_once __DIR__ . "/models/Follow.php";
 require_once __DIR__ . "/models/Report.php";
+require_once __DIR__ . "/models/Badge.php";
 
 $pageTitle = "Profile | Witchy";
 $pageCss = "profile.css";
@@ -24,6 +25,19 @@ if (!$user) {
     http_response_code(404);
     exit("User not found.");
 }
+
+ // Get the user's badges
+$badgeModel = new Badge($conn);
+
+// Check permanent achievements
+// Elder Moon will be implemented later.
+// $badgeModel->checkElderMoon($profile_id);
+
+$badgeModel->checkCommunityFavorite($profile_id);
+
+// Retrieve badges for display
+$userBadges = $badgeModel->getUserBadges($profile_id);
+
 
 // Follow information
 $followModel = new Follow($conn);
@@ -262,16 +276,63 @@ require_once __DIR__ . "/includes/user_header.php";
 
         </article>
 
+                
         <article class="profile-panel">
 
             <h2>Badges</h2>
 
-            <div class="profile-empty-state">
-                <span class="profile-empty-icon">✦</span>
-                <p>No badges earned yet.</p>
-            </div>
+            <?php if (!empty($userBadges)): ?>
+
+                <div class="profile-badges">
+
+                    <?php foreach ($userBadges as $badge): ?>
+
+                        <div class="profile-badge"
+                            title="<?= htmlspecialchars(
+                                $badge['description'] ?? '',
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?>">
+
+                            <img
+                                src="<?= htmlspecialchars(
+                                    BASE_URL . ltrim($badge['image'], '/'),
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                                alt="<?= htmlspecialchars(
+                                    $badge['name'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>"
+                                loading="lazy"
+                            >
+
+                            <span class="profile-badge-name">
+                                <?= htmlspecialchars(
+                                    $badge['name'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>
+                            </span>
+
+                        </div>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            <?php else: ?>
+
+                <div class="profile-empty-state">
+                    <span class="profile-empty-icon">✦</span>
+                    <p>No badges earned yet.</p>
+                </div>
+
+            <?php endif; ?>
 
         </article>
+
 
     </section>
 
