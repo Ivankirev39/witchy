@@ -4,6 +4,7 @@ require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/models/UploadQuota.php";
+require_once __DIR__ . "/models/KeywordFilter.php";
 
 $pdoConnector = new \DataAccess\DB\DBConnector();
 $pdo = $pdoConnector->connectToDB();
@@ -28,6 +29,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
     if ($topic === "") {
         die("Please select a topic.");
+    }
+    $keywordFilter = new KeywordFilter();
+    $fieldsToCheck = [
+        "Title" => $title,
+        "Description" => $description,
+        "Sources" => $sources
+    ];
+    foreach ($fieldsToCheck as $fieldName => $fieldValue) {
+        if ($keywordFilter->containsBlockedContent($fieldValue)) {
+            http_response_code(400);
+            exit(
+                "Your " . strtolower($fieldName) .
+                " contains inappropriate language. Please edit it and try again."
+            );
+        }
     }
     $mediaFiles = [];
     if (isset($_FILES["media"])) {
@@ -83,6 +99,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         $extension = $allowedTypes[$mimeType]["extension"];
         $mediaType = $allowedTypes[$mimeType]["type"];
+        if ($mediaType === "image") {
+            $imageInfo = @getimagesize($file["tmp_name"]);
+
+            if ($imageInfo === false) {
+                die("Invalid image.");
+            }
+
+            $width = (int) $imageInfo[0];
+            $height = (int) $imageInfo[1];
+
+            if (
+                $width < 1 ||
+                $height < 1 ||
+                $width > 6000 ||
+                $height > 6000 ||
+                $width * $height > 24000000
+            ) {
+                die("Image dimensions are too large. Maximum 6000px per side and 24 megapixels.");
+            }
+        }
+
         $fileName = bin2hex(random_bytes(16)) . "." . $extension;
         $validatedMedia[] = [
             "tmp_name" => $file["tmp_name"],

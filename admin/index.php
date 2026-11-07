@@ -17,10 +17,15 @@ $stats = [
     "hot" => 0,
     "active_bans" => 0,
     "posts_this_week" => 0,
-    "comments_this_week" => 0
+    "comments_this_week" => 0,
+    "reports" => 0,
+    "pending_reports" => 0,
+    "reviewed_reports" => 0,
+    "dismissed_reports" => 0
 ];
 
 $recentActivity = [];
+$recentReports = [];
 $dashboardError = "";
 
 try {
@@ -78,6 +83,65 @@ try {
         WHERE revoked_at IS NULL
           AND (expires_at IS NULL OR expires_at > NOW())
     ")->fetchColumn();
+
+    // Report statistics.
+    $reportStats = $conn->query("
+    SELECT
+        COUNT(*) AS total,
+        COALESCE(SUM(status = 'pending'), 0) AS pending,
+        COALESCE(SUM(status = 'reviewed'), 0) AS reviewed,
+        COALESCE(SUM(status = 'dismissed'), 0) AS dismissed
+    FROM reports
+    ")->fetch(PDO::FETCH_ASSOC);
+
+    $stats["reports"] = (int) $reportStats["total"];
+    $stats["pending_reports"] = (int) $reportStats["pending"];
+    $stats["reviewed_reports"] = (int) $reportStats["reviewed"];
+    $stats["dismissed_reports"] = (int) $reportStats["dismissed"];
+
+    // Latest reports.
+    $recentReportsQuery = $conn->query("
+    SELECT
+        r.report_id,
+        r.reason,
+        r.status,
+        r.created_at,
+        reporter.username AS reporter_username,
+
+        CASE
+            WHEN r.comment_id IS NOT NULL THEN 'Comment'
+            ELSE 'User'
+        END AS target_type,
+
+        CASE
+            WHEN r.comment_id IS NOT NULL THEN
+                COALESCE(
+                    LEFT(c.comment, 100),
+                    'Comment no longer available'
+                )
+            ELSE
+                COALESCE(
+                    reported_user.username,
+                    'User no longer available'
+                )
+        END AS target_label
+
+    FROM reports r
+
+    LEFT JOIN users reporter
+        ON r.reporter_id = reporter.user_id
+
+    LEFT JOIN users reported_user
+        ON r.reported_user_id = reported_user.user_id
+
+    LEFT JOIN comment c
+        ON r.comment_id = c.comment_id
+
+    ORDER BY r.created_at DESC
+    LIMIT 5
+    ");
+
+$recentReports = $recentReportsQuery->fetchAll(PDO::FETCH_ASSOC);
 
     // Posts created during the last seven days.
     $stats["posts_this_week"] = (int) $conn->query("
@@ -347,6 +411,160 @@ require_once __DIR__ . "/includes/admin_header.php";
             <?php endif; ?>
 
         </div>
+    </section>
+
+    <!-- Reports overview -->
+    <section class="dashboard-section">
+
+    <div class="dashboard-section-heading">
+        <div>
+            <h2>Reports overview</h2>
+            <p>Monitor community reports and moderation activity.</p>
+        </div>
+
+        <a href="reports.php" class="dashboard-text-link">
+            Manage reports →
+        </a>
+    </div>
+
+    <!-- Report statistics -->
+    <div class="dashboard-report-stats">
+
+        <article class="dashboard-report-stat">
+            <span>Total reports</span>
+            <strong><?= number_format($stats["reports"]) ?></strong>
+        </article>
+
+        <article class="dashboard-report-stat pending-report-stat">
+            <span>Pending</span>
+            <strong><?= number_format($stats["pending_reports"]) ?></strong>
+        </article>
+
+        <article class="dashboard-report-stat">
+            <span>Reviewed</span>
+            <strong><?= number_format($stats["reviewed_reports"]) ?></strong>
+        </article>
+
+        <article class="dashboard-report-stat">
+            <span>Dismissed</span>
+            <strong><?= number_format($stats["dismissed_reports"]) ?></strong>
+        </article>
+
+    </div>
+
+    <!-- Recent reports -->
+    <div class="dashboard-panel">
+
+        <div class="dashboard-panel-heading">
+            <h3>Recent reports</h3>
+
+            <a href="reports.php" class="dashboard-text-link">
+                View all →
+            </a>
+        </div>
+
+        <?php if (empty($recentReports)): ?>
+
+            <div class="dashboard-empty">
+                <span>✧</span>
+                <p>No reports have been submitted yet.</p>
+            </div>
+
+        <?php else: ?>
+
+            <div class="dashboard-report-list">
+
+                <?php foreach ($recentReports as $report): ?>
+
+                    <?php
+                    $reportDate = !empty($report["created_at"])
+                        ? strtotime($report["created_at"])
+                        : false;
+                    ?>
+
+                    <article class="dashboard-report-item">
+
+                        <div class="dashboard-report-details">
+
+                            <div class="dashboard-report-title">
+                                <strong>
+                                    <?= htmlspecialchars(
+                                        $report["target_type"],
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>
+                                    report
+                                </strong>
+
+                                <span class="dashboard-report-status status-<?= htmlspecialchars(
+                                    $report["status"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>">
+                                    <?= htmlspecialchars(
+                                        ucfirst($report["status"]),
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>
+                                </span>
+                            </div>
+
+                            <p>
+                                <strong>Reported by:</strong>
+                                <?= htmlspecialchars(
+                                    $report["reporter_username"] ?? "Unknown member",
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>
+                            </p>
+
+                            <p>
+                                <strong>Target:</strong>
+                                <?= htmlspecialchars(
+                                    $report["target_label"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>
+                            </p>
+
+                            <p>
+                                <strong>Reason:</strong>
+                                <?= htmlspecialchars(
+                                    $report["reason"],
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>
+                            </p>
+
+                            <?php if ($reportDate !== false): ?>
+                                <time
+                                    datetime="<?= date("c", $reportDate) ?>"
+                                    class="dashboard-report-date"
+                                >
+                                    <?= date("M j, Y · g:i a", $reportDate) ?>
+                                </time>
+                            <?php endif; ?>
+
+                        </div>
+
+                        <a
+                            href="view_report.php?id=<?= (int) $report["report_id"] ?>"
+                            class="dashboard-report-link"
+                            aria-label="View report details"
+                        >
+                            →
+                        </a>
+
+                    </article>
+
+                <?php endforeach; ?>
+
+            </div>
+
+        <?php endif; ?>
+
+    </div>
+
     </section>
 
 

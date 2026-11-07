@@ -12,7 +12,7 @@ class Post
     public function getPostMedia(int $postId): array
     {
         $sql = "
-            SELECT media_id, file, media_type, sort_order
+            SELECT media_id, file, media_type, sort_order, file_size
             FROM post_media
             WHERE post_id = ?
             ORDER BY sort_order ASC, media_id ASC
@@ -217,6 +217,287 @@ class Post
         $ownerId = $stmt->fetchColumn();
 
         return $ownerId === false ? null : (int) $ownerId;
+    }
+
+    public function updatePost(
+        int $postId,
+        int $userId,
+        string $title,
+        string $description,
+        string $topic,
+        string $sources
+    ): bool {
+        $this->db->beginTransaction();
+
+        try {
+            $stmt = $this->db->prepare("
+                SELECT post_id
+                FROM post
+                WHERE post_id = ? AND user_id = ?
+                FOR UPDATE
+            ");
+
+            $stmt->execute([$postId, $userId]);
+
+            if ($stmt->fetchColumn() === false) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            $stmt = $this->db->prepare("
+                UPDATE post
+                SET title = ?,
+                    description = ?,
+                    topic = ?,
+                    sources = ?
+                WHERE post_id = ? AND user_id = ?
+            ");
+
+            $stmt->execute([
+                $title,
+                $description,
+                $topic,
+                $sources,
+                $postId,
+                $userId
+            ]);
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
+    }
+
+    public function updatePostWithMedia(
+        int $postId,
+        int $userId,
+        string $title,
+        string $description,
+        string $topic,
+        string $sources,
+        array $mediaRecords,
+        array $removeMediaIds
+    ): ?array {
+        $this->db->beginTransaction();
+    
+        try {
+            $lockStmt = $this->db->prepare("
+                SELECT user_id
+                FROM users
+                WHERE user_id = ?
+                FOR UPDATE
+            ");
+    
+            $lockStmt->execute([$userId]);
+    
+            $postStmt = $this->db->prepare("
+                SELECT post_id
+                FROM post
+                WHERE post_id = ? AND user_id = ?
+                FOR UPDATE
+            ");
+    
+            $postStmt->execute([$postId, $userId]);
+    
+            if ($postStmt->fetchColumn() === false) {
+                $this->db->rollBack();
+                return null;
+            }
+    
+            $mediaStmt = $this->db->prepare("
+                SELECT media_id, file, file_size
+                FROM post_media
+                WHERE post_id = ?
+                FOR UPDATE
+            ");
+    
+            $mediaStmt->execute([$postId]);
+            $existingMedia = $mediaStmt->fetchAll(PDO::FETCH_ASSOC);
+    
+            $existingMediaById = [];
+    
+            foreach ($existingMedia as $media) {
+                $existingMediaById[(int) $media["media_id"]] = $media;
+            }
+    
+            $removeMediaIds = array_values(array_unique(array_map(
+                "intval",
+                $removeMediaIds
+            )));
+    
+            $removedFiles = [];
+            $removedSize = 0;
+    
+            foreach ($removeMediaIds as $mediaId) {
+                if (!isset($existingMediaById[$mediaId])) {
+                    throw new RuntimeException("Invalid media selection.");
+                }
+    
+                $removedFiles[] = $existingMediaById[$mediaId]["file"];
+                $removedSize += (int) $existingMediaById[$mediaId]["file_size"];
+            }
+    
+            $remainingMedia = [];
+    
+            foreach ($existingMedia as $media) {
+                if (!in_array((int) $media["media_id"], $removeMediaIds, true)) {
+                    $remainingMedia[] = $media;
+                }
+            }
+    
+            if (count($remainingMedia) + count($mediaRecords) > 5) {
+                throw new RuntimeException("Post media limit exceeded.");
+            }
+    
+            $newUploadSize = array_sum(
+                array_column($mediaRecords, "file_size")
+            );
+    
+            $remainingSize = array_sum(
+                array_column($remainingMedia, "file_size")
+            );
+    
+            if ($remainingSize + $newUploadSize > 35 * 1024 * 1024) {
+                throw new RuntimeException("Post media size limit exceeded.");
+            }
+    
+            if ($mediaRecords !== []) {
+                $dailyStmt = $this->db->prepare("
+                    SELECT COALESCE(SUM(file_size), 0)
+                    FROM upload_history
+                    WHERE user_id = ?
+                    AND uploaded_at >= NOW() - INTERVAL 24 HOUR
+                ");
+    
+                $dailyStmt->execute([$userId]);
+                $dailyUsage = (int) $dailyStmt->fetchColumn();
+    
+                $storageStmt = $this->db->prepare("
+                    SELECT COALESCE(SUM(pm.file_size), 0)
+                    FROM post_media pm
+                    INNER JOIN post p ON p.post_id = pm.post_id
+                    WHERE p.user_id = ?
+                ");
+    
+                $storageStmt->execute([$userId]);
+                $storageUsage = (int) $storageStmt->fetchColumn();
+    
+                if ($dailyUsage + $newUploadSize > 100 * 1024 * 1024) {
+                    throw new RuntimeException("Daily upload limit exceeded.");
+                }
+    
+                if (
+                    $storageUsage - $removedSize + $newUploadSize >
+                    500 * 1024 * 1024
+                ) {
+                    throw new RuntimeException("Total storage limit exceeded.");
+                }
+            }
+    
+            $updateStmt = $this->db->prepare("
+                UPDATE post
+                SET title = ?,
+                    description = ?,
+                    topic = ?,
+                    sources = ?
+                WHERE post_id = ? AND user_id = ?
+            ");
+    
+            $updateStmt->execute([
+                $title,
+                $description,
+                $topic,
+                $sources,
+                $postId,
+                $userId
+            ]);
+    
+            if ($removeMediaIds !== []) {
+                $placeholders = implode(
+                    ",",
+                    array_fill(0, count($removeMediaIds), "?")
+                );
+    
+                $deleteStmt = $this->db->prepare("
+                    DELETE FROM post_media
+                    WHERE post_id = ?
+                    AND media_id IN ($placeholders)
+                ");
+    
+                $deleteStmt->execute(array_merge([$postId], $removeMediaIds));
+            }
+    
+            $sortOrder = 1;
+    
+            $sortStmt = $this->db->prepare("
+                UPDATE post_media
+                SET sort_order = ?
+                WHERE media_id = ? AND post_id = ?
+            ");
+    
+            foreach ($remainingMedia as $media) {
+                $sortStmt->execute([
+                    $sortOrder,
+                    $media["media_id"],
+                    $postId
+                ]);
+    
+                $sortOrder++;
+            }
+    
+            if ($mediaRecords !== []) {
+                $insertStmt = $this->db->prepare("
+                    INSERT INTO post_media (
+                        post_id,
+                        file,
+                        media_type,
+                        sort_order,
+                        file_size
+                    )
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+    
+                $historyStmt = $this->db->prepare("
+                    INSERT INTO upload_history (user_id, file_size)
+                    VALUES (?, ?)
+                ");
+    
+                foreach ($mediaRecords as $media) {
+                    $insertStmt->execute([
+                        $postId,
+                        $media["file"],
+                        $media["media_type"],
+                        $sortOrder,
+                        $media["file_size"]
+                    ]);
+    
+                    $historyStmt->execute([
+                        $userId,
+                        $media["file_size"]
+                    ]);
+    
+                    $sortOrder++;
+                }
+            }
+    
+            $this->db->commit();
+    
+            return $removedFiles;
+    
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+    
+            throw $e;
+        }
     }
 
     public function getLikedPosts(

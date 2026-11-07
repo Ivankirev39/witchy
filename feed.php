@@ -5,6 +5,7 @@ require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/models/Comment.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/PostFeed.php";
+require_once __DIR__ . "/models/Report.php";
 
 $pageTitle = "Home | Witchy";
 $user_id = (int) $_SESSION["user_id"];
@@ -38,7 +39,11 @@ $pageCss = "feed.css";
 
 $postIds = array_column($posts, "post_id");
 $postMediaByPost = $postFeedModel->getPostMediaForPosts($postIds);
-$commentsByPost = $commentModel->getCommentsForPosts($postIds, 5);
+$commentsByPost = $commentModel->getCommentsForPosts(
+    $postIds,
+    5,
+    $user_id
+);
 
 require_once __DIR__ . "/includes/user_header.php";
 ?>
@@ -73,13 +78,13 @@ require_once __DIR__ . "/includes/user_header.php";
             ?>
             <article class="post-card" id="post-<?= $postId ?>">
                 <!-- POST AUTHOR -->
-                
+
                 <?php if (!empty($post["is_sticky"])): ?>
                     <div class="admin-pinned-badge">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z"/>
-                        <path d="M12 14v7"/>
-                    </svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z" />
+                            <path d="M12 14v7" />
+                        </svg>
                         <span>Admin Pinned</span>
                     </div>
                 <?php endif; ?>
@@ -255,8 +260,20 @@ require_once __DIR__ . "/includes/user_header.php";
                         <?php
                         $postComments = $commentsByPost[$postId] ?? [];
                         ?>
+
                         <?php foreach ($postComments as $comment): ?>
-                            <div class="comment">
+                            <?php
+                            $commentId = (int) $comment["comment_id"];
+                            $replyCount = (int) $comment["reply_count"];
+                            $likeCount = (int) $comment["like_count"];
+                            $userLiked = (bool) $comment["user_liked"];
+                            ?>
+
+                            <div
+                                class="comment"
+                                data-comment-id="<?= $commentId ?>"
+                                data-post-id="<?= $postId ?>">
+
                                 <strong>
                                     <a
                                         href="profile.php?id=<?= (int) $comment["user_id"] ?>&return=<?= urlencode($returnUrl) ?>"
@@ -264,42 +281,94 @@ require_once __DIR__ . "/includes/user_header.php";
                                         <?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>
                                     </a>
                                 </strong>
+
                                 <div class="feed-comment-content">
                                     <?php if ($comment["comment"] !== ""): ?>
                                         <p><?= htmlspecialchars($comment["comment"], ENT_QUOTES, "UTF-8") ?></p>
                                     <?php endif; ?>
+
                                     <?php if (!empty($comment["media_file"])): ?>
-                                        <a class="comment-media-link" href="uploads/comments/<?= rawurlencode(basename($comment["media_file"])) ?>" target="_blank" rel="noopener noreferrer" aria-label="Open comment image">
-                                            <img class="comment-media" src="uploads/comments/<?= rawurlencode(basename($comment["media_file"])) ?>" alt="Comment attachment" loading="lazy">
+                                        <a
+                                            class="comment-media-link"
+                                            href="uploads/comments/<?= rawurlencode(basename($comment["media_file"])) ?>"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label="Open comment image">
+                                            <img
+                                                class="comment-media"
+                                                src="uploads/comments/<?= rawurlencode(basename($comment["media_file"])) ?>"
+                                                alt="Comment attachment"
+                                                loading="lazy">
                                         </a>
                                     <?php endif; ?>
+
                                     <?php if ((int) $comment["user_id"] === $user_id): ?>
-                                        <form
-                                            action="comment_delete.php"
-                                            method="POST"
-                                            class="delete-comment-form">
+                                        <form action="comment_delete.php" method="POST" class="delete-comment-form">
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-                                            <input
-                                                type="hidden"
-                                                name="comment_id"
-                                                value="<?= (int) $comment["comment_id"] ?>">
-                                            <input
-                                                type="hidden"
-                                                name="post_id"
-                                                value="<?= $postId ?>">
-                                            <input
-                                                type="hidden"
-                                                name="return_to"
-                                                value="feed">
-                                            <button type="submit" class="delete-comment-button">
-                                                Delete
-                                            </button>
+                                            <input type="hidden" name="comment_id" value="<?= $commentId ?>">
+                                            <input type="hidden" name="post_id" value="<?= $postId ?>">
+                                            <input type="hidden" name="return_to" value="feed">
+                                            <button type="submit" class="delete-comment-button">Delete</button>
                                         </form>
+                                    <?php else: ?>
+                                        <button
+                                            type="button"
+                                            class="report-button"
+                                            data-report-type="comment"
+                                            data-target-id="<?= $commentId ?>">
+                                            Report
+                                        </button>
                                     <?php endif; ?>
                                 </div>
-                                <small><?= htmlspecialchars($comment["created_at"], ENT_QUOTES, "UTF-8") ?></small>
-                            </div>
 
+                                <small><?= htmlspecialchars($comment["created_at"], ENT_QUOTES, "UTF-8") ?></small>
+
+                                <div class="comment-actions">
+                                    <form action="comment_like.php" method="POST" class="comment-like-form">
+                                        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                                        <input type="hidden" name="comment_id" value="<?= $commentId ?>">
+                                        <input type="hidden" name="post_id" value="<?= $postId ?>">
+                                        <input type="hidden" name="return_to" value="feed">
+
+                                        <button
+                                            type="submit"
+                                            class="comment-like-button <?= $userLiked ? "active" : "" ?>"
+                                            aria-label="<?= $userLiked ? "Unlike comment" : "Like comment" ?>">
+                                            <span class="comment-like-heart"><?= $userLiked ? "♥" : "♡" ?></span>
+                                            <span class="comment-like-count"><?= $likeCount ?></span>
+                                        </button>
+                                    </form>
+
+                                    <button type="button" class="reply-toggle-button">
+                                        Reply
+                                    </button>
+                                </div>
+
+                                <form action="comment_post.php" method="POST" class="comment-reply-form" hidden>
+                                    <input type="hidden" name="post_id" value="<?= $postId ?>">
+                                    <input type="hidden" name="parent_comment_id" value="<?= $commentId ?>">
+                                    <input type="hidden" name="return_to" value="feed">
+                                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                                    <input type="text" name="comment" maxlength="500" placeholder="Write a reply..." required>
+                                    <button type="submit">Reply</button>
+                                </form>
+
+                                <div
+                                    class="comment-replies"
+                                    data-loaded="0"
+                                    data-offset="0"
+                                    hidden>
+                                </div>
+
+                                <?php if ($replyCount > 0): ?>
+                                    <button
+                                        type="button"
+                                        class="view-replies-button"
+                                        data-reply-count="<?= $replyCount ?>">
+                                        View <?= $replyCount ?> <?= $replyCount === 1 ? "reply" : "replies" ?>
+                                    </button>
+                                <?php endif; ?>
+                            </div>
                         <?php endforeach; ?>
                     </div>
 
@@ -357,6 +426,89 @@ require_once __DIR__ . "/includes/user_header.php";
 
     </section>
 </section>
+<!-- REPORT MODAL -->
+<div
+    id="report-modal"
+    class="report-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="report-modal-title"
+    hidden>
+
+    <div class="report-modal-content">
+
+        <button
+            type="button"
+            class="report-modal-close"
+            aria-label="Close report form">
+            &times;
+        </button>
+
+        <h2 id="report-modal-title">Report comment</h2>
+
+        <p>Why are you reporting this content?</p>
+
+        <form id="report-form">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+
+            <input
+                type="hidden"
+                name="report_type"
+                id="report-type"
+                value="comment">
+
+            <input
+                type="hidden"
+                name="target_id"
+                id="report-target-id">
+
+            <label for="report-reason">Reason</label>
+
+            <select name="reason" id="report-reason" required>
+                <option value="">Select a reason</option>
+                <option value="Harassment or bullying">Harassment or bullying</option>
+                <option value="Spam">Spam</option>
+                <option value="Hate speech">Hate speech</option>
+                <option value="Inappropriate content">Inappropriate content</option>
+                <option value="Misinformation">Misinformation</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="report-details">
+                Additional details (optional)
+            </label>
+
+            <textarea
+                name="details"
+                id="report-details"
+                maxlength="1000"
+                placeholder="Tell us more about the issue..."></textarea>
+
+            <div class="report-modal-actions">
+                <button type="button" class="report-cancel-button">
+                    Cancel
+                </button>
+
+                <button type="submit" class="report-submit-button">
+                    Submit report
+                </button>
+            </div>
+
+            <p
+                id="report-message"
+                class="report-message"
+                role="status"
+                aria-live="polite"
+                hidden>
+            </p>
+
+        </form>
+    </div>
+</div>
 <script src="assets/js/feed.js" defer></script>
 <?php
 require_once __DIR__ . "/includes/user_footer.php";

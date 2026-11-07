@@ -5,6 +5,7 @@ require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/User.php";
 require_once __DIR__ . "/models/Follow.php";
+require_once __DIR__ . "/models/Report.php";
 
 $pageTitle = "Profile | Witchy";
 $pageCss = "profile.css";
@@ -107,12 +108,11 @@ require_once __DIR__ . "/includes/user_header.php";
         <?php if (!empty($user["cover_image"])): ?>
             <img
                 src="<?= htmlspecialchars(
-                    BASE_URL . ltrim($user["cover_image"], "/"),
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>"
-                alt=""
-            >
+                            BASE_URL . ltrim($user["cover_image"], "/"),
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
+                alt="">
         <?php else: ?>
             <span>WITCHY</span>
         <?php endif; ?>
@@ -123,19 +123,18 @@ require_once __DIR__ . "/includes/user_header.php";
         <div class="profile-avatar">
             <img
                 src="<?= htmlspecialchars(
-                    BASE_URL . ltrim(
-                        !empty($user["profile_image"])
-                            ? $user["profile_image"]
-                            : "images/default-profile.jpg",
-                        "/"
-                    ),
-                    ENT_QUOTES,
-                    "UTF-8"
-                ) ?>"
+                            BASE_URL . ltrim(
+                                !empty($user["profile_image"])
+                                    ? $user["profile_image"]
+                                    : "images/default-profile.jpg",
+                                "/"
+                            ),
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>"
                 alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture"
                 class="profile-avatar-image"
-                id="profile-avatar-image"
-            >
+                id="profile-avatar-image">
         </div>
 
         <div class="profile-identity">
@@ -165,44 +164,46 @@ require_once __DIR__ . "/includes/user_header.php";
                     </div>
 
                 <?php else: ?>
-
+                    <div class="profile-user-actions">
                     <form
                         action="<?= BASE_URL ?>follow_user.php"
                         method="POST"
-                        class="profile-follow-form"
-                    >
+                        class="profile-follow-form">
                         <input
                             type="hidden"
                             name="csrf_token"
-                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
-                        >
+                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
 
                         <input
                             type="hidden"
                             name="user_id"
-                            value="<?= $profile_id ?>"
-                        >
+                            value="<?= $profile_id ?>">
 
                         <input
                             type="hidden"
                             name="action"
-                            value="<?= $is_following ? "unfollow" : "follow" ?>"
-                        >
+                            value="<?= $is_following ? "unfollow" : "follow" ?>">
 
                         <input
                             type="hidden"
                             name="return_to"
-                            value="profile.php?id=<?= $profile_id ?>"
-                        >
+                            value="profile.php?id=<?= $profile_id ?>">
 
                         <button
                             type="submit"
-                            class="profile-follow-button <?= $is_following ? "active" : "" ?>"
-                        >
+                            class="profile-follow-button <?= $is_following ? "active" : "" ?>">
                             <?= $is_following ? "Following" : "Follow" ?>
                         </button>
+            
                     </form>
-
+                    <button
+                        type="button"
+                        class="report-button"
+                        data-report-type="user"
+                        data-target-id="<?= $profile_id ?>">
+                        Report profile
+                    </button>
+                        </div>
                 <?php endif; ?>
 
             </div>
@@ -304,29 +305,25 @@ require_once __DIR__ . "/includes/user_header.php";
                             <form
                                 action="<?= BASE_URL ?>profile_pin.php"
                                 method="POST"
-                                class="profile-pin-form"
-                            >
+                                class="profile-pin-form">
                                 <input
                                     type="hidden"
                                     name="csrf_token"
-                                    value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
-                                >
+                                    value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
 
                                 <input
                                     type="hidden"
                                     name="post_id"
-                                    value="<?= $postId ?>"
-                                >
+                                    value="<?= $postId ?>">
 
                                 <button
                                     type="submit"
                                     class="profile-pin-button <?= !empty($post["is_profile_pinned"]) ? "is-pinned" : "" ?>"
                                     aria-label="<?= !empty($post["is_profile_pinned"]) ? "Unpin post" : "Pin post to profile" ?>"
-                                    title="<?= !empty($post["is_profile_pinned"]) ? "Unpin post" : "Pin to profile" ?>"
-                                >
+                                    title="<?= !empty($post["is_profile_pinned"]) ? "Unpin post" : "Pin to profile" ?>">
                                     <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z"/>
-                                        <path d="M12 14v7"/>
+                                        <path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6Z" />
+                                        <path d="M12 14v7" />
                                     </svg>
                                 </button>
                             </form>
@@ -336,8 +333,7 @@ require_once __DIR__ . "/includes/user_header.php";
                         <a
                             href="<?= BASE_URL ?>post.php?id=<?= $postId ?>"
                             class="profile-post-card <?= !$firstMedia ? "profile-text-post" : "" ?>"
-                            aria-label="View <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
-                        >
+                            aria-label="View <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>">
 
                             <?php if ($firstMedia): ?>
 
@@ -352,8 +348,7 @@ require_once __DIR__ . "/includes/user_header.php";
                                         class="profile-post-media"
                                         src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
                                         alt="<?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>"
-                                        loading="lazy"
-                                    >
+                                        loading="lazy">
 
                                 <?php elseif ($firstMedia["media_type"] === "video"): ?>
 
@@ -362,8 +357,7 @@ require_once __DIR__ . "/includes/user_header.php";
                                         src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
                                         muted
                                         playsinline
-                                        preload="metadata"
-                                    ></video>
+                                        preload="metadata"></video>
 
                                     <span class="profile-video-icon" aria-hidden="true">
                                         ▶
@@ -448,18 +442,104 @@ require_once __DIR__ . "/includes/user_header.php";
 
 </section>
 
-<!-- Profile picture modal -->
+<!-- REPORT MODAL -->
+<div
+    id="report-modal"
+    class="report-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="report-modal-title"
+    hidden
+>
+    <div class="report-modal-content">
 
+        <button
+            type="button"
+            class="report-modal-close"
+            aria-label="Close report form"
+        >
+            &times;
+        </button>
+
+        <h2 id="report-modal-title">Report user</h2>
+
+        <p>Why are you reporting this content?</p>
+
+        <form id="report-form">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+            >
+
+            <input
+                type="hidden"
+                name="report_type"
+                id="report-type"
+                value="user"
+            >
+
+            <input
+                type="hidden"
+                name="target_id"
+                id="report-target-id"
+            >
+
+            <label for="report-reason">Reason</label>
+
+            <select name="reason" id="report-reason" required>
+                <option value="">Select a reason</option>
+                <option value="Harassment or bullying">Harassment or bullying</option>
+                <option value="Fake or impersonation account">Fake or impersonation account</option>
+                <option value="Spam">Spam</option>
+                <option value="Inappropriate profile">Inappropriate profile</option>
+                <option value="Hate speech">Hate speech</option>
+                <option value="Other">Other</option>
+            </select>
+
+            <label for="report-details">
+                Additional details (optional)
+            </label>
+
+            <textarea
+                name="details"
+                id="report-details"
+                maxlength="1000"
+                placeholder="Tell us more about the issue..."
+            ></textarea>
+
+            <div class="report-modal-actions">
+                <button type="button" class="report-cancel-button">
+                    Cancel
+                </button>
+
+                <button type="submit" class="report-submit-button">
+                    Submit report
+                </button>
+            </div>
+
+            <p
+                id="report-message"
+                class="report-message"
+                role="status"
+                aria-live="polite"
+                hidden
+            ></p>
+
+        </form>
+    </div>
+</div>
+
+<!-- Profile picture modal -->
 <div
     id="profile-image-modal"
     class="profile-image-modal"
-    aria-hidden="true"
->
+    aria-hidden="true">
     <button
         type="button"
         class="profile-image-modal-close"
-        aria-label="Close profile picture"
-    >
+        aria-label="Close profile picture">
         &times;
     </button>
 
@@ -467,8 +547,7 @@ require_once __DIR__ . "/includes/user_header.php";
         id="profile-modal-image"
         class="profile-modal-image"
         src=""
-        alt=""
-    >
+        alt="">
 </div>
 
 <script src="<?= BASE_URL ?>assets/js/profile.js?v=2"></script>

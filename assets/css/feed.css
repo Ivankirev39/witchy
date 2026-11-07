@@ -1,7 +1,6 @@
-/* ========================================
-   FEED
-   ======================================== */
-   .feed-page {
+/* FEED */
+
+.feed-page {
     max-width: 760px;
     margin: 0 auto;
 }
@@ -18,9 +17,8 @@
 .feed-page p {
     color: var(--text-secondary);
 }
-/* ========================================
-   FEED TABS
-   ======================================== */
+/* FEED TABS */
+
 .feed-tabs {
     display: flex;
     gap: 14px;
@@ -44,9 +42,8 @@
 }
 
 
-/* ========================================
-   POST CARD
-   ======================================== */
+/* POST CARD */
+
    .post-card {
     width: 100%;
     margin-bottom: 28px;
@@ -122,9 +119,9 @@
     background: var(--surface);
     color: var(--text);
 }
-/* ========================================
-   POST MEDIA - GENERAL
-   ======================================== */
+
+/* POST MEDIA - GENERAL */
+
 .post-media {
     width: 100%;
     display: grid;
@@ -424,7 +421,6 @@
 }
 
 /* COMMENT FORM*/
-
    .comment-form {
     display: flex;
     align-items: center;
@@ -509,6 +505,219 @@
 .delete-comment-button:active {
   transform: scale(0.96);
 }
+/* ========================================
+   WITCHY - FEED REPORT FUNCTION
+   ======================================== */
+
+/* ========================================
+   REPORT BUTTON
+   ======================================== */
+
+.report-button {
+    margin-left: auto;
+    padding: 4px 8px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--brand-plum);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease,
+                transform 0.2s ease;
+}
+
+.report-button:hover {
+    color: var(--brand-black);
+    background: rgba(55, 20, 70, 0.07);
+    transform: translateY(-1px);
+}
+
+.report-button:focus-visible {
+    outline: 2px solid #C6A4CF;
+    outline-offset: 2px;
+}
+
+/* ========================================
+   REPORT MODAL OVERLAY
+   ======================================== */
+
+.report-modal[hidden] {
+    display: none !important;
+}
+
+.report-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(16, 14, 18, 0.78);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+/* ========================================
+   REPORT MODAL CONTENT
+   ======================================== */
+.report-modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 30px;
+    background: #ffffff;
+    border: 1px solid #e5dce8;
+    border-radius: 14px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+    color: #100e12;
+    animation: reportModalAppear 0.2s ease;
+}
+/* ========================================
+   MODAL HEADING AND DESCRIPTION
+   ======================================== */
+.report-modal-content h2 {
+    margin: 0 0 10px;
+    color: #371446;
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 600;
+}
+.report-modal-content > p {
+    margin: 0 0 24px;
+    color: #716676;
+    font-size: 14px;
+    line-height: 1.6;
+}
+/* ========================================
+   CLOSE BUTTON
+   ======================================== */
+.report-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #716676;
+    font-size: 26px;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+.report-modal-close:hover {
+    color: #371446;
+    background: #f2edf4;
+}
+/* REPORT FORM */
+#report-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#report-form label {
+    margin-top: 8px;
+    color: #371446;
+    font-size: 13px;
+    font-weight: 600;
+}
+#report-form select,
+#report-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ded3e2;
+    border-radius: 7px;
+    background: #f8f5f9;
+    color: #100e12;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+#report-form select {
+    cursor: pointer;
+}
+#report-form textarea {
+    min-height: 110px;
+    resize: vertical;
+    line-height: 1.5;
+}
+#report-form textarea::placeholder {
+    color: #99909d;
+}
+#report-form select:focus,
+#report-form textarea:focus {
+    border-color: #a77bb2;
+    box-shadow: 0 0 0 3px rgba(198, 164, 207, 0.2);
+}
+.report-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+.report-modal-actions button {
+    min-height: 40px;
+    padding: 10px 18px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.15s ease;
+}
+.report-modal-actions button:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+.report-cancel-button {
+    border: 1px solid #d2c5d6;
+    background: transparent;
+    color: #5e5063;
+}
+.report-cancel-button:hover {
+    border-color: #bda9c4;
+    background: #f2edf4;
+}
+.report-submit-button {
+    border: 1px solid #371446;
+    background: #371446;
+    color: #ffffff;
+}
+.report-submit-button:hover {
+    border-color: #51205f;
+    background: #51205f;
+}
+.report-modal-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.report-message {
+    margin-top: 10px;
+    padding: 10px 12px;
+
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.report-message.success {
+    border: 1px solid rgba(75, 160, 110, 0.4);
+    background: rgba(75, 160, 110, 0.12);
+    color: #287a48;
+}
+.report-message.error {
+    border: 1px solid rgba(210, 75, 75, 0.4);
+    background: rgba(210, 75, 75, 0.12);
+    color: #b83232;
+}
 /* PAGINATION STLYING */
 .feed-pagination {
     display: flex;
@@ -540,8 +749,6 @@
     outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
-
-
 /* ADMIN COMMUNITY PIN */
 .admin-pinned-badge {
     display: inline-flex;
@@ -550,19 +757,15 @@
     width: fit-content;
     margin: 14px 16px 0;
     padding: 6px 12px;
-
     border: 1px solid var(--accent);
     border-radius: 8px;
-
     background: var(--accent-soft);
     color: var(--brand-plum);
-
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.25px;
     line-height: 1.3;
 }
-
 .admin-pinned-badge svg {
     width: 14px;
     height: 14px;
@@ -573,7 +776,6 @@
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-
 /* DARK MODE */
 html.dark-mode .admin-pinned-badge {
     background: #493b4d;
@@ -690,6 +892,83 @@ html.dark-mode .delete-comment-button {
 }
 html.dark-mode .delete-comment-button:hover {
     background: #c5a6ca;
+}
+html.dark-mode .report-button {
+    color: #c084cc;
+}
+html.dark-mode .report-button:hover {
+    color: #e1c3e6;
+    background: rgba(192, 132, 204, 0.12);
+}
+html.dark-mode .report-button:focus-visible {
+    outline-color: #c084cc;
+}
+html.dark-mode .report-modal {
+    background: rgba(10, 9, 12, 0.88);
+}
+html.dark-mode .report-modal-content {
+    border-color: #403b45;
+    background: #1f1d24;
+    color: #f1e8dc;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+}
+html.dark-mode .report-modal-content h2 {
+    color: #f1e8dc;
+}
+html.dark-mode .report-modal-content > p {
+    color: #aaa2aa;
+}
+html.dark-mode .report-modal-close {
+    color: #aaa2aa;
+}
+html.dark-mode .report-modal-close:hover {
+    background: #332f38;
+    color: #e1c3e6;
+}
+html.dark-mode #report-form label {
+    color: #e1c3e6;
+}
+html.dark-mode #report-form select,
+html.dark-mode #report-form textarea {
+    border-color: #403b45;
+    background: #242229;
+    color: #f1e8dc;
+}
+html.dark-mode #report-form select:focus,
+html.dark-mode #report-form textarea:focus {
+    border-color: #806b84;
+    box-shadow: 0 0 0 3px #493b4d;
+}
+html.dark-mode #report-form textarea::placeholder {
+    color: #8f8991;
+}
+html.dark-mode .report-cancel-button {
+    border-color: #55445d;
+    background: transparent;
+    color: #c4bdc5;
+}
+html.dark-mode .report-cancel-button:hover {
+    background: #332f38;
+    color: #f1e8dc;
+}
+html.dark-mode .report-submit-button {
+    border-color: #c084cc;
+    background: #c084cc;
+    color: #100e12;
+}
+html.dark-mode .report-submit-button:hover {
+    border-color: #c5a6ca;
+    background: #c5a6ca;
+}
+html.dark-mode .report-message.success {
+    border-color: rgba(75, 160, 110, 0.4);
+    background: rgba(75, 160, 110, 0.12);
+    color: #8fdaa9;
+}
+html.dark-mode .report-message.error {
+    border-color: rgba(210, 75, 75, 0.4);
+    background: rgba(210, 75, 75, 0.12);
+    color: #f19b9b;
 }
 html.dark-mode .feed-pagination a {
     border-color: #343039;
@@ -847,6 +1126,19 @@ html.dark-mode .save-button.active:hover {
         grid-row: 3;
         width: 100%;
     }
+     .report-modal {
+        padding: 12px;
+    }
+    .report-modal-content {
+        max-height: 92vh;
+        padding: 24px 18px;
+    }
+    .report-modal-actions {
+        flex-direction: column-reverse;
+    }
+    .report-modal-actions button {
+        width: 100%;
+    }
 }
 
 /* COMMENT IMAGE LAYOUT FIX */
@@ -946,4 +1238,374 @@ html.dark-mode .save-button.active:hover {
 .load-more-comments-button:disabled {
     opacity: 0.6;
     cursor: wait;
+}
+
+
+
+/* ========================================
+   FEED COMMENTS - LIKE AND REPLY STYLING
+   ======================================== */
+
+   .post-comments .comment {
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.post-comments .comment:last-child {
+    border-bottom: none;
+}
+
+.post-comments .comment > strong {
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.post-comments .feed-comment-content p {
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.post-comments .comment small {
+    margin-top: 5px;
+    font-size: 10px;
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 7px;
+}
+
+.comment-like-form {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+}
+
+.comment-like-button {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.comment-like-button:hover {
+    background: var(--accent-soft);
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.comment-like-button.active {
+    color: #b64d72;
+}
+
+.comment-like-button:active {
+    transform: scale(0.92);
+}
+
+.comment-like-count {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.reply-toggle-button {
+    padding: 5px 9px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--brand-plum);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.reply-toggle-button:hover {
+    background: var(--accent-soft);
+    color: var(--primary);
+}
+
+.comment-like-button:focus-visible,
+.reply-toggle-button:focus-visible,
+.view-replies-button:focus-visible,
+.load-more-replies-button:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+}
+
+.comment-reply-form {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-top: 12px;
+    padding: 11px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+}
+
+.comment-reply-form[hidden],
+.comment-replies[hidden] {
+    display: none;
+}
+
+.comment-reply-form input,
+.comment-reply-form textarea {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    flex: 1;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    background: var(--input-background);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.comment-reply-form input::placeholder,
+.comment-reply-form textarea::placeholder {
+    color: var(--placeholder);
+}
+
+.comment-reply-form input:focus,
+.comment-reply-form textarea:focus {
+    border-color: var(--focus);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.comment-reply-form textarea {
+    max-height: 120px;
+    resize: vertical;
+}
+
+.comment-reply-form button {
+    min-height: 38px;
+    flex-shrink: 0;
+    padding: 0 15px;
+    border: none;
+    border-radius: 8px;
+    background: var(--brand-plum);
+    color: var(--brand-white);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.comment-reply-form button:hover {
+    background: var(--brand-black);
+    transform: translateY(-1px);
+}
+
+.comment-reply-form button:disabled,
+.comment-like-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.view-replies-button,
+.load-more-replies-button {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 5px 9px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--brand-plum);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.view-replies-button:hover,
+.load-more-replies-button:hover {
+    background: var(--accent-soft);
+    color: var(--primary);
+}
+
+.load-more-replies-button[hidden] {
+    display: none;
+}
+
+.comment-replies {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 12px;
+    margin-left: 2px;
+    padding-left: 16px;
+    border-left: 2px solid var(--accent-soft);
+}
+
+.comment-replies .comment-reply {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.comment-replies .comment-reply:last-of-type {
+    padding-bottom: 2px;
+    border-bottom: none;
+}
+
+.comment-replies .comment-reply > strong {
+    font-size: 11px;
+}
+
+.comment-replies .comment-reply .feed-comment-content p {
+    font-size: 12px;
+}
+
+.comment-replies .comment-reply small {
+    font-size: 10px;
+}
+
+.comment-replies .comment-reply .comment-actions {
+    margin-top: 5px;
+}
+
+.comment-replies .comment-reply .comment-like-button {
+    width: 25px;
+    height: 25px;
+    font-size: 17px;
+}
+
+.comment-replies .comment-reply .delete-comment-button {
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+}
+
+.comment-replies .comment-reply .report-button {
+    padding: 4px 6px;
+    font-size: 10px;
+}
+
+/* DARK MODE */
+
+html.dark-mode .comment-like-button {
+    color: #aaa2aa;
+}
+
+html.dark-mode .comment-like-button:hover {
+    background: #332f38;
+    color: #e1c3e6;
+}
+
+html.dark-mode .comment-like-button.active {
+    color: #e58aa9;
+}
+
+html.dark-mode .comment-like-count {
+    color: #aaa2aa;
+}
+
+html.dark-mode .reply-toggle-button,
+html.dark-mode .view-replies-button,
+html.dark-mode .load-more-replies-button {
+    color: #d9b7df;
+}
+
+html.dark-mode .reply-toggle-button:hover,
+html.dark-mode .view-replies-button:hover,
+html.dark-mode .load-more-replies-button:hover {
+    background: #332f38;
+    color: #f1e8dc;
+}
+
+html.dark-mode .comment-replies {
+    border-left-color: #493b4d;
+}
+
+html.dark-mode .comment-replies .comment-reply {
+    border-bottom-color: #343039;
+}
+
+html.dark-mode .comment-reply-form {
+    border-color: #403b45;
+    background: #242229;
+}
+
+html.dark-mode .comment-reply-form input,
+html.dark-mode .comment-reply-form textarea {
+    border-color: #403b45;
+    background: #1f1d24;
+    color: #f1e8dc;
+}
+
+html.dark-mode .comment-reply-form input::placeholder,
+html.dark-mode .comment-reply-form textarea::placeholder {
+    color: #8f8991;
+}
+
+html.dark-mode .comment-reply-form input:focus,
+html.dark-mode .comment-reply-form textarea:focus {
+    border-color: #806b84;
+    box-shadow: 0 0 0 3px #493b4d;
+}
+
+html.dark-mode .comment-reply-form button {
+    background: #c084cc;
+    color: #100e12;
+}
+
+html.dark-mode .comment-reply-form button:hover {
+    background: #c5a6ca;
+}
+
+/* MOBILE */
+
+@media (max-width: 500px) {
+    .comment-actions {
+        gap: 8px;
+    }
+
+    .comment-replies {
+        margin-left: 0;
+        padding-left: 11px;
+    }
+
+    .comment-reply-form {
+        gap: 7px;
+        padding: 8px;
+    }
+
+    .comment-reply-form input,
+    .comment-reply-form textarea {
+        min-height: 38px;
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .comment-reply-form button {
+        min-height: 36px;
+        padding: 0 11px;
+    }
+}
+
+html.feed-restoring body {
+    visibility: hidden;
 }

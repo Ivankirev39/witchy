@@ -159,3 +159,122 @@ function showPinMessage(message) {
 
     messageElement.textContent = message;
 }
+// REPORT PROFILE
+const reportProfileButton = document.querySelector(
+    '.report-button[data-report-type="user"]'
+);
+
+const reportModal = document.getElementById("report-modal");
+const reportForm = document.getElementById("report-form");
+const reportTargetId = document.getElementById("report-target-id");
+const reportType = document.getElementById("report-type");
+const reportMessage = document.getElementById("report-message");
+
+if (
+    reportProfileButton &&
+    reportModal &&
+    reportForm &&
+    reportTargetId &&
+    reportType &&
+    reportMessage
+) {
+    const closeReportModal = () => {
+        reportModal.classList.remove("active");
+        reportModal.hidden = true;
+        document.body.style.overflow = "";
+    };
+
+    // Open report modal
+    reportProfileButton.addEventListener("click", () => {
+        reportTargetId.value = reportProfileButton.dataset.targetId;
+        reportType.value = "user";
+
+        reportForm.reset();
+        reportTargetId.value = reportProfileButton.dataset.targetId;
+        reportType.value = "user";
+
+        reportMessage.textContent = "";
+        reportMessage.className = "report-message";
+        reportMessage.hidden = true;
+
+        reportModal.hidden = false;
+        reportModal.classList.add("active");
+        document.body.style.overflow = "hidden";
+    });
+
+    const closeButton = reportModal.querySelector(".report-modal-close");
+
+    if (closeButton) {
+        closeButton.addEventListener("click", closeReportModal);
+    }
+
+    const cancelButton = reportModal.querySelector(".report-cancel-button");
+
+    if (cancelButton) {
+        cancelButton.addEventListener("click", closeReportModal);
+    }
+
+    reportModal.addEventListener("click", (event) => {
+        if (event.target === reportModal) {
+            closeReportModal();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !reportModal.hidden) {
+            closeReportModal();
+        }
+    });
+
+    reportForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const submitButton = reportForm.querySelector(
+            ".report-submit-button"
+        );
+
+        if (!submitButton || submitButton.disabled) return;
+
+        submitButton.disabled = true;
+        reportMessage.hidden = true;
+
+        try {
+            const response = await fetch("report_submit.php", {
+                method: "POST",
+                body: new FormData(reportForm),
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json"
+                }
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.success) {
+                reportMessage.textContent =
+                    result.message || "We couldn't submit your report. Please try again.";
+                reportMessage.classList.add("error");
+                reportMessage.hidden = false;
+                return;
+            }
+
+            reportMessage.textContent =
+                result.message || "Your report has been submitted successfully.";
+            reportMessage.classList.add("success");
+            reportMessage.hidden = false;
+
+            reportForm.reset();
+
+        } catch (error) {
+            console.error("Profile report error:", error);
+
+            reportMessage.textContent =
+                "Something went wrong. Please try again.";
+
+            reportMessage.hidden = false;
+
+        } finally {
+            submitButton.disabled = false;
+        }
+    });
+}

@@ -3,6 +3,7 @@ require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/User.php";
+require_once __DIR__ . "/models/KeywordFilter.php";
 
 $pageTitle = "Edit Profile | Witchy";
 $pageCss = "edit_profile.css";
@@ -29,10 +30,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $birthdate = trim($_POST["birthdate"] ?? "");
         $bio = trim($_POST["bio"] ?? "");
 
+        
+        $keywordFilter = new KeywordFilter();
+
         if (!preg_match('/^[A-Za-z0-9_]{3,50}$/', $username)) {
             $error = "Username must be 3-50 characters and only contain letters, numbers or underscores.";
         } elseif (strlen($bio) > 500) {
             $error = "Bio cannot be longer than 500 characters.";
+        } elseif (
+            $bio !== "" &&
+            $keywordFilter->containsBlockedContent($bio)
+        ) {
+            $error = "Your bio contains inappropriate language. Please edit it and try again.";
         } elseif ($birthdate !== "" && (
             !preg_match('/^\d{4}-\d{2}-\d{2}$/', $birthdate) ||
             !checkdate(
@@ -44,6 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         )) {
             $error = "Please enter a valid birthday.";
         }
+
     }
 
     if ($error === "") {

@@ -86,6 +86,12 @@ $profileImageUrl = BASE_URL . ltrim($profileImage, "/");
         </a>
 
         <div class="mobile-header-actions">
+            <button
+             type="button"
+             class="theme-toggle mobile-theme-toggle"
+             aria-label="Switch to dark mode"
+             title="Switch to dark mode">☾
+            </button>
 
             <a href="<?= BASE_URL ?>profile.php" class="mobile-profile" aria-label="Profile">
                 <img
@@ -241,3 +247,5 @@ $profileImageUrl = BASE_URL . ltrim($profileImage, "/");
             </div>
 
         </header>
+
+        <script src="/witchy/assets/js/feed-scroll.js"></script>

@@ -1,7 +1,5 @@
 
-/* =========================================================
-   WITCHY — PUBLIC EXPLORE
-   ========================================================= */
+/* PUBLIC EXPLORE */
 
 .explore-page {
     --public-bg: var(--background);
@@ -28,9 +26,7 @@
     color: inherit;
 }
 
-/* =========================================================
-   PAGE HEADER
-   ========================================================= */
+/* PAGE HEADER */
 
 .explore-page .explore-header {
     margin-bottom: 28px;
@@ -64,9 +60,7 @@
     text-decoration: underline;
 }
 
-/* =========================================================
-   SEARCH
-   ========================================================= */
+/* SEARCH */
 
 .explore-page .public-explore-search {
     max-width: 760px;
@@ -125,9 +119,7 @@
     background: var(--public-accent-hover);
 }
 
-/* =========================================================
-   TOPIC FILTERS
-   ========================================================= */
+/* TOPIC FILTERS */
 
 .explore-page .explore-topics {
     display: flex;
@@ -166,11 +158,9 @@
     color: #fff;
 }
 
-/* =========================================================
-   PUBLIC DISCOVERY TABS
-   ========================================================= */
+/* PUBLIC DISCOVERY TABS */
 
-   .explore-page .public-explore-tabs {
+.explore-page .public-explore-tabs {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -216,7 +206,7 @@
     outline-offset: 3px;
 }
 
-/* Pinned post label */
+/* PINNED POST LABEL */
 
 .explore-page .public-explore-pinned {
     position: absolute;
@@ -234,7 +224,7 @@
     box-shadow: 0 2px 8px rgb(0 0 0 / 15%);
 }
 
-/* Empty state decoration */
+/* EMPTY STATE DECORATION */
 
 .explore-page .explore-empty-icon {
     display: block;
@@ -243,35 +233,7 @@
     font-size: 2rem;
 }
 
-body.dark-mode .explore-page .public-explore-tabs a {
-    border-color: var(--border);
-    background: var(--surface);
-    color: var(--text);
-}
-
-body.dark-mode .explore-page .public-explore-tabs a.active {
-    border-color: var(--public-accent);
-    background: var(--public-accent);
-    color: #fff;
-}
-
-@media (max-width: 600px) {
-    .explore-page .public-explore-tabs {
-        gap: 7px;
-        margin-bottom: 22px;
-    }
-
-    .explore-page .public-explore-tabs a {
-        min-height: 38px;
-        padding: 8px 15px;
-        font-size: 0.86rem;
-    }
-}
-
-
-/* =========================================================
-   SORTING
-   ========================================================= */
+/* SORTING */
 
 .explore-page .explore-sort {
     display: flex;
@@ -298,9 +260,7 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     cursor: pointer;
 }
 
-/* =========================================================
-   POST GRID
-   ========================================================= */
+/* POST GRID */
 
 .explore-page .explore-grid {
     display: grid;
@@ -309,7 +269,6 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     gap: 22px;
 }
 
-/* Every card has the same height. */
 .explore-page .explore-cards {
     display: flex;
     min-width: 0;
@@ -330,9 +289,7 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     box-shadow: 0 9px 24px rgb(40 25 50 / 10%);
 }
 
-/* =========================================================
-   CARD MEDIA
-   ========================================================= */
+/* CARD MEDIA */
 
 .explore-page .explore-cards-image {
     position: relative;
@@ -394,9 +351,7 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     pointer-events: none;
 }
 
-/* =========================================================
-   CARD CONTENT
-   ========================================================= */
+/* CARD CONTENT */
 
 .explore-page .explore-cards-body {
     display: flex;
@@ -441,7 +396,8 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     text-underline-offset: 3px;
 }
 
-/* Short, readable preview; Read more stays inline. */
+/* DESCRIPTION PREVIEW */
+
 .explore-page .explore-cards-description {
     display: -webkit-box;
     margin: 0;
@@ -473,24 +429,21 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     opacity: 0.8;
 }
 
-/* =========================================================
-   TOPIC AND DATE — ANCHORED AT THE BOTTOM
-   ========================================================= */
+/* TOPIC TAG */
 
-.explore-page .explore-cards-meta {
+.explore-page .explore-cards-topic-row {
     display: flex;
     flex-shrink: 0;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    min-height: 32px;
     margin-top: auto;
     padding-top: 10px;
-    border-top: 1px solid var(--public-border);
+    padding-bottom: 10px;
 }
 
 .explore-page .explore-cards-topic {
     display: inline-block;
-    max-width: 62%;
+    max-width: 100%;
     overflow: hidden;
     padding: 5px 9px;
     border-radius: 999px;
@@ -502,6 +455,43 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     white-space: nowrap;
 }
 
+/* ENGAGEMENT AND DATE */
+
+.explore-page .explore-cards-meta {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--public-border);
+}
+
+.explore-page .explore-cards-engagement {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 16px;
+}
+
+.explore-page .explore-engagement-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--public-muted);
+    font-size: 0.82rem;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.explore-page .explore-engagement-item svg {
+    display: block;
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+    stroke: currentColor;
+}
+
 .explore-page .explore-cards-date {
     flex-shrink: 0;
     color: var(--public-muted);
@@ -509,9 +499,7 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     white-space: nowrap;
 }
 
-/* =========================================================
-   EMPTY RESULTS
-   ========================================================= */
+/* EMPTY RESULTS */
 
 .explore-page .explore-empty {
     grid-column: 1 / -1;
@@ -544,9 +532,7 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     text-decoration: none;
 }
 
-/* =========================================================
-   PAGINATION
-   ========================================================= */
+/* PAGINATION */
 
 .explore-page .explore-pagination {
     display: flex;
@@ -602,9 +588,7 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     font-weight: 700;
 }
 
-/* =========================================================
-   JOIN COMMUNITY
-   ========================================================= */
+/* JOIN COMMUNITY */
 
 .explore-page .public-explore-join {
     margin: 30px 0 0;
@@ -620,9 +604,7 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     text-underline-offset: 3px;
 }
 
-/* =========================================================
-   KEYBOARD ACCESSIBILITY
-   ========================================================= */
+/* KEYBOARD ACCESSIBILITY */
 
 .explore-page a:focus-visible,
 .explore-page button:focus-visible,
@@ -632,9 +614,7 @@ body.dark-mode .explore-page .public-explore-tabs a.active {
     outline-offset: 3px;
 }
 
-/* =========================================================
-   DARK MODE
-   ========================================================= */
+/* DARK MODE */
 
 body.dark-mode .explore-page {
     color: var(--text);
@@ -684,9 +664,7 @@ body.dark-mode .explore-page .explore-empty p {
     color: var(--text-secondary);
 }
 
-/* =========================================================
-   RESPONSIVE LAYOUT
-   ========================================================= */
+/* RESPONSIVE LAYOUT */
 
 @media (max-width: 900px) {
     .explore-page .explore-grid {
@@ -765,6 +743,24 @@ body.dark-mode .explore-page .explore-empty p {
         font-size: 0.86rem;
     }
 
+    .explore-page .explore-cards-engagement {
+        gap: 12px;
+    }
+
+    .explore-page .explore-engagement-item {
+        gap: 4px;
+        font-size: 0.78rem;
+    }
+
+    .explore-page .explore-engagement-item svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .explore-page .explore-cards-date {
+        font-size: 0.7rem;
+    }
+
     .explore-page .explore-pagination {
         gap: 8px;
     }
@@ -780,7 +776,8 @@ body.dark-mode .explore-page .explore-empty p {
     }
 }
 
-/* Respect users who prefer reduced motion. */
+/* REDUCED MOTION */
+
 @media (prefers-reduced-motion: reduce) {
     .explore-page *,
     .explore-page *::before,
