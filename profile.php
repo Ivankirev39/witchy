@@ -491,10 +491,10 @@ require_once __DIR__ . "/includes/user_header.php";
             <select name="reason" id="report-reason" required>
                 <option value="">Select a reason</option>
                 <option value="Harassment or bullying">Harassment or bullying</option>
+                <option value="Fake or impersonation account">Fake or impersonation account</option>
                 <option value="Spam">Spam</option>
+                <option value="Inappropriate profile">Inappropriate profile</option>
                 <option value="Hate speech">Hate speech</option>
-                <option value="Inappropriate content">Inappropriate content</option>
-                <option value="Misinformation">Misinformation</option>
                 <option value="Other">Other</option>
             </select>
 

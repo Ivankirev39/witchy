@@ -194,6 +194,7 @@ if (
         reportType.value = "user";
 
         reportMessage.textContent = "";
+        reportMessage.className = "report-message";
         reportMessage.hidden = true;
 
         reportModal.hidden = false;
@@ -252,14 +253,14 @@ if (
             if (!response.ok || !result.success) {
                 reportMessage.textContent =
                     result.message || "We couldn't submit your report. Please try again.";
-
+                reportMessage.classList.add("error");
                 reportMessage.hidden = false;
                 return;
             }
 
             reportMessage.textContent =
                 result.message || "Your report has been submitted successfully.";
-
+            reportMessage.classList.add("success");
             reportMessage.hidden = false;
 
             reportForm.reset();
