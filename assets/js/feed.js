@@ -989,7 +989,7 @@ async function loadCommentReplies(comment, button) {
         formData.append("parent_comment_id", parentCommentId);
         formData.append("offset", offset);
 
-        const response = await fetch("/witchy/get_comment_replies.php", {
+        const response = await fetch("/get_comment_replies.php", {
             method: "POST",
             body: formData,
             headers: {
