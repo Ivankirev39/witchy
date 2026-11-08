@@ -33,12 +33,12 @@ document.addEventListener("DOMContentLoaded", function () {
     menuClose.addEventListener("click", closeMobileMenu);
     overlay.addEventListener("click", closeMobileMenu);
 
-    // Close menu when clicking any navigation link
     sidebar.querySelectorAll(
-        ".user-nav a, .create-post-button, .mobile-extra-links a"
+        ".user-nav a, .create-post-button, .mobile-menu-nav a"
     ).forEach(function (link) {
         link.addEventListener("click", closeMobileMenu);
     });
+
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {

@@ -813,3 +813,119 @@ html:not(.dark-mode) .topbar-notification-link .notification-dot {
         color: var(--text);
     }
 }
+
+
+/* =====================================
+   WITCHY REDESIGNED MOBILE NAVIGATION
+   ===================================== */
+
+.mobile-menu-nav {
+    display: none;
+}
+
+@media (max-width: 700px) {
+
+    .user-sidebar {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    /* Hide desktop links on mobile */
+    .user-sidebar .user-nav,
+    .user-sidebar .mobile-extra-links {
+        display: none;
+    }
+
+    .mobile-menu-top {
+        order: 0;
+        margin-bottom: 16px;
+    }
+
+    /* Create Post at the top */
+    .user-sidebar .create-post-button {
+        order: 1;
+        width: 100%;
+        min-height: 48px;
+        margin: 0 0 16px;
+        flex-shrink: 0;
+        border-radius: 12px;
+    }
+
+    .mobile-menu-nav {
+        order: 2;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .mobile-nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .mobile-nav-heading {
+        margin: 4px 0 8px;
+        padding: 0 12px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+    }
+
+    .mobile-menu-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 44px;
+        padding: 10px 12px;
+        border-radius: 11px;
+        box-sizing: border-box;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .mobile-menu-link:hover,
+    .mobile-menu-link.active {
+        background: var(--accent-soft);
+        color: var(--text);
+    }
+
+    .mobile-menu-link.active {
+        font-weight: 700;
+    }
+
+    .mobile-nav-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 22px;
+        width: 22px;
+        font-size: 19px;
+    }
+
+    /* Search below links */
+    .user-sidebar .mobile-menu-search {
+        order: 3;
+        margin-top: 10px;
+    }
+
+    /* Logout at bottom */
+    .user-sidebar .user-sidebar-bottom {
+        order: 4;
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border);
+    }
+
+    .user-sidebar .logout-button {
+        min-height: 44px;
+    }
+}

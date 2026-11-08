@@ -166,15 +166,78 @@ $profileImageUrl = BASE_URL . ltrim($profileImage, "/");
                 <a href="<?= BASE_URL ?>admin/index.php">Admin Dashboard</a>
             <?php endif; ?>
         </nav>
-        <nav class="mobile-extra-links" aria-label="More pages">
-            <a href="<?= BASE_URL ?>notifications.php">Notifications</a>
-            <a href="<?= BASE_URL ?>liked.php">Liked posts</a>
-            <a href="<?= BASE_URL ?>settings.php">Account settings</a>
-            <a href="<?= BASE_URL ?>help.php">Help</a>
-            <a href="<?= BASE_URL ?>contact.php">Contact</a>
-            <a href="<?= BASE_URL ?>about.php">About</a>
-            <a href="<?= BASE_URL ?>community.php">Community</a>
+
+        <nav class="mobile-menu-nav" aria-label="Mobile navigation">
+
+            <div class="mobile-nav-group">
+                <a href="<?= BASE_URL ?>feed.php"
+                class="mobile-menu-link <?= $currentPage === 'feed.php' ? 'active' : '' ?>">
+                    <span class="mobile-nav-icon">⌂</span> Home
+                </a>
+
+                <a href="<?= BASE_URL ?>explore.php"
+                class="mobile-menu-link <?= $currentPage === 'explore.php' ? 'active' : '' ?>">
+                    <span class="mobile-nav-icon">⌕</span> Explore
+                </a>
+
+                <a href="<?= BASE_URL ?>saved.php"
+                class="mobile-menu-link <?= $currentPage === 'saved.php' ? 'active' : '' ?>">
+                    <span class="mobile-nav-icon">♡</span> Saved
+                </a>
+
+                <a href="<?= BASE_URL ?>profile.php"
+                class="mobile-menu-link <?= $isOwnProfile ? 'active' : '' ?>">
+                    <span class="mobile-nav-icon">♙</span> Profile
+                </a>
+            </div>
+
+            <div class="mobile-nav-group">
+                <p class="mobile-nav-heading">ACCOUNT</p>
+
+                <a href="<?= BASE_URL ?>liked.php"
+                class="mobile-menu-link <?= $currentPage === 'liked.php' ? 'active' : '' ?>">
+                    <span class="mobile-nav-icon">♡</span> Liked posts
+                </a>
+
+                <a href="<?= BASE_URL ?>settings.php"
+                class="mobile-menu-link <?= $currentPage === 'settings.php' ? 'active' : '' ?>">
+                    <span class="mobile-nav-icon">⚙</span> Account settings
+                </a>
+            </div>
+
+            <div class="mobile-nav-group">
+                <p class="mobile-nav-heading">MORE</p>
+
+                <a href="<?= BASE_URL ?>rules.php"
+                class="mobile-menu-link <?= $currentPage === 'rules.php' ? 'active' : '' ?>">
+                    <span class="mobile-nav-icon">☷</span> Community rules
+                </a>
+
+                <a href="<?= BASE_URL ?>help.php"
+                class="mobile-menu-link <?= $currentPage === 'help.php' ? 'active' : '' ?>">
+                    <span class="mobile-nav-icon">?</span> Help
+                </a>
+
+                <a href="<?= BASE_URL ?>contact.php"
+                class="mobile-menu-link <?= $currentPage === 'contact.php' ? 'active' : '' ?>">
+                    <span class="mobile-nav-icon">✉</span> Contact
+                </a>
+            </div>
+
+            <?php if (($_SESSION["rank"] ?? "") === "admin"): ?>
+                <div class="mobile-nav-group">
+                    <p class="mobile-nav-heading">ADMINISTRATION</p>
+
+                    <a href="<?= BASE_URL ?>admin/index.php"
+                    class="mobile-menu-link">
+                        <span class="mobile-nav-icon">♢</span> Admin Dashboard
+                    </a>
+                </div>
+            <?php endif; ?>
+
         </nav>
+
+
 
         <a
             href="<?= BASE_URL ?>upload.php"

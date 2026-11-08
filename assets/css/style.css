@@ -721,3 +721,79 @@ html.dark-mode .user-footer-logo .user-footer-logo-dark {
         display: none;
     }
 }
+
+
+/* ========================================
+   MOBILE USER FOOTER FIX
+   ======================================== */
+
+@media (max-width: 700px) {
+
+    .user-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+
+        margin-top: 40px;
+        padding: 28px 16px;
+
+        gap: 20px;
+        text-align: center;
+    }
+
+    /* Center logo */
+    .user-footer-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        align-self: center;
+        width: auto;
+        max-width: 100%;
+    }
+
+    .user-footer-logo img {
+        width: auto;
+        height: 54px;
+        max-width: 100%;
+    }
+
+    /* Allow links to wrap */
+    .user-footer-nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+
+        gap: 12px 18px;
+    }
+
+    .user-footer-nav a {
+        font-size: 13px;
+        text-align: center;
+    }
+
+    /* Center copyright */
+    .user-footer-copy {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+
+        justify-self: auto;
+        text-align: center;
+        white-space: normal;
+        overflow-wrap: break-word;
+
+        font-size: 12px;
+        line-height: 1.6;
+    }
+}

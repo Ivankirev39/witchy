@@ -1258,3 +1258,77 @@ html.dark-mode .profile-no-posts {
         transition: none;
     }
 }
+
+/* ========================================
+   MOBILE PROFILE LAYOUT FIX
+   ======================================== */
+
+@media (max-width: 600px) {
+
+    .profile-page {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .profile-header {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .profile-identity {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    /* Stack username and buttons vertically */
+    .profile-name-row {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .profile-name-row > div:first-child {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .profile-name-row h1 {
+        overflow-wrap: anywhere;
+    }
+
+    /* Profile action buttons */
+    .profile-owner-actions {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        flex-shrink: 1;
+        box-sizing: border-box;
+    }
+
+    .profile-owner-actions a {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* Follow and report buttons */
+    .profile-user-actions {
+        width: 100%;
+        align-items: stretch;
+    }
+
+    /* Bio and statistics */
+    .profile-bio {
+        overflow-wrap: anywhere;
+    }
+
+    .profile-stats {
+        flex-wrap: wrap;
+        gap: 16px 24px;
+    }
+}
