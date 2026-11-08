@@ -92,6 +92,29 @@ $profileImageUrl = BASE_URL . ltrim($profileImage, "/");
              aria-label="Switch to dark mode"
              title="Switch to dark mode">☾
             </button>
+            <a
+                href="<?= BASE_URL ?>notifications.php"
+                class="mobile-notification-link"
+                aria-label="Notifications<?= $unreadNotificationCount > 0
+                    ? ' (' . $unreadNotificationCount . ' unread)'
+                    : '' ?>"
+                title="Notifications"
+            >
+                <svg viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Z"/>
+                    <path d="M10 21h4"/>
+                </svg>
+
+                <?php if ($unreadNotificationCount > 0): ?>
+                    <span class="notification-dot"></span>
+                <?php endif; ?>
+            </a>
 
             <a href="<?= BASE_URL ?>profile.php" class="mobile-profile" aria-label="Profile">
                 <img
@@ -142,6 +165,15 @@ $profileImageUrl = BASE_URL . ltrim($profileImage, "/");
             <?php if (($_SESSION["rank"] ?? "") === "admin"): ?>
                 <a href="<?= BASE_URL ?>admin/index.php">Admin Dashboard</a>
             <?php endif; ?>
+        </nav>
+        <nav class="mobile-extra-links" aria-label="More pages">
+            <a href="<?= BASE_URL ?>notifications.php">Notifications</a>
+            <a href="<?= BASE_URL ?>liked.php">Liked posts</a>
+            <a href="<?= BASE_URL ?>settings.php">Account settings</a>
+            <a href="<?= BASE_URL ?>help.php">Help</a>
+            <a href="<?= BASE_URL ?>contact.php">Contact</a>
+            <a href="<?= BASE_URL ?>about.php">About</a>
+            <a href="<?= BASE_URL ?>community.php">Community</a>
         </nav>
 
         <a

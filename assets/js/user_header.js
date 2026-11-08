@@ -3,7 +3,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const menuClose = document.getElementById("mobile-menu-close");
     const sidebar = document.getElementById("user-sidebar");
     const overlay = document.getElementById("mobile-menu-overlay");
+
     if (!menuButton || !menuClose || !sidebar || !overlay) return;
+
     function openMobileMenu() {
         sidebar.classList.add("mobile-open");
         overlay.classList.add("active");
@@ -11,6 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
         menuButton.setAttribute("aria-expanded", "true");
         menuButton.setAttribute("aria-label", "Close navigation");
     }
+
     function closeMobileMenu() {
         sidebar.classList.remove("mobile-open");
         overlay.classList.remove("active");
@@ -18,6 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
         menuButton.setAttribute("aria-expanded", "false");
         menuButton.setAttribute("aria-label", "Open navigation");
     }
+
     menuButton.addEventListener("click", function () {
         if (sidebar.classList.contains("mobile-open")) {
             closeMobileMenu();
@@ -25,16 +29,23 @@ document.addEventListener("DOMContentLoaded", function () {
             openMobileMenu();
         }
     });
+
     menuClose.addEventListener("click", closeMobileMenu);
     overlay.addEventListener("click", closeMobileMenu);
-    sidebar.querySelectorAll(".user-nav a, .create-post-button").forEach(function (link) {
+
+    // Close menu when clicking any navigation link
+    sidebar.querySelectorAll(
+        ".user-nav a, .create-post-button, .mobile-extra-links a"
+    ).forEach(function (link) {
         link.addEventListener("click", closeMobileMenu);
     });
+
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
             closeMobileMenu();
         }
     });
+
     window.addEventListener("resize", function () {
         if (window.innerWidth > 700) {
             closeMobileMenu();

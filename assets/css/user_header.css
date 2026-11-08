@@ -730,3 +730,86 @@ html.dark-mode .topbar-profile {
 html:not(.dark-mode) .topbar-notification-link .notification-dot {
     border-color: #fff;
 }
+
+/* Mobile notification button */
+.mobile-notification-link {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    .mobile-notification-link {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 40px;
+        width: 40px;
+        height: 40px;
+        color: var(--text);
+        text-decoration: none;
+        border-radius: 50%;
+    }
+
+    .mobile-notification-link svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .mobile-notification-link .notification-dot {
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #c084cc;
+        pointer-events: none;
+    }
+
+    .mobile-notification-link:hover {
+        background: var(--accent-soft);
+    }
+
+    .mobile-notification-link:focus-visible {
+        outline: 2px solid var(--focus);
+        outline-offset: 2px;
+    }
+}
+
+/* Prevent overcrowding on narrow phones */
+@media (max-width: 500px) {
+    .mobile-profile {
+        display: none;
+    }
+
+    .mobile-header-actions {
+        gap: 6px;
+    }
+}
+.mobile-extra-links {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    .mobile-extra-links {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+    }
+
+    .mobile-extra-links a {
+        display: block;
+        padding: 13px 14px;
+        border-radius: 10px;
+        color: var(--text-secondary);
+        text-decoration: none;
+    }
+
+    .mobile-extra-links a:hover {
+        background: var(--accent-soft);
+        color: var(--text);
+    }
+}
