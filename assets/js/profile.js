@@ -278,3 +278,82 @@ if (
         }
     });
 }
+// FOLLOWERS / FOLLOWING MODAL
+(() => {
+    const followModal = document.getElementById("follow-modal");
+
+    if (!followModal) return;
+
+    const modalTitle = document.getElementById("follow-modal-title");
+    const closeButton = followModal.querySelector(".follow-modal-close");
+    const tabs = followModal.querySelectorAll("[data-follow-tab]");
+    const followersList = document.getElementById("followers-list");
+    const followingList = document.getElementById("following-list");
+    const openButtons = document.querySelectorAll("[data-follow-modal]");
+
+    let previousFocus = null;
+
+    function switchTab(tabName) {
+        const showingFollowers = tabName === "followers";
+
+        modalTitle.textContent = showingFollowers ? "Followers" : "Following";
+
+        followersList.hidden = !showingFollowers;
+        followingList.hidden = showingFollowers;
+
+        tabs.forEach(tab => {
+            const isActive = tab.dataset.followTab === tabName;
+
+            tab.classList.toggle("active", isActive);
+            tab.setAttribute("aria-selected", String(isActive));
+        });
+    }
+
+    function openModal(tabName) {
+        previousFocus = document.activeElement;
+
+        switchTab(tabName);
+
+        followModal.hidden = false;
+        followModal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+
+        closeButton.focus();
+    }
+
+    function closeModal() {
+        followModal.hidden = true;
+        followModal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+
+        if (previousFocus) {
+            previousFocus.focus();
+        }
+    }
+
+    openButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            openModal(button.dataset.followModal);
+        });
+    });
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            switchTab(tab.dataset.followTab);
+        });
+    });
+
+    closeButton.addEventListener("click", closeModal);
+
+    followModal.addEventListener("click", event => {
+        if (event.target === followModal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !followModal.hidden) {
+            closeModal();
+        }
+    });
+})();

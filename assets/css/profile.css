@@ -347,6 +347,7 @@
 }
 .profile-stats {
     display: flex;
+    align-items: center;
     gap: 32px;
     margin-top: 20px;
 }
@@ -362,6 +363,156 @@
     margin-top: 2px;
     color: var(--text-secondary);
     font-size: 12px;
+}
+.profile-stat-button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.profile-stat-button strong {
+    color: var(--text);
+    font-size: 18px;
+    font-weight: 700;
+    transition: color 0.2s ease;
+}
+.profile-stat-button span {
+    margin-top: 2px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    transition: color 0.2s ease;
+}
+.profile-stat-button:hover strong,
+.profile-stat-button:hover span {
+    color: var(--accent);
+}
+.profile-stat-button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 5px;
+    border-radius: 3px;
+}
+/* ========================================
+   FOLLOWERS / FOLLOWING MODAL
+   ======================================== */
+.follow-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10001;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+}
+.follow-modal[hidden],
+.follow-modal-list[hidden] {
+    display: none;
+}
+.follow-modal-content {
+    width: 100%;
+    max-width: 420px;
+    max-height:  min(600px, 80vh);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+}
+.follow-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+}
+.follow-modal-header h2 {
+    margin: 0;
+    color: var(--text);
+    font-size: 18px;
+}
+.follow-modal-close {
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 26px;
+    cursor: pointer;
+    line-height: 1;
+}
+.follow-modal-close:hover {
+    color: var(--text);
+}
+.follow-modal-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+}
+.follow-modal-tab {
+    flex: 1;
+    padding: 13px 10px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+.follow-modal-tab:hover {
+    color: var(--text);
+}
+.follow-modal-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+.follow-modal-tab:focus-visible,
+.follow-modal-close:focus-visible,
+.follow-user:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+.follow-modal-list {
+    padding: 8px 12px;
+    overflow-y: auto;
+}
+.follow-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    color: var(--text);
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.follow-user:hover {
+    background: var(--surface-hover);
+}
+.follow-user img {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.follow-user span {
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+.follow-modal-empty {
+    padding: 24px 12px;
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 13px;
+    text-align: center;
 }
 /* ========================================
    PROFILE INFORMATION
@@ -951,6 +1102,35 @@ html.dark-mode .profile-follow-button.active {
     border-color: #343039;
     color: #f1e8dc;
 }
+html.dark-mode .follow-modal-content {
+    background: #1f1d24;
+    border-color: #493b4d;
+}
+html.dark-mode .follow-modal-header,
+html.dark-mode .follow-modal-tabs {
+    border-color: #493b4d;
+}
+html.dark-mode .follow-modal-header h2,
+html.dark-mode .follow-user {
+    color: #f1e8dc;
+}
+html.dark-mode .follow-modal-close,
+html.dark-mode .follow-modal-empty {
+    color: #aaa2aa;
+}
+html.dark-mode .follow-modal-close:hover {
+    color: #f1e8dc;
+}
+html.dark-mode .follow-modal-tab {
+    color: #aaa2aa;
+}
+html.dark-mode .follow-modal-tab.active {
+    color: #c084cc;
+    border-bottom-color: #c084cc;
+}
+html.dark-mode .follow-user:hover {
+    background: #493b4d;
+}
 html.dark-mode .profile-user-actions .report-button {
     background: #1f1d24;
     border-color: #806b84;
@@ -1053,7 +1233,19 @@ html.dark-mode .profile-text-description {
 html.dark-mode .profile-no-posts {
     border-color: #343039;
 }
-
+html.dark-mode .profile-stat-button strong {
+    color: #f1e8dc;
+}
+html.dark-mode .profile-stat-button span {
+    color: #aaa2aa;
+}
+html.dark-mode .profile-stat-button:hover strong,
+html.dark-mode .profile-stat-button:hover span {
+    color: #c084cc;
+}
+html.dark-mode .profile-stat-button:focus-visible {
+    outline-color: #c084cc;
+}
 /* TABLET */
 @media (max-width: 850px) {
     .profile-post-grid {
@@ -1119,7 +1311,13 @@ html.dark-mode .profile-no-posts {
     .profile-post-overlay strong {
         font-size: 12px;
     }
-         .report-modal {
+    .follow-modal {
+        padding: 12px;
+    }
+    .follow-modal-content {
+        max-height: 75vh;
+    }
+    .report-modal {
         padding: 12px;
     }
     .report-modal-content {

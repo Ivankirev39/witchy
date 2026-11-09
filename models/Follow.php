@@ -82,4 +82,44 @@ class Follow
 
         return (int) $stmt->fetchColumn();
     }
+    // Get users who follow a specific user
+    public function getFollowers(int $userId): array
+    {
+        $sql = "
+        SELECT
+            u.user_id,
+            u.username,
+            u.profile_image
+        FROM follow f
+        INNER JOIN users u
+            ON u.user_id = f.follower_id
+        WHERE f.following_id = ?
+        ORDER BY f.created_at DESC
+    ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    // Get users a specific user follows
+    public function getFollowing(int $userId): array
+    {
+        $sql = "
+        SELECT
+            u.user_id,
+            u.username,
+            u.profile_image
+        FROM follow f
+        INNER JOIN users u
+            ON u.user_id = f.following_id
+        WHERE f.follower_id = ?
+        ORDER BY f.created_at DESC
+    ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$userId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

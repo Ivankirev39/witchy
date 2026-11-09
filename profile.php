@@ -26,7 +26,7 @@ if (!$user) {
     exit("User not found.");
 }
 
- // Get the user's badges
+// Get the user's badges
 $badgeModel = new Badge($conn);
 
 // Check permanent achievements
@@ -50,6 +50,9 @@ if (!$is_own_profile) {
 
 $follower_count = $followModel->countFollowers($profile_id);
 $following_count = $followModel->countFollowing($profile_id);
+// Get follower and following lists
+$followers = $followModel->getFollowers($profile_id);
+$following = $followModel->getFollowing($profile_id);
 
 // Get user's posts and profile pin status
 $postStmt = $conn->prepare("
@@ -179,45 +182,45 @@ require_once __DIR__ . "/includes/user_header.php";
 
                 <?php else: ?>
                     <div class="profile-user-actions">
-                    <form
-                        action="<?= BASE_URL ?>follow_user.php"
-                        method="POST"
-                        class="profile-follow-form">
-                        <input
-                            type="hidden"
-                            name="csrf_token"
-                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                        <form
+                            action="<?= BASE_URL ?>follow_user.php"
+                            method="POST"
+                            class="profile-follow-form">
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
 
-                        <input
-                            type="hidden"
-                            name="user_id"
-                            value="<?= $profile_id ?>">
+                            <input
+                                type="hidden"
+                                name="user_id"
+                                value="<?= $profile_id ?>">
 
-                        <input
-                            type="hidden"
-                            name="action"
-                            value="<?= $is_following ? "unfollow" : "follow" ?>">
+                            <input
+                                type="hidden"
+                                name="action"
+                                value="<?= $is_following ? "unfollow" : "follow" ?>">
 
-                        <input
-                            type="hidden"
-                            name="return_to"
-                            value="profile.php?id=<?= $profile_id ?>">
+                            <input
+                                type="hidden"
+                                name="return_to"
+                                value="profile.php?id=<?= $profile_id ?>">
 
+                            <button
+                                type="submit"
+                                class="profile-follow-button <?= $is_following ? "active" : "" ?>">
+                                <?= $is_following ? "Following" : "Follow" ?>
+                            </button>
+
+                        </form>
                         <button
-                            type="submit"
-                            class="profile-follow-button <?= $is_following ? "active" : "" ?>">
-                            <?= $is_following ? "Following" : "Follow" ?>
+                            type="button"
+                            class="report-button"
+                            data-report-type="user"
+                            data-target-id="<?= $profile_id ?>">
+                            Report profile
                         </button>
-            
-                    </form>
-                    <button
-                        type="button"
-                        class="report-button"
-                        data-report-type="user"
-                        data-target-id="<?= $profile_id ?>">
-                        Report profile
-                    </button>
-                        </div>
+                    </div>
                 <?php endif; ?>
 
             </div>
@@ -240,13 +243,23 @@ require_once __DIR__ . "/includes/user_header.php";
                 </div>
 
                 <div class="profile-stat">
-                    <strong><?= $follower_count ?></strong>
-                    <span>Followers</span>
+                    <button
+                        type="button"
+                        class="profile-stat-button"
+                        data-follow-modal="followers">
+                        <strong><?= $follower_count ?></strong>
+                        <span>Followers</span>
+                    </button>
                 </div>
 
                 <div class="profile-stat">
-                    <strong><?= $following_count ?></strong>
-                    <span>Following</span>
+                    <button
+                        type="button"
+                        class="profile-stat-button"
+                        data-follow-modal="following">
+                        <strong><?= $following_count ?></strong>
+                        <span>Following</span>
+                    </button>
                 </div>
 
             </div>
@@ -276,7 +289,7 @@ require_once __DIR__ . "/includes/user_header.php";
 
         </article>
 
-                
+
         <article class="profile-panel">
 
             <h2>Badges</h2>
@@ -289,24 +302,23 @@ require_once __DIR__ . "/includes/user_header.php";
 
                         <div class="profile-badge"
                             title="<?= htmlspecialchars(
-                                $badge['description'] ?? '',
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>">
+                                        $badge['description'] ?? '',
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?>">
 
                             <img
                                 src="<?= htmlspecialchars(
-                                    BASE_URL . ltrim($badge['image'], '/'),
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>"
+                                            BASE_URL . ltrim($badge['image'], '/'),
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>"
                                 alt="<?= htmlspecialchars(
-                                    $badge['name'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>"
-                                loading="lazy"
-                            >
+                                            $badge['name'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>"
+                                loading="lazy">
 
                             <span class="profile-badge-name">
                                 <?= htmlspecialchars(
@@ -503,6 +515,88 @@ require_once __DIR__ . "/includes/user_header.php";
 
 </section>
 
+<!-- Followers / Following Modal -->
+<div class="follow-modal" id="follow-modal" aria-hidden="true" hidden>
+    <div class="follow-modal-content" role="dialog" aria-modal="true" aria-labelledby="follow-modal-title">
+
+        <div class="follow-modal-header">
+            <h2 id="follow-modal-title">Followers</h2>
+            <button type="button" class="follow-modal-close" aria-label="Close">
+                &times;
+            </button>
+        </div>
+
+        <div class="follow-modal-tabs" role="tablist" aria-label="Followers and following">
+            <button
+                type="button"
+                class="follow-modal-tab active"
+                data-follow-tab="followers"
+                role="tab"
+                aria-selected="true"
+            >
+                Followers (<?= $follower_count ?>)
+            </button>
+
+            <button
+                type="button"
+                class="follow-modal-tab"
+                data-follow-tab="following"
+                role="tab"
+                aria-selected="false"
+            >
+                Following (<?= $following_count ?>)
+            </button>
+        </div>
+
+        <!-- Followers -->
+        <div class="follow-modal-list" id="followers-list" role="tabpanel">
+            <?php if (!empty($followers)): ?>
+                <?php foreach ($followers as $follower): ?>
+                    <a
+                        href="<?= BASE_URL ?>profile.php?id=<?= (int) $follower["user_id"] ?>"
+                        class="follow-user"
+                    >
+                        <img
+                            src="<?= BASE_URL . ltrim(!empty($follower["profile_image"]) ? $follower["profile_image"] : "images/default-profile.jpg", "/") ?>"
+                            alt=""
+                        >
+
+                        <span>
+                            <?= htmlspecialchars($follower["username"], ENT_QUOTES, "UTF-8") ?>
+                        </span>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="follow-modal-empty">No followers yet.</p>
+            <?php endif; ?>
+        </div>
+
+        <!-- Following -->
+        <div class="follow-modal-list" id="following-list" role="tabpanel" hidden>
+            <?php if (!empty($following)): ?>
+                <?php foreach ($following as $followed_user): ?>
+                    <a
+                        href="<?= BASE_URL ?>profile.php?id=<?= (int) $followed_user["user_id"] ?>"
+                        class="follow-user"
+                    >
+                        <img
+                            src="<?= BASE_URL . ltrim(!empty($followed_user["profile_image"]) ? $followed_user["profile_image"] : "images/default-profile.jpg", "/") ?>"
+                            alt=""
+                        >
+
+                        <span>
+                            <?= htmlspecialchars($followed_user["username"], ENT_QUOTES, "UTF-8") ?>
+                        </span>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="follow-modal-empty">Not following anyone yet.</p>
+            <?php endif; ?>
+        </div>
+
+    </div>
+</div>
+
 <!-- REPORT MODAL -->
 <div
     id="report-modal"
@@ -510,15 +604,13 @@ require_once __DIR__ . "/includes/user_header.php";
     role="dialog"
     aria-modal="true"
     aria-labelledby="report-modal-title"
-    hidden
->
+    hidden>
     <div class="report-modal-content">
 
         <button
             type="button"
             class="report-modal-close"
-            aria-label="Close report form"
-        >
+            aria-label="Close report form">
             &times;
         </button>
 
@@ -531,21 +623,18 @@ require_once __DIR__ . "/includes/user_header.php";
             <input
                 type="hidden"
                 name="csrf_token"
-                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
-            >
+                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
 
             <input
                 type="hidden"
                 name="report_type"
                 id="report-type"
-                value="user"
-            >
+                value="user">
 
             <input
                 type="hidden"
                 name="target_id"
-                id="report-target-id"
-            >
+                id="report-target-id">
 
             <label for="report-reason">Reason</label>
 
@@ -567,8 +656,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 name="details"
                 id="report-details"
                 maxlength="1000"
-                placeholder="Tell us more about the issue..."
-            ></textarea>
+                placeholder="Tell us more about the issue..."></textarea>
 
             <div class="report-modal-actions">
                 <button type="button" class="report-cancel-button">
@@ -585,8 +673,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 class="report-message"
                 role="status"
                 aria-live="polite"
-                hidden
-            ></p>
+                hidden></p>
 
         </form>
     </div>
