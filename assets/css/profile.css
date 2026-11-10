@@ -763,6 +763,10 @@
 .profile-avatar-image {
     cursor: zoom-in;
 }
+/* PROFILE COVER IMAGE MODAL */
+.profile-cover-image {
+    cursor: zoom-in;
+}
 
 .profile-image-modal {
     position: fixed;

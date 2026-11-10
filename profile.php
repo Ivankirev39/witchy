@@ -129,7 +129,9 @@ require_once __DIR__ . "/includes/user_header.php";
                             ENT_QUOTES,
                             "UTF-8"
                         ) ?>"
-                alt="">
+                alt="<?= htmlspecialchars($user["username"], ENT_QUOTES, "UTF-8") ?>'s cover image"
+                class="profile-cover-image"
+                id="profile-cover-image">
         <?php else: ?>
             <span>WITCHY</span>
         <?php endif; ?>
@@ -532,8 +534,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 class="follow-modal-tab active"
                 data-follow-tab="followers"
                 role="tab"
-                aria-selected="true"
-            >
+                aria-selected="true">
                 Followers (<?= $follower_count ?>)
             </button>
 
@@ -542,8 +543,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 class="follow-modal-tab"
                 data-follow-tab="following"
                 role="tab"
-                aria-selected="false"
-            >
+                aria-selected="false">
                 Following (<?= $following_count ?>)
             </button>
         </div>
@@ -554,12 +554,10 @@ require_once __DIR__ . "/includes/user_header.php";
                 <?php foreach ($followers as $follower): ?>
                     <a
                         href="<?= BASE_URL ?>profile.php?id=<?= (int) $follower["user_id"] ?>"
-                        class="follow-user"
-                    >
+                        class="follow-user">
                         <img
                             src="<?= BASE_URL . ltrim(!empty($follower["profile_image"]) ? $follower["profile_image"] : "images/default-profile.jpg", "/") ?>"
-                            alt=""
-                        >
+                            alt="">
 
                         <span>
                             <?= htmlspecialchars($follower["username"], ENT_QUOTES, "UTF-8") ?>
@@ -577,12 +575,10 @@ require_once __DIR__ . "/includes/user_header.php";
                 <?php foreach ($following as $followed_user): ?>
                     <a
                         href="<?= BASE_URL ?>profile.php?id=<?= (int) $followed_user["user_id"] ?>"
-                        class="follow-user"
-                    >
+                        class="follow-user">
                         <img
                             src="<?= BASE_URL . ltrim(!empty($followed_user["profile_image"]) ? $followed_user["profile_image"] : "images/default-profile.jpg", "/") ?>"
-                            alt=""
-                        >
+                            alt="">
 
                         <span>
                             <?= htmlspecialchars($followed_user["username"], ENT_QUOTES, "UTF-8") ?>

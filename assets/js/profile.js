@@ -1,41 +1,64 @@
-
-// Profile Picture Modal
+// Profile Picture and Cover Image Modal
 const profileAvatarImage = document.getElementById("profile-avatar-image");
+const profileCoverImage = document.getElementById("profile-cover-image");
 const profileImageModal = document.getElementById("profile-image-modal");
 const profileModalImage = document.getElementById("profile-modal-image");
 const profileImageClose = document.querySelector(".profile-image-modal-close");
 
 if (
-    profileAvatarImage &&
     profileImageModal &&
     profileModalImage &&
     profileImageClose
 ) {
-    profileAvatarImage.addEventListener("click", () => {
-        profileModalImage.src = profileAvatarImage.src;
-        profileModalImage.alt = profileAvatarImage.alt;
+    // Open modal with the selected image
+    const openProfileImageModal = (image) => {
+        profileModalImage.src = image.src;
+        profileModalImage.alt = image.alt;
 
         profileImageModal.classList.add("active");
         profileImageModal.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
-    });
+    };
 
+    // Close modal
     const closeProfileImageModal = () => {
         profileImageModal.classList.remove("active");
         profileImageModal.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
+
+        profileModalImage.src = "";
     };
 
+    // Profile picture click
+    if (profileAvatarImage) {
+        profileAvatarImage.addEventListener("click", () => {
+            openProfileImageModal(profileAvatarImage);
+        });
+    }
+
+    // Cover image click
+    if (profileCoverImage) {
+        profileCoverImage.addEventListener("click", () => {
+            openProfileImageModal(profileCoverImage);
+        });
+    }
+
+    // Close button
     profileImageClose.addEventListener("click", closeProfileImageModal);
 
+    // Close when clicking outside the image
     profileImageModal.addEventListener("click", (event) => {
         if (event.target === profileImageModal) {
             closeProfileImageModal();
         }
     });
 
+    // Close with Escape
     document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") {
+        if (
+            event.key === "Escape" &&
+            profileImageModal.classList.contains("active")
+        ) {
             closeProfileImageModal();
         }
     });
