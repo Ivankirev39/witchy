@@ -26,8 +26,7 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
     <?php if (!empty($pageCss)): ?>
         <link
             rel="stylesheet"
-            href="<?= BASE_URL ?>assets/css/<?= htmlspecialchars($pageCss, ENT_QUOTES, "UTF-8") ?>"
-        >
+            href="<?= BASE_URL ?>assets/css/<?= htmlspecialchars($pageCss, ENT_QUOTES, "UTF-8") ?>">
     <?php endif; ?>
 
     <!-- MOBILE NAVIGATION -->
@@ -37,89 +36,96 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
 
 <body>
 
-<header class="site-header">
+    <header class="site-header">
 
-    <!-- LOGO -->
-    <a
-        href="<?= BASE_URL ?>index.php"
-        class="site-logo"
-        aria-label="Witchy home"
-    >
-        <img
-            src="<?= BASE_URL ?>images/horizontal_black.svg"
-            alt="Witchy"
-            class="logo-light"
-        >
+        <!-- LOGO -->
+        <a
+            href="<?= BASE_URL ?>index.php"
+            class="site-logo"
+            aria-label="Witchy home">
+            <img
+                src="<?= BASE_URL ?>images/horizontal_black.svg"
+                alt="Witchy"
+                class="logo-light">
 
-        <img
-            src="<?= BASE_URL ?>images/horizontal_white.svg"
-            alt=""
-            class="logo-dark"
-            aria-hidden="true"
-        >
-    </a>
+            <img
+                src="<?= BASE_URL ?>images/horizontal_white.svg"
+                alt=""
+                class="logo-dark"
+                aria-hidden="true">
+        </a>
 
-    <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
-        <a href="<?= BASE_URL ?>index.php"
-           class="<?= $currentPage === 'index.php' ? 'active' : '' ?>">Home</a>
+        <nav class="site-nav" id="site-navigation" aria-label="Main navigation">
+            <a href="<?= BASE_URL ?>index.php"
+                class="<?= $currentPage === 'index.php' ? 'active' : '' ?>">Home</a>
 
-        <a href="<?= BASE_URL ?>public-explore.php"
-           class="<?= $currentPage === 'public-explore.php' ? 'active' : '' ?>">Explore</a>
+            <a href="<?= BASE_URL ?>public-explore.php"
+                class="<?= $currentPage === 'public-explore.php' ? 'active' : '' ?>">Explore</a>
 
-        <a href="<?= BASE_URL ?>community.php"
-           class="<?= $currentPage === 'community.php' ? 'active' : '' ?>">Community</a>
-    </nav>
+            <a href="<?= BASE_URL ?>community.php"
+                class="<?= $currentPage === 'community.php' ? 'active' : '' ?>">Community</a>
 
-    <!-- HEADER ACTIONS -->
-    <div class="site-header-actions">
+            <?php if (!$isLoggedIn && $currentPage !== "login.php"): ?>
+                <a href="<?= BASE_URL ?>login.php" class="mobile-login-link">
+                    Log in
+                </a>
+            <?php endif; ?>
 
-        <!-- DARK MODE -->
-        <button
-            type="button"
-            class="theme-toggle site-theme-toggle"
-            id="theme-toggle"
-            aria-label="Switch to dark mode"
-            title="Switch theme"
-        >
-            ☾
-        </button>
-
-        <!-- LOG IN -->
-        <?php if (!$isLoggedIn && $currentPage !== "login.php"): ?>
-            <a
-                href="<?= BASE_URL ?>login.php"
-                class="button button-secondary"
-            >
-                Log in
-            </a>
-        <?php endif; ?>
-
-        <!-- REGISTER -->
-        <?php if (!$isLoggedIn && $currentPage !== "register.php"): ?>
-            <a
-                href="<?= BASE_URL ?>register.php"
-                class="button button-primary"
-            >
+            <?php if ($currentPage !== "register.php"): ?>
+            <a href="<?= BASE_URL ?>register.php" class="mobile-join-link">
                 Join Witchy
             </a>
-        <?php endif; ?>
+            <?php endif; ?>
 
-    </div>
+        </nav>
 
-    <!-- MOBILE MENU BUTTON -->
-    <button
-        type="button"
-        class="mobile-menu-toggle"
-        id="mobile-menu-toggle"
-        aria-label="Open navigation menu"
-        aria-expanded="false"
-        aria-controls="site-navigation"
-    >
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
+        <!-- HEADER ACTIONS -->
+        <div class="site-header-actions">
 
-</header>
+            <!-- DARK MODE -->
+            <button
+                type="button"
+                class="theme-toggle site-theme-toggle"
+                id="theme-toggle"
+                aria-label="Switch to dark mode"
+                title="Switch theme">
+                ☾
+            </button>
+
+            <!-- LOG IN -->
+            <?php if (!$isLoggedIn && $currentPage !== "login.php"): ?>
+                <a
+                    href="<?= BASE_URL ?>login.php"
+                    class="button button-secondary">
+                    Log in
+                </a>
+            <?php endif; ?>
+
+            <!-- REGISTER -->
+            <?php if (!$isLoggedIn && $currentPage !== "register.php"): ?>
+                <a
+                    href="<?= BASE_URL ?>register.php"
+                    class="button button-primary">
+                    Join Witchy
+                </a>
+            <?php endif; ?>
+
+        </div>
+
+        <!-- MOBILE MENU BUTTON -->
+        <button
+            type="button"
+            class="mobile-menu-toggle"
+            id="mobile-menu-toggle"
+            aria-label="Open navigation menu"
+            aria-expanded="false"
+            aria-controls="site-navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+    </header>
 </body>
+
 </html>

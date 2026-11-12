@@ -1,9 +1,8 @@
-
 /* ========================================
    WITCHY PUBLIC HEADER
    ======================================== */
 
-   .site-header {
+.site-header {
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -91,6 +90,10 @@ body.dark-mode .site-logo .logo-dark {
     outline-offset: 4px;
     border-radius: 4px;
 }
+.site-nav .mobile-login-link {
+    display: none;
+}
+
 
 /* ========================================
    HEADER ACTIONS
@@ -286,6 +289,55 @@ body.dark-mode .site-logo .logo-dark {
         outline: 2px solid var(--focus);
         outline-offset: -2px;
     }
+
+    .site-nav .mobile-login-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 8px;
+        min-height: 44px;
+        background: var(--primary);
+        color: #ffffff;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    .site-nav .mobile-login-link:hover {
+        background: var(--primary-hover);
+        color: #ffffff;
+    }
+
+/* Mobile authentication buttons */
+
+.site-nav .mobile-login-link,
+.site-nav .mobile-join-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    margin-top: 6px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Log in - secondary */
+.site-nav .mobile-login-link {
+    background: var(--surface);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+/* Join Witchy - primary */
+.site-nav .mobile-join-link {
+    background: var(--primary);
+    color: #ffffff;
+    border: 1px solid var(--primary);
+}
+
+.site-nav .mobile-join-link:hover {
+    background: var(--primary-hover);
+    color: #ffffff;
+}
+
 }
 
 /* ========================================
@@ -312,6 +364,35 @@ body.dark-mode .mobile-menu-toggle:hover {
     background: var(--surface);
     border-color: var(--primary);
 }
+
+/* Mobile authentication buttons - dark mode */
+
+html.dark-mode .site-nav .mobile-login-link,
+body.dark-mode .site-nav .mobile-login-link {
+    background: var(--surface);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+html.dark-mode .site-nav .mobile-login-link:hover,
+body.dark-mode .site-nav .mobile-login-link:hover {
+    background: var(--surface-hover);
+    color: var(--primary);
+}
+
+html.dark-mode .site-nav .mobile-join-link,
+body.dark-mode .site-nav .mobile-join-link {
+    background: #C6A4CF;
+    color: #100E12;
+    border-color: #C6A4CF;
+}
+
+html.dark-mode .site-nav .mobile-join-link:hover,
+body.dark-mode .site-nav .mobile-join-link:hover {
+    background: #D5B9DC;
+    color: #100E12;
+}
+
 
 /* Dropdown */
 
