@@ -100,46 +100,57 @@ try {
     $stats["dismissed_reports"] = (int) $reportStats["dismissed"];
 
     // Latest reports.
-    $recentReportsQuery = $conn->query("
-    SELECT
-        r.report_id,
-        r.reason,
-        r.status,
-        r.created_at,
-        reporter.username AS reporter_username,
+$recentReportsQuery = $conn->query("
+SELECT
+    r.report_id,
+    r.reason,
+    r.status,
+    r.created_at,
+    reporter.username AS reporter_username,
 
-        CASE
-            WHEN r.comment_id IS NOT NULL THEN 'Comment'
-            ELSE 'User'
-        END AS target_type,
+    CASE
+        WHEN r.post_id IS NOT NULL THEN 'Post'
+        WHEN r.comment_id IS NOT NULL THEN 'Comment'
+        ELSE 'Profile'
+    END AS target_type,
 
-        CASE
-            WHEN r.comment_id IS NOT NULL THEN
-                COALESCE(
-                    LEFT(c.comment, 100),
-                    'Comment no longer available'
-                )
-            ELSE
-                COALESCE(
-                    reported_user.username,
-                    'User no longer available'
-                )
-        END AS target_label
+    CASE
+        WHEN r.post_id IS NOT NULL THEN
+            COALESCE(
+                NULLIF(reported_post.title, ''),
+                CONCAT('Post #', r.post_id)
+            )
 
-    FROM reports r
+        WHEN r.comment_id IS NOT NULL THEN
+            COALESCE(
+                LEFT(c.comment, 100),
+                'Comment no longer available'
+            )
 
-    LEFT JOIN users reporter
-        ON r.reporter_id = reporter.user_id
+        ELSE
+            COALESCE(
+                reported_user.username,
+                'User no longer available'
+            )
+    END AS target_label
 
-    LEFT JOIN users reported_user
-        ON r.reported_user_id = reported_user.user_id
+FROM reports r
 
-    LEFT JOIN comment c
-        ON r.comment_id = c.comment_id
+LEFT JOIN users reporter
+    ON r.reporter_id = reporter.user_id
 
-    ORDER BY r.created_at DESC
-    LIMIT 5
-    ");
+LEFT JOIN users reported_user
+    ON r.reported_user_id = reported_user.user_id
+
+LEFT JOIN comment c
+    ON r.comment_id = c.comment_id
+
+LEFT JOIN post reported_post
+    ON r.post_id = reported_post.post_id
+
+ORDER BY r.created_at DESC
+LIMIT 5
+");
 
 $recentReports = $recentReportsQuery->fetchAll(PDO::FETCH_ASSOC);
 

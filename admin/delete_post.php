@@ -1,23 +1,18 @@
+
 <?php
 require_once __DIR__ . "/includes/admin_auth.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../includes/csrf.php";
-
-/* 1. Validate request method */
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header("Location: content.php?tab=posts");
     exit;
 }
 
-/* 2. Validate CSRF token */
-
 if (!csrf_valid($_POST["csrf_token"] ?? null)) {
     http_response_code(403);
     exit("Invalid security token. Please refresh the page and try again.");
 }
-
-/* 3. Validate post ID */
 
 $postId = filter_input(INPUT_POST, "post_id", FILTER_VALIDATE_INT);
 
@@ -26,13 +21,17 @@ if (!$postId || $postId < 1) {
     exit;
 }
 
-/* 4. Validate return destination */
-
 $returnFrom = $_POST["return_from"] ?? "";
 
 $returnUserId = filter_input(
     INPUT_POST,
     "return_user_id",
+    FILTER_VALIDATE_INT
+);
+
+$returnReportId = filter_input(
+    INPUT_POST,
+    "return_report_id",
     FILTER_VALIDATE_INT
 );
 
@@ -47,7 +46,11 @@ if (
     $returnUserId = (int) $returnUserId;
 }
 
-/* 5. Queue uploaded files for safe deletion */
+if (!$returnReportId || $returnReportId < 1) {
+    $returnReportId = null;
+} else {
+    $returnReportId = (int) $returnReportId;
+}
 
 $queueFile = function (string $folder, ?string $filename) use ($conn): void {
 
@@ -55,7 +58,6 @@ $queueFile = function (string $folder, ?string $filename) use ($conn): void {
         return;
     }
 
-    // Only allow plain filenames, never paths.
     if (
         basename($filename) !== $filename ||
         !preg_match('/^[a-zA-Z0-9_.-]+$/D', $filename)
@@ -63,7 +65,6 @@ $queueFile = function (string $folder, ?string $filename) use ($conn): void {
         throw new RuntimeException("Invalid uploaded filename.");
     }
 
-    // Avoid adding the same file to the queue more than once.
     $checkStmt = $conn->prepare("
         SELECT COUNT(*)
         FROM file_deletion_queue
@@ -93,13 +94,10 @@ $queueFile = function (string $folder, ?string $filename) use ($conn): void {
     ]);
 };
 
-/* 6. Delete post safely */
-
 try {
 
     $conn->beginTransaction();
 
-    // Lock and retrieve the post.
     $stmt = $conn->prepare("
         SELECT post_id, image
         FROM post
@@ -116,14 +114,21 @@ try {
     if (!$post) {
         $conn->rollBack();
 
+        if ($returnReportId !== null) {
+            header(
+                "Location: view_report.php?id="
+                . $returnReportId
+                . "&action_success=post_removed"
+            );
+            exit;
+        }
+
         header("Location: content.php?tab=posts&status=not_found");
         exit;
     }
 
-    // Queue the main post image.
     $queueFile("posts", $post["image"]);
 
-    // Retrieve and queue additional post media.
     $stmt = $conn->prepare("
         SELECT file
         FROM post_media
@@ -140,7 +145,6 @@ try {
         $queueFile("posts", $filename);
     }
 
-    // Retrieve and queue comment attachments.
     $stmt = $conn->prepare("
         SELECT media_file
         FROM comment
@@ -157,7 +161,6 @@ try {
         $queueFile("comments", $filename);
     }
 
-    // Remove notifications connected to this post.
     $stmt = $conn->prepare("
         DELETE FROM notification
         WHERE post_id = :post_id
@@ -167,7 +170,6 @@ try {
         ":post_id" => $postId
     ]);
 
-    // Remove likes.
     $stmt = $conn->prepare("
         DELETE FROM post_like
         WHERE post_id = :post_id
@@ -177,7 +179,6 @@ try {
         ":post_id" => $postId
     ]);
 
-    // Remove saved-post records.
     $stmt = $conn->prepare("
         DELETE FROM save
         WHERE post_id = :post_id
@@ -187,7 +188,6 @@ try {
         ":post_id" => $postId
     ]);
 
-    // Remove comments.
     $stmt = $conn->prepare("
         DELETE FROM comment
         WHERE post_id = :post_id
@@ -197,7 +197,6 @@ try {
         ":post_id" => $postId
     ]);
 
-    // Remove additional media records.
     $stmt = $conn->prepare("
         DELETE FROM post_media
         WHERE post_id = :post_id
@@ -207,7 +206,6 @@ try {
         ":post_id" => $postId
     ]);
 
-    // Finally, remove the post itself.
     $stmt = $conn->prepare("
         DELETE FROM post
         WHERE post_id = :post_id
@@ -217,16 +215,22 @@ try {
         ":post_id" => $postId
     ]);
 
-    // Commit all database changes.
     $conn->commit();
 
-    /* 7. Return to the correct page */
+    if ($returnReportId !== null) {
+        header(
+            "Location: view_report.php?id="
+            . $returnReportId
+            . "&action_success=post_removed"
+        );
+        exit;
+    }
 
     if ($returnFrom === "user" && $returnUserId !== null) {
         header(
-            "Location: view_user.php?id=" .
-            (int) $returnUserId .
-            "&post_status=deleted"
+            "Location: view_user.php?id="
+            . $returnUserId
+            . "&post_status=deleted"
         );
         exit;
     }
@@ -242,19 +246,28 @@ try {
 
     error_log("Admin post deletion failed: " . $e->getMessage());
 
+    if ($returnReportId !== null) {
+        header(
+            "Location: view_report.php?id="
+            . $returnReportId
+            . "&action_error=server"
+        );
+        exit;
+    }
+
     if ($returnFrom === "user" && $returnUserId !== null) {
         header(
-            "Location: view_user.php?id=" .
-            (int) $returnUserId .
-            "&post_status=error"
+            "Location: view_user.php?id="
+            . $returnUserId
+            . "&post_status=error"
         );
         exit;
     }
 
     header(
-        "Location: view_post.php?id=" .
-        (int) $postId .
-        "&status=error"
+        "Location: view_post.php?id="
+        . (int) $postId
+        . "&status=error"
     );
     exit;
 }

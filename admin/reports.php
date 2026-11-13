@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/includes/admin_auth.php";
 require_once __DIR__ . "/models/AdminReport.php";
@@ -14,10 +15,8 @@ $reports = [];
 $totalReports = 0;
 $totalPages = 1;
 
-// Pagination settings.
 $limit = 10;
 
-// Validate the requested page number.
 $page = filter_var(
     $_GET["page"] ?? 1,
     FILTER_VALIDATE_INT
@@ -25,34 +24,28 @@ $page = filter_var(
 
 $page = ($page && $page > 0) ? $page : 1;
 
-// Validate filters.
 $status = $_GET["status"] ?? "";
 $type = $_GET["type"] ?? "";
 $search = $_GET["search"] ?? "";
 
-// Only accept simple string values.
 $status = is_string($status) ? $status : "";
 $type = is_string($type) ? $type : "";
 $search = is_string($search) ? trim($search) : "";
 
-// Allow only the statuses that exist in the database.
 $allowedStatuses = ["pending", "reviewed", "dismissed"];
 
 if (!in_array($status, $allowedStatuses, true)) {
     $status = "";
 }
 
-// Allow only supported report types.
-$allowedTypes = ["user", "comment"];
+$allowedTypes = ["user", "comment", "post"];
 
 if (!in_array($type, $allowedTypes, true)) {
     $type = "";
 }
 
-// Avoid excessively long search queries.
 $search = substr($search, 0, 100);
 
-// Build the filters array for the model.
 $filters = [
     "status" => $status,
     "type" => $type,
@@ -60,23 +53,18 @@ $filters = [
 ];
 
 try {
-    // Retrieve overall statistics.
     $reportCounts = $reportModel->getReportCounts();
 
-    // Count reports matching the selected filters.
     $totalReports = $reportModel->getFilteredReportCount($filters);
 
-    // Calculate pagination.
     $totalPages = max(1, (int) ceil($totalReports / $limit));
 
-    // Prevent requests for pages that do not exist.
     if ($page > $totalPages) {
         $page = $totalPages;
     }
 
     $offset = ($page - 1) * $limit;
 
-    // Retrieve the reports for the current page.
     $reports = $reportModel->getReports(
         $filters,
         $limit,
@@ -89,7 +77,6 @@ try {
 }
 
 require_once __DIR__ . "/includes/admin_header.php";
-
 ?>
 
 <section class="admin-reports">
@@ -109,60 +96,59 @@ require_once __DIR__ . "/includes/admin_header.php";
 
     <?php else: ?>
 
-        <!-- REPORT FILTERS -->
-
         <form method="GET" action="<?= BASE_URL ?>admin/reports.php" class="reports-filters">
 
-        <div class="filter-group">
-            <label for="status">Status</label>
+            <div class="filter-group">
+                <label for="status">Status</label>
 
-            <select name="status" id="status">
-                <option value="">All statuses</option>
-                <option value="pending" <?= $status === "pending" ? "selected" : "" ?>>
-                    Pending
-                </option>
-                <option value="reviewed" <?= $status === "reviewed" ? "selected" : "" ?>>
-                    Reviewed
-                </option>
-                <option value="dismissed" <?= $status === "dismissed" ? "selected" : "" ?>>
-                    Dismissed
-                </option>
-            </select>
-        </div>
+                <select name="status" id="status">
+                    <option value="">All statuses</option>
+                    <option value="pending" <?= $status === "pending" ? "selected" : "" ?>>
+                        Pending
+                    </option>
+                    <option value="reviewed" <?= $status === "reviewed" ? "selected" : "" ?>>
+                        Reviewed
+                    </option>
+                    <option value="dismissed" <?= $status === "dismissed" ? "selected" : "" ?>>
+                        Dismissed
+                    </option>
+                </select>
+            </div>
 
-        <div class="filter-group">
-            <label for="type">Report type</label>
+            <div class="filter-group">
+                <label for="type">Report type</label>
 
-            <select name="type" id="type">
-                <option value="">All types</option>
-                <option value="user" <?= $type === "user" ? "selected" : "" ?>>
-                    Profile
-                </option>
-                <option value="comment" <?= $type === "comment" ? "selected" : "" ?>>
-                    Comment
-                </option>
-            </select>
-        </div>
+                <select name="type" id="type">
+                    <option value="">All types</option>
+                    <option value="user" <?= $type === "user" ? "selected" : "" ?>>
+                        Profile
+                    </option>
+                    <option value="comment" <?= $type === "comment" ? "selected" : "" ?>>
+                        Comment
+                    </option>
+                    <option value="post" <?= $type === "post" ? "selected" : "" ?>>
+                        Post
+                    </option>
+                </select>
+            </div>
 
-        <div class="filter-group">
-            <label for="search">Search</label>
+            <div class="filter-group">
+                <label for="search">Search</label>
 
-            <input
-                type="search"
-                name="search"
-                id="search"
-                placeholder="Report ID or username"
-                value="<?= htmlspecialchars($search, ENT_QUOTES, "UTF-8") ?>"
-            >
-        </div>
+                <input
+                    type="search"
+                    name="search"
+                    id="search"
+                    placeholder="Report ID, username or post title"
+                    value="<?= htmlspecialchars($search, ENT_QUOTES, "UTF-8") ?>"
+                >
+            </div>
 
-        <button type="submit">Apply filters</button>
+            <button type="submit">Apply filters</button>
 
-        <a href="<?= BASE_URL ?>admin/reports.php">Clear filters</a>
+            <a href="<?= BASE_URL ?>admin/reports.php">Clear filters</a>
 
         </form>
-
-        <!-- REPORT STATISTICS -->
 
         <div class="report-stats">
 
@@ -187,8 +173,6 @@ require_once __DIR__ . "/includes/admin_header.php";
             </div>
 
         </div>
-
-        <!-- REPORTS TABLE -->
 
         <div class="reports-table-container">
 
@@ -224,13 +208,23 @@ require_once __DIR__ . "/includes/admin_header.php";
                         <?php foreach ($reports as $report): ?>
 
                             <?php
-                                $isCommentReport = !empty($report["comment_id"]);
+                            $isUserReport = !empty($report["reported_user_id"]);
+                            $isCommentReport = !empty($report["comment_id"]);
+                            $isPostReport = !empty($report["post_id"]);
 
-                                $target = $isCommentReport
-                                    ? "Comment #" . (int) $report["comment_id"]
-                                    : "@" . ($report["reported_username"] ?? "Unknown user");
+                            if ($isCommentReport) {
+                                $targetType = "Comment";
+                                $target = "Comment #" . (int) $report["comment_id"];
+                            } elseif ($isPostReport) {
+                                $targetType = "Post";
+                                $target = $report["reported_post_title"]
+                                    ?: "Post #" . (int) $report["post_id"];
+                            } else {
+                                $targetType = "Profile";
+                                $target = "@" . ($report["reported_username"] ?? "Unknown user");
+                            }
 
-                                $status = $report["status"] ?? "pending";
+                            $statusValue = $report["status"] ?? "pending";
                             ?>
 
                             <tr>
@@ -249,7 +243,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                                 <td>
                                     <span class="report-type">
-                                        <?= $isCommentReport ? "Comment" : "Profile" ?>
+                                        <?= htmlspecialchars($targetType, ENT_QUOTES, "UTF-8") ?>
                                     </span>
 
                                     <span>
@@ -275,12 +269,12 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                                 <td>
                                     <span class="report-status status-<?= htmlspecialchars(
-                                        $status,
+                                        $statusValue,
                                         ENT_QUOTES,
                                         "UTF-8"
                                     ) ?>">
                                         <?= htmlspecialchars(
-                                            ucfirst($status),
+                                            ucfirst($statusValue),
                                             ENT_QUOTES,
                                             "UTF-8"
                                         ) ?>
@@ -288,7 +282,10 @@ require_once __DIR__ . "/includes/admin_header.php";
                                 </td>
 
                                 <td>
-                                    <a href="<?= BASE_URL ?>admin/view_report.php?id=<?= (int) $report["report_id"] ?>" class="view-report-link">
+                                    <a
+                                        href="<?= BASE_URL ?>admin/view_report.php?id=<?= (int) $report["report_id"] ?>"
+                                        class="view-report-link"
+                                    >
                                         View report
                                     </a>
                                 </td>
@@ -305,37 +302,37 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             <?php if ($totalPages > 1): ?>
 
-            <div class="reports-pagination">
+                <div class="reports-pagination">
 
-                <?php if ($page > 1): ?>
+                    <?php if ($page > 1): ?>
 
-                    <a href="<?= BASE_URL ?>admin/reports.php?<?= htmlspecialchars(
-                        http_build_query(array_merge($filters, ["page" => $page - 1])),
-                        ENT_QUOTES,
-                        "UTF-8"
-                    ) ?>">
-                        Previous
-                    </a>
+                        <a href="<?= BASE_URL ?>admin/reports.php?<?= htmlspecialchars(
+                            http_build_query(array_merge($filters, ["page" => $page - 1])),
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>">
+                            Previous
+                        </a>
 
-                <?php endif; ?>
+                    <?php endif; ?>
 
-                <span>
-                    Page <?= $page ?> of <?= $totalPages ?>
-                </span>
+                    <span>
+                        Page <?= $page ?> of <?= $totalPages ?>
+                    </span>
 
-                <?php if ($page < $totalPages): ?>
+                    <?php if ($page < $totalPages): ?>
 
-                    <a href="<?= BASE_URL ?>admin/reports.php?<?= htmlspecialchars(
-                        http_build_query(array_merge($filters, ["page" => $page + 1])),
-                        ENT_QUOTES,
-                        "UTF-8"
-                    ) ?>">
-                        Next
-                    </a>
+                        <a href="<?= BASE_URL ?>admin/reports.php?<?= htmlspecialchars(
+                            http_build_query(array_merge($filters, ["page" => $page + 1])),
+                            ENT_QUOTES,
+                            "UTF-8"
+                        ) ?>">
+                            Next
+                        </a>
 
-                <?php endif; ?>
+                    <?php endif; ?>
 
-            </div>
+                </div>
 
             <?php endif; ?>
 

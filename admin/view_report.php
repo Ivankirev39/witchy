@@ -1,3 +1,4 @@
+
 <?php
 require_once __DIR__ . "/includes/admin_auth.php";
 require_once __DIR__ . "/models/AdminReport.php";
@@ -6,7 +7,6 @@ require_once __DIR__ . "/models/AdminPost.php";
 $pageTitle = "Report Details | Witchy";
 $pageCss = "admin_reports.css";
 
-// Validate the report ID.
 $reportId = filter_var(
     $_GET["id"] ?? null,
     FILTER_VALIDATE_INT
@@ -17,7 +17,6 @@ if (!$reportId || $reportId < 1) {
     exit("Invalid report ID.");
 }
 
-// Initialise models and variables.
 $reportModel = new AdminReport($conn);
 $adminPost = new AdminPost($conn);
 
@@ -27,24 +26,25 @@ $originalPost = null;
 $postMedia = [];
 
 try {
-    // Retrieve the report first.
     $report = $reportModel->getReportById($reportId);
 
     if (!$report) {
         http_response_code(404);
-    } elseif (
-        !empty($report["comment_id"])
-        && !empty($report["post_id"])
-    ) {
-        // Retrieve the original post associated with the reported comment.
-        $originalPost = $adminPost->getPostById(
-            (int) $report["post_id"]
-        );
+    } else {
+        $postId = 0;
 
-        if ($originalPost) {
-            $postMedia = $adminPost->getPostMedia(
-                (int) $report["post_id"]
-            );
+        if (!empty($report["reported_post_id"])) {
+            $postId = (int) $report["reported_post_id"];
+        } elseif (!empty($report["comment_post_id"])) {
+            $postId = (int) $report["comment_post_id"];
+        }
+
+        if ($postId > 0) {
+            $originalPost = $adminPost->getPostById($postId);
+
+            if ($originalPost) {
+                $postMedia = $adminPost->getPostMedia($postId);
+            }
         }
     }
 } catch (Throwable $e) {
@@ -90,6 +90,8 @@ require_once __DIR__ . "/includes/admin_header.php";
         <?php
         $isUserReport = !empty($report["reported_user_id"]);
         $isCommentReport = !empty($report["comment_id"]);
+        $isPostReport = !empty($report["reported_post_id"]);
+
         $commentRemoved = !empty($report["comment_deleted_at"]);
 
         $status = $report["status"];
@@ -107,14 +109,14 @@ require_once __DIR__ . "/includes/admin_header.php";
             strtotime($report["created_at"])
         );
 
-        // Prepare feedback messages.
         $actionSuccess = $_GET["action_success"] ?? "";
         $actionError = $_GET["action_error"] ?? "";
 
         $successMessages = [
             "review" => "The report has been marked as reviewed.",
             "dismiss" => "The report has been dismissed.",
-            "comment_removed" => "The reported comment has been removed."
+            "comment_removed" => "The reported comment has been removed.",
+            "post_removed" => "The reported post has been deleted."
         ];
 
         $errorMessages = [
@@ -122,15 +124,25 @@ require_once __DIR__ . "/includes/admin_header.php";
             "server" => "Something went wrong while processing this action."
         ];
 
-        // Preserve the report page when navigating to a user profile.
         $returnTo = rawurlencode(
             "view_report.php?id=" . (int) $report["report_id"]
         );
+
+        $postRemoved = $isPostReport && !$originalPost;
+
+        $commentFilename = basename($report["comment_media_file"] ?? "");
+        $commentMediaType = $report["comment_media_type"] ?? "";
+
+        $allowedCommentTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif"
+        ];
         ?>
 
         <div class="report-details-layout">
 
-            <!-- MAIN REPORT INFORMATION -->
             <div class="report-details-main">
 
                 <?php if (isset($successMessages[$actionSuccess])): ?>
@@ -161,11 +173,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                             <p>
                                 Submitted on
-                                <?= htmlspecialchars(
-                                    $reportDate,
-                                    ENT_QUOTES,
-                                    "UTF-8"
-                                ) ?>
+                                <?= htmlspecialchars($reportDate, ENT_QUOTES, "UTF-8") ?>
                             </p>
                         </div>
 
@@ -182,7 +190,9 @@ require_once __DIR__ . "/includes/admin_header.php";
                             <strong>
                                 <?= $isUserReport
                                     ? "Profile report"
-                                    : ($isCommentReport ? "Comment report" : "Unknown") ?>
+                                    : ($isCommentReport
+                                        ? "Comment report"
+                                        : ($isPostReport ? "Post report" : "Unknown")) ?>
                             </strong>
                         </div>
 
@@ -220,7 +230,6 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                 </div>
 
-                <!-- REPORTED CONTENT -->
                 <div class="report-details-panel">
 
                     <div class="report-details-panel-header">
@@ -288,7 +297,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                             <?php if (
                                 !empty($report["reported_comment"])
-                                || !empty($report["comment_media_file"])
+                                || $commentFilename !== ""
                             ): ?>
 
                                 <div class="reported-comment-content">
@@ -330,28 +339,9 @@ require_once __DIR__ . "/includes/admin_header.php";
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php
-                                    $commentFilename = basename(
-                                        $report["comment_media_file"] ?? ""
-                                    );
-
-                                    $commentMediaType = $report["comment_media_type"] ?? "";
-
-                                    $allowedCommentTypes = [
-                                        "image/jpeg",
-                                        "image/png",
-                                        "image/webp",
-                                        "image/gif"
-                                    ];
-                                    ?>
-
                                     <?php if (
                                         $commentFilename !== ""
-                                        && in_array(
-                                            $commentMediaType,
-                                            $allowedCommentTypes,
-                                            true
-                                        )
+                                        && in_array($commentMediaType, $allowedCommentTypes, true)
                                     ): ?>
 
                                         <div class="reported-comment-media">
@@ -378,7 +368,8 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                             <?php endif; ?>
 
-                            <!-- ORIGINAL POST CONTEXT -->
+                            <h4>Original post context</h4>
+
                             <?php if ($originalPost): ?>
 
                                 <div class="reported-original-post">
@@ -402,7 +393,6 @@ require_once __DIR__ . "/includes/admin_header.php";
                                     </div>
 
                                     <div class="reported-original-post-meta">
-
                                         <span>
                                             By
                                             <?= htmlspecialchars(
@@ -429,7 +419,6 @@ require_once __DIR__ . "/includes/admin_header.php";
                                                 ) ?>
                                             </span>
                                         <?php endif; ?>
-
                                     </div>
 
                                     <?php if (!empty($originalPost["description"])): ?>
@@ -470,32 +459,18 @@ require_once __DIR__ . "/includes/admin_header.php";
                                                     . rawurlencode($filename);
                                                 ?>
 
-                                                <?php if (
-                                                    $filename !== ""
-                                                    && $mediaType === "image"
-                                                ): ?>
+                                                <?php if ($filename !== "" && $mediaType === "image"): ?>
 
                                                     <img
-                                                        src="<?= htmlspecialchars(
-                                                            $mediaPath,
-                                                            ENT_QUOTES,
-                                                            "UTF-8"
-                                                        ) ?>"
+                                                        src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
                                                         alt="Additional post image"
                                                         loading="lazy"
                                                     >
 
-                                                <?php elseif (
-                                                    $filename !== ""
-                                                    && $mediaType === "video"
-                                                ): ?>
+                                                <?php elseif ($filename !== "" && $mediaType === "video"): ?>
 
                                                     <video controls preload="metadata">
-                                                        <source src="<?= htmlspecialchars(
-                                                            $mediaPath,
-                                                            ENT_QUOTES,
-                                                            "UTF-8"
-                                                        ) ?>">
+                                                        <source src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>">
                                                         Your browser does not support this video.
                                                     </video>
 
@@ -508,15 +483,154 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                                 </div>
 
-                            <?php elseif (!empty($report["post_id"])): ?>
+                            <?php else: ?>
 
-                                <p class="admin-content-empty">
+                                <p class="report-no-details">
                                     The original post is no longer available.
                                 </p>
 
                             <?php endif; ?>
 
                         </div>
+
+                    <?php elseif ($isPostReport): ?>
+
+                        <?php if ($originalPost): ?>
+
+                            <div class="reported-target">
+                                <span class="report-info-label">Post author</span>
+
+                                <strong>
+                                    @<?= htmlspecialchars(
+                                        $originalPost["username"] ?? "Unknown member",
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>
+                                </strong>
+
+                                <a href="<?= BASE_URL ?>admin/view_user.php?id=<?= (int) $originalPost["user_id"] ?>&return_to=<?= $returnTo ?>">
+                                    View post author
+                                </a>
+                            </div>
+
+                            <div class="reported-original-post">
+
+                                <div class="reported-original-post-heading">
+                                    <div>
+                                        <span>Reported post</span>
+
+                                        <h4>
+                                            <?= htmlspecialchars(
+                                                $originalPost["title"] ?? "Untitled",
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>
+                                        </h4>
+                                    </div>
+
+                                    <a href="<?= BASE_URL ?>admin/view_post.php?id=<?= (int) $originalPost["post_id"] ?>">
+                                        View full post
+                                    </a>
+                                </div>
+
+                                <div class="reported-original-post-meta">
+                                    <span>
+                                        By
+                                        <?= htmlspecialchars(
+                                            $originalPost["username"] ?? "Unknown member",
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        ) ?>
+                                    </span>
+
+                                    <span>
+                                        <?= htmlspecialchars(
+                                            $originalPost["topic"] ?? "Uncategorized",
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        ) ?>
+                                    </span>
+
+                                    <?php if (!empty($originalPost["created_at"])): ?>
+                                        <span>
+                                            <?= htmlspecialchars(
+                                                date("M j, Y", strtotime($originalPost["created_at"])),
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+
+                                <?php if (!empty($originalPost["description"])): ?>
+                                    <div class="reported-original-post-description">
+                                        <?= nl2br(htmlspecialchars(
+                                            $originalPost["description"],
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        )) ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($originalPost["image"])): ?>
+                                    <div class="reported-original-post-media">
+                                        <img
+                                            src="<?= htmlspecialchars(
+                                                BASE_URL . "uploads/posts/" . rawurlencode(basename($originalPost["image"])),
+                                                ENT_QUOTES,
+                                                "UTF-8"
+                                            ) ?>"
+                                            alt="Reported post image"
+                                            loading="lazy"
+                                        >
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($postMedia)): ?>
+                                    <div class="reported-original-post-gallery">
+
+                                        <?php foreach ($postMedia as $item): ?>
+
+                                            <?php
+                                            $filename = basename($item["file"] ?? "");
+                                            $mediaType = strtolower($item["media_type"] ?? "");
+
+                                            $mediaPath = BASE_URL
+                                                . "uploads/posts/"
+                                                . rawurlencode($filename);
+                                            ?>
+
+                                            <?php if ($filename !== "" && $mediaType === "image"): ?>
+
+                                                <img
+                                                    src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
+                                                    alt="Additional post image"
+                                                    loading="lazy"
+                                                >
+
+                                            <?php elseif ($filename !== "" && $mediaType === "video"): ?>
+
+                                                <video controls preload="metadata">
+                                                    <source src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>">
+                                                    Your browser does not support this video.
+                                                </video>
+
+                                            <?php endif; ?>
+
+                                        <?php endforeach; ?>
+
+                                    </div>
+                                <?php endif; ?>
+
+                            </div>
+
+                        <?php else: ?>
+
+                            <p class="report-no-details">
+                                This post has already been deleted or is no longer available.
+                            </p>
+
+                        <?php endif; ?>
 
                     <?php else: ?>
 
@@ -530,7 +644,6 @@ require_once __DIR__ . "/includes/admin_header.php";
 
             </div>
 
-            <!-- REPORT SIDEBAR -->
             <aside class="report-details-sidebar">
 
                 <div class="report-details-panel">
@@ -601,8 +714,7 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                 </div>
 
-                <!-- REPORT ACTIONS -->
-                 <div class="report-comment-moderation">
+                <div class="report-comment-moderation">
 
                     <h4>Report actions</h4>
 
@@ -617,15 +729,10 @@ require_once __DIR__ . "/includes/admin_header.php";
                             method="POST"
                             action="<?= BASE_URL ?>admin/report_action.php"
                         >
-
                             <input
                                 type="hidden"
                                 name="csrf_token"
-                                value="<?= htmlspecialchars(
-                                    csrf_token(),
-                                    ENT_QUOTES,
-                                    "UTF-8"
-                                ) ?>"
+                                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
                             >
 
                             <input
@@ -642,7 +749,6 @@ require_once __DIR__ . "/includes/admin_header.php";
                             >
                                 Mark as reviewed
                             </button>
-
                         </form>
 
                         <form
@@ -650,15 +756,10 @@ require_once __DIR__ . "/includes/admin_header.php";
                             action="<?= BASE_URL ?>admin/report_action.php"
                             onsubmit="return confirm('Are you sure you want to dismiss this report?');"
                         >
-
                             <input
                                 type="hidden"
                                 name="csrf_token"
-                                value="<?= htmlspecialchars(
-                                    csrf_token(),
-                                    ENT_QUOTES,
-                                    "UTF-8"
-                                ) ?>"
+                                value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
                             >
 
                             <input
@@ -675,7 +776,6 @@ require_once __DIR__ . "/includes/admin_header.php";
                             >
                                 Dismiss report
                             </button>
-
                         </form>
 
                     <?php else: ?>
@@ -688,7 +788,6 @@ require_once __DIR__ . "/includes/admin_header.php";
 
                 </div>
 
-                <!-- COMMENT MODERATION -->
                 <?php if ($isCommentReport): ?>
 
                     <div class="report-comment-moderation">
@@ -704,8 +803,8 @@ require_once __DIR__ . "/includes/admin_header.php";
                         <?php else: ?>
 
                             <p>
-                                Remove this comment from public view while
-                                preserving the report and its original content.
+                                Remove this comment while preserving the report
+                                and its original content.
                             </p>
 
                             <form
@@ -713,15 +812,10 @@ require_once __DIR__ . "/includes/admin_header.php";
                                 action="<?= BASE_URL ?>admin/delete_comment.php"
                                 onsubmit="return confirm('Are you sure you want to remove this comment?');"
                             >
-
                                 <input
                                     type="hidden"
                                     name="csrf_token"
-                                    value="<?= htmlspecialchars(
-                                        csrf_token(),
-                                        ENT_QUOTES,
-                                        "UTF-8"
-                                    ) ?>"
+                                    value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
                                 >
 
                                 <input
@@ -742,7 +836,63 @@ require_once __DIR__ . "/includes/admin_header.php";
                                 >
                                     Remove reported comment
                                 </button>
+                            </form>
 
+                        <?php endif; ?>
+
+                    </div>
+
+                <?php endif; ?>
+
+                <?php if ($isPostReport): ?>
+
+                    <div class="report-comment-moderation">
+
+                        <h4>Post moderation</h4>
+
+                        <?php if ($postRemoved): ?>
+
+                            <p class="report-no-details">
+                                This post has already been deleted. The report has been preserved.
+                            </p>
+
+                        <?php else: ?>
+
+                            <p>
+                                Delete this post and its associated media,
+                                comments, likes and saves. The report itself
+                                will remain available.
+                            </p>
+
+                            <form
+                                method="POST"
+                                action="<?= BASE_URL ?>admin/delete_post.php"
+                                onsubmit="return confirm('Are you sure you want to permanently delete this post? This action cannot be undone.');"
+                            >
+                                <input
+                                    type="hidden"
+                                    name="csrf_token"
+                                    value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="post_id"
+                                    value="<?= (int) $report["reported_post_id"] ?>"
+                                >
+
+                                <input
+                                    type="hidden"
+                                    name="return_report_id"
+                                    value="<?= (int) $report["report_id"] ?>"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="admin-button-secondary"
+                                >
+                                    Delete reported post
+                                </button>
                             </form>
 
                         <?php endif; ?>

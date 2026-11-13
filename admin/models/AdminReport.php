@@ -1,3 +1,4 @@
+
 <?php
 
 class AdminReport
@@ -9,7 +10,6 @@ class AdminReport
         $this->conn = $conn;
     }
 
-    /* Retrieve report statistics */
     public function getReportCounts(): array
     {
         $stmt = $this->conn->query("
@@ -24,9 +24,6 @@ class AdminReport
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
-    /**
-     * Retrieve reports using optional filters and pagination.
-     */
     public function getReports(
         array $filters = [],
         int $limit = 10,
@@ -35,27 +32,31 @@ class AdminReport
         $conditions = [];
         $params = [];
 
-        // Filter by report status.
         if (!empty($filters["status"])) {
             $conditions[] = "r.status = :status";
             $params[":status"] = $filters["status"];
         }
 
-        // Filter by report type.
         if (($filters["type"] ?? "") === "user") {
             $conditions[] = "r.reported_user_id IS NOT NULL";
             $conditions[] = "r.comment_id IS NULL";
+            $conditions[] = "r.post_id IS NULL";
         } elseif (($filters["type"] ?? "") === "comment") {
             $conditions[] = "r.comment_id IS NOT NULL";
             $conditions[] = "r.reported_user_id IS NULL";
+            $conditions[] = "r.post_id IS NULL";
+        } elseif (($filters["type"] ?? "") === "post") {
+            $conditions[] = "r.post_id IS NOT NULL";
+            $conditions[] = "r.reported_user_id IS NULL";
+            $conditions[] = "r.comment_id IS NULL";
         }
 
-        // Search by report ID or username.
         if (!empty($filters["search"])) {
             $conditions[] = "(
                 CAST(r.report_id AS CHAR) LIKE :report_search
                 OR reporter.username LIKE :reporter_search
                 OR reported_user.username LIKE :reported_search
+                OR reported_post.title LIKE :post_search
             )";
 
             $searchTerm = "%" . $filters["search"] . "%";
@@ -63,6 +64,7 @@ class AdminReport
             $params[":report_search"] = $searchTerm;
             $params[":reporter_search"] = $searchTerm;
             $params[":reported_search"] = $searchTerm;
+            $params[":post_search"] = $searchTerm;
         }
 
         $where = $conditions
@@ -75,13 +77,15 @@ class AdminReport
                 r.reporter_id,
                 r.reported_user_id,
                 r.comment_id,
+                r.post_id,
                 r.reason,
                 r.details,
                 r.status,
                 r.created_at,
 
                 reporter.username AS reporter_username,
-                reported_user.username AS reported_username
+                reported_user.username AS reported_username,
+                reported_post.title AS reported_post_title
 
             FROM reports r
 
@@ -90,6 +94,9 @@ class AdminReport
 
             LEFT JOIN users reported_user
                 ON r.reported_user_id = reported_user.user_id
+
+            LEFT JOIN post reported_post
+                ON r.post_id = reported_post.post_id
 
             $where
 
@@ -114,9 +121,6 @@ class AdminReport
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Count reports matching the current filters.
-     */
     public function getFilteredReportCount(array $filters = []): int
     {
         $conditions = [];
@@ -130,9 +134,15 @@ class AdminReport
         if (($filters["type"] ?? "") === "user") {
             $conditions[] = "r.reported_user_id IS NOT NULL";
             $conditions[] = "r.comment_id IS NULL";
+            $conditions[] = "r.post_id IS NULL";
         } elseif (($filters["type"] ?? "") === "comment") {
             $conditions[] = "r.comment_id IS NOT NULL";
             $conditions[] = "r.reported_user_id IS NULL";
+            $conditions[] = "r.post_id IS NULL";
+        } elseif (($filters["type"] ?? "") === "post") {
+            $conditions[] = "r.post_id IS NOT NULL";
+            $conditions[] = "r.reported_user_id IS NULL";
+            $conditions[] = "r.comment_id IS NULL";
         }
 
         if (!empty($filters["search"])) {
@@ -140,6 +150,7 @@ class AdminReport
                 CAST(r.report_id AS CHAR) LIKE :report_search
                 OR reporter.username LIKE :reporter_search
                 OR reported_user.username LIKE :reported_search
+                OR reported_post.title LIKE :post_search
             )";
 
             $searchTerm = "%" . $filters["search"] . "%";
@@ -147,6 +158,7 @@ class AdminReport
             $params[":report_search"] = $searchTerm;
             $params[":reporter_search"] = $searchTerm;
             $params[":reported_search"] = $searchTerm;
+            $params[":post_search"] = $searchTerm;
         }
 
         $where = $conditions
@@ -163,6 +175,9 @@ class AdminReport
             LEFT JOIN users reported_user
                 ON r.reported_user_id = reported_user.user_id
 
+            LEFT JOIN post reported_post
+                ON r.post_id = reported_post.post_id
+
             $where
         ";
 
@@ -177,12 +192,6 @@ class AdminReport
         return (int) $stmt->fetchColumn();
     }
 
-    /**
-     * Retrieve one report with its related user or comment information.
-     *
-     * Deleted comments are intentionally included so administrators
-     * can still see their original content and report history.
-     */
     public function getReportById(int $reportId): array|false
     {
         $stmt = $this->conn->prepare("
@@ -191,6 +200,7 @@ class AdminReport
                 r.reporter_id,
                 r.reported_user_id,
                 r.comment_id,
+                r.post_id AS reported_post_id,
                 r.reason,
                 r.details,
                 r.status,
@@ -199,23 +209,21 @@ class AdminReport
                 r.reviewed_by,
 
                 reporter.username AS reporter_username,
-
                 reported_user.username AS reported_username,
-
                 reviewer.username AS reviewer_username,
 
                 c.comment AS reported_comment,
                 c.created_at AS comment_created_at,
                 c.media_file AS comment_media_file,
                 c.media_type AS comment_media_type,
-                c.post_id,
+                c.post_id AS comment_post_id,
                 c.deleted_at AS comment_deleted_at,
 
                 comment_author.user_id AS comment_author_id,
                 comment_author.username AS comment_author_username,
 
-                p.title AS post_title,
-                p.created_at AS post_created_at
+                comment_post.title AS comment_post_title,
+                comment_post.created_at AS comment_post_created_at
 
             FROM reports r
 
@@ -234,8 +242,8 @@ class AdminReport
             LEFT JOIN users comment_author
                 ON c.user_id = comment_author.user_id
 
-            LEFT JOIN post p
-                ON c.post_id = p.post_id
+            LEFT JOIN post comment_post
+                ON c.post_id = comment_post.post_id
 
             WHERE r.report_id = :report_id
             LIMIT 1
@@ -248,16 +256,11 @@ class AdminReport
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Update a pending report's moderation status.
-     */
     public function updateReportStatus(
         int $reportId,
         string $status,
         int $adminId
     ): bool {
-
-        // Only allow these final report statuses.
         if (!in_array($status, ["reviewed", "dismissed"], true)) {
             return false;
         }
