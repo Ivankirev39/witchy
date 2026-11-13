@@ -93,6 +93,9 @@ body.dark-mode .site-logo .logo-dark {
 .site-nav .mobile-login-link {
     display: none;
 }
+.site-nav .mobile-join-link {
+    display: none;
+}
 
 
 /* ========================================
@@ -113,6 +116,7 @@ body.dark-mode .site-logo .logo-dark {
     flex-shrink: 0;
     box-shadow: none;
 }
+
 
 /* ========================================
    MOBILE MENU BUTTON
