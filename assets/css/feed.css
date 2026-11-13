@@ -288,7 +288,21 @@
     outline: 2px solid var(--focus);
     outline-offset: 2px;
 }
-
+.post-actions .report-button {
+    margin-left: 0;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.post-actions .report-button svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 /* LIKE*/
 
 .like-heart {

@@ -580,9 +580,11 @@ document.querySelectorAll(".post-card .load-more-comments-button").forEach(butto
         typeInput.value = type;
         targetInput.value = targetId;
 
-        title.textContent = type === "comment"
-            ? "Report comment"
-            : "Report user";
+        title.textContent = {
+            comment: "Report comment",
+            post: "Report post",
+            user: "Report user"
+        }[type] || "Report content";
 
         message.hidden = true;
         message.textContent = "";

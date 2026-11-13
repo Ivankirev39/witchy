@@ -1311,6 +1311,9 @@ button.post-detail-action:hover {
 .post-owner-menu-item.delete-post-button {
     color: #d65b5b;
 }
+.post-owner-menu-item.report-button {
+    margin-left: 0;
+}
 
 .post-owner-menu-item.delete-post-button:hover {
     background: rgba(214, 91, 91, 0.1);

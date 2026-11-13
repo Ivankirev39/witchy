@@ -187,12 +187,12 @@ if ($isLoggedIn) {
                     <img
                         class="post-detail-avatar"
                         src="<?= htmlspecialchars(
-                            !empty($post["profile_image"])
-                                ? $post["profile_image"]
-                                : "images/default-profile.jpg",
-                            ENT_QUOTES,
-                            "UTF-8"
-                        ) ?>"
+                                    !empty($post["profile_image"])
+                                        ? $post["profile_image"]
+                                        : "images/default-profile.jpg",
+                                    ENT_QUOTES,
+                                    "UTF-8"
+                                ) ?>"
                         alt="<?= htmlspecialchars($post["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
 
                 </a>
@@ -263,10 +263,7 @@ if ($isLoggedIn) {
                         <?= htmlspecialchars($post["title"], ENT_QUOTES, "UTF-8") ?>
                     </h1>
 
-                    <?php if (
-                        $isLoggedIn &&
-                        (int) $post["user_id"] === $user_id
-                    ): ?>
+                    <?php if ($isLoggedIn): ?>
                         <details class="post-owner-menu">
                             <summary aria-label="Post options" title="Post options">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -277,38 +274,43 @@ if ($isLoggedIn) {
                             </summary>
 
                             <div class="post-owner-menu-dropdown">
-                                <a
-                                    href="edit_post.php?id=<?= $post_id ?>&return=<?= rawurlencode($backUrl) ?>"
-                                    class="post-owner-menu-item">
-
-                                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="m16 4 4 4L9 19H5v-4L16 4Z M14 6l4 4" />
-                                    </svg>
-                                    <span>Edit post</span>
-                                </a>
-
-                                <form
-                                    action="delete_post.php"
-                                    method="POST"
-                                    class="delete-post-form">
-
-                                    <input
-                                        type="hidden"
-                                        name="csrf_token"
-                                        value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
-
-                                    <input
-                                        type="hidden"
-                                        name="post_id"
-                                        value="<?= $post_id ?>">
-
-                                    <button type="submit" class="post-owner-menu-item delete-post-button">
+                                <?php if ((int) $post["user_id"] === $user_id): ?>
+                                    <a
+                                        href="edit_post.php?id=<?= $post_id ?>&return=<?= rawurlencode($backUrl) ?>"
+                                        class="post-owner-menu-item">
                                         <svg viewBox="0 0 24 24" aria-hidden="true">
-                                            <path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-1 6h2v8H8v-8Zm6 0h2v8h-2v-8ZM6 8h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8Z" />
+                                            <path d="m16 4 4 4L9 19H5v-4L16 4Z M14 6l4 4" />
                                         </svg>
-                                        <span>Delete post</span>
+                                        <span>Edit post</span>
+                                    </a>
+
+                                    <form action="delete_post.php" method="POST" class="delete-post-form">
+                                        <input
+                                            type="hidden"
+                                            name="csrf_token"
+                                            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
+                                        <input type="hidden" name="post_id" value="<?= $post_id ?>">
+
+                                        <button type="submit" class="post-owner-menu-item delete-post-button">
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                                <path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-1 6h2v8H8v-8Zm6 0h2v8h-2v-8ZM6 8h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8Z" />
+                                            </svg>
+                                            <span>Delete post</span>
+                                        </button>
+                                    </form>
+                                <?php else: ?>
+                                    <button
+                                        type="button"
+                                        class="post-owner-menu-item report-button"
+                                        data-report-type="post"
+                                        data-target-id="<?= $post_id ?>">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M5 21V4" />
+                                            <path d="M5 4c4-3 7 3 11 0l3-1v11l-3 1c-4 3-7-3-11 0" />
+                                        </svg>
+                                        <span>Report post</span>
                                     </button>
-                                </form>
+                                <?php endif; ?>
                             </div>
                         </details>
                     <?php endif; ?>
@@ -361,7 +363,6 @@ if ($isLoggedIn) {
 
                             <span><?= (int) $post["like_count"] ?></span>
                         </button>
-
                     </form>
                 <?php else: ?>
                     <a
@@ -468,7 +469,6 @@ if ($isLoggedIn) {
                         </svg>
                     </a>
                 <?php endif; ?>
-
             </div>
 
             <section class="post-detail-comments">
@@ -504,12 +504,12 @@ if ($isLoggedIn) {
                                     <img
                                         class="comment-avatar"
                                         src="<?= htmlspecialchars(
-                                            !empty($comment["profile_image"])
-                                                ? $comment["profile_image"]
-                                                : "images/default-profile.jpg",
-                                            ENT_QUOTES,
-                                            "UTF-8"
-                                        ) ?>"
+                                                    !empty($comment["profile_image"])
+                                                        ? $comment["profile_image"]
+                                                        : "images/default-profile.jpg",
+                                                    ENT_QUOTES,
+                                                    "UTF-8"
+                                                ) ?>"
                                         alt="<?= htmlspecialchars($comment["username"], ENT_QUOTES, "UTF-8") ?>'s profile picture">
 
                                 </a>

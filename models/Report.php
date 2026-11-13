@@ -13,37 +13,37 @@ class Report
     public function hasAlreadyReported(
         int $reporterId,
         ?int $reportedUserId = null,
-        ?int $commentId = null
+        ?int $commentId = null,
+        ?int $postId = null
     ): bool {
-        if (($reportedUserId === null) === ($commentId === null)) {
+        $targets = array_filter(
+            [$reportedUserId, $commentId, $postId],
+            static fn(?int $id): bool => $id !== null
+        );
+
+        if (count($targets) !== 1) {
             throw new InvalidArgumentException("Exactly one report target is required.");
         }
 
         if ($reportedUserId !== null) {
-            $sql = "
-                SELECT report_id
-                FROM reports
-                WHERE reporter_id = ?
-                AND reported_user_id = ?
-                AND status = 'pending'
-                LIMIT 1
-            ";
-
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([$reporterId, $reportedUserId]);
+            $sql = "SELECT report_id FROM reports
+                WHERE reporter_id = ? AND reported_user_id = ? AND status = 'pending'
+                LIMIT 1";
+            $targetId = $reportedUserId;
+        } elseif ($commentId !== null) {
+            $sql = "SELECT report_id FROM reports
+                WHERE reporter_id = ? AND comment_id = ? AND status = 'pending'
+                LIMIT 1";
+            $targetId = $commentId;
         } else {
-            $sql = "
-                SELECT report_id
-                FROM reports
-                WHERE reporter_id = ?
-                AND comment_id = ?
-                AND status = 'pending'
-                LIMIT 1
-            ";
-
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([$reporterId, $commentId]);
+            $sql = "SELECT report_id FROM reports
+                WHERE reporter_id = ? AND post_id = ? AND status = 'pending'
+                LIMIT 1";
+            $targetId = $postId;
         }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$reporterId, $targetId]);
 
         return $stmt->fetch(PDO::FETCH_ASSOC) !== false;
     }
@@ -144,4 +144,43 @@ class Report
 
         return (int) $this->db->lastInsertId();
     }
+public function createPostReport(
+    int $reporterId,
+    int $postId,
+    string $reason,
+    ?string $details = null
+): ?int {
+    if ($reason === "" || strlen($reason) > 100) {
+        throw new InvalidArgumentException("Invalid report reason.");
+    }
+
+    $stmt = $this->db->prepare(
+        "SELECT user_id FROM post WHERE post_id = ? LIMIT 1"
+    );
+    $stmt->execute([$postId]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$post) {
+        throw new InvalidArgumentException("Post does not exist.");
+    }
+
+    if ((int) $post["user_id"] === $reporterId) {
+        throw new InvalidArgumentException("You cannot report your own post.");
+    }
+
+    if ($this->hasAlreadyReported($reporterId, null, null, $postId)) {
+        return null;
+    }
+
+    $details = trim($details ?? "");
+    $details = $details === "" ? null : $details;
+
+    $stmt = $this->db->prepare(
+        "INSERT INTO reports (reporter_id, post_id, reason, details)
+         VALUES (?, ?, ?, ?)"
+    );
+    $stmt->execute([$reporterId, $postId, $reason, $details]);
+
+    return (int) $this->db->lastInsertId();
+}
 }

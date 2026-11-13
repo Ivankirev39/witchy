@@ -64,6 +64,14 @@ $allowedReasons = [
         "Inappropriate content",
         "Misinformation",
         "Other"
+    ],
+    "post" => [
+        "Harassment or bullying",
+        "Spam",
+        "Hate speech",
+        "Inappropriate content",
+        "Misinformation",
+        "Other"
     ]
 ];
 
@@ -93,17 +101,21 @@ try {
 
     // Create appropriate report
     if ($reportType === "user") {
-
         $reportId = $reportModel->createUserReport(
             $reporterId,
             $targetId,
             $reason,
             $details
         );
-
-    } else {
-
+    } elseif ($reportType === "comment") {
         $reportId = $reportModel->createCommentReport(
+            $reporterId,
+            $targetId,
+            $reason,
+            $details
+        );
+    } else {
+        $reportId = $reportModel->createPostReport(
             $reporterId,
             $targetId,
             $reason,
@@ -123,11 +135,9 @@ try {
         true,
         "Your report has been submitted successfully."
     );
-
 } catch (InvalidArgumentException $e) {
 
     sendReportResponse(false, $e->getMessage(), 400);
-
 } catch (PDOException $e) {
 
     error_log("Report submission error: " . $e->getMessage());

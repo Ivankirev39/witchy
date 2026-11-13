@@ -528,9 +528,11 @@ document.querySelector(
         typeInput.value = type;
         targetInput.value = targetId;
 
-        title.textContent = type === "comment"
-            ? "Report comment"
-            : "Report user";
+        title.textContent = {
+            comment: "Report comment",
+            post: "Report post",
+            user: "Report user"
+        }[type] || "Report content";
 
         message.hidden = true;
         message.textContent = "";
@@ -955,10 +957,9 @@ document.addEventListener("click", async (event) => {
             repliesContainer.hidden = true;
 
             viewButton.textContent =
-                `View ${viewButton.dataset.replyCount} ${
-                    Number(viewButton.dataset.replyCount) === 1
-                        ? "reply"
-                        : "replies"
+                `View ${viewButton.dataset.replyCount} ${Number(viewButton.dataset.replyCount) === 1
+                    ? "reply"
+                    : "replies"
                 }`;
 
             viewButton.setAttribute("aria-expanded", "false");
