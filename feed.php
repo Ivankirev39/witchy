@@ -22,18 +22,24 @@ $feedMode = ($_GET["feed"] ?? "for_you") === "following"
     : "for_you";
 
 $pageSize = 10;
+
+$totalPosts = $postFeedModel->getFeedPostCount(
+    $user_id,
+    $feedMode === "following"
+);
+    
+$totalPages = max(1, (int) ceil($totalPosts / $pageSize));
+    
 $page = max(1, (int) ($_GET["page"] ?? 1));
+$page = min($page, $totalPages);
+    
 $posts = $postFeedModel->getFeedPosts(
     $user_id,
     $feedMode === "following",
-    $pageSize + 1,
+    $pageSize,
     ($page - 1) * $pageSize
 );
-$hasNextPage = count($posts) > $pageSize;
 
-if ($hasNextPage) {
-    array_pop($posts);
-}
 
 $pageCss = "feed.css";
 
@@ -400,29 +406,102 @@ require_once __DIR__ . "/includes/user_header.php";
                 </div>
             </article>
         <?php endforeach; ?>
-        <nav class="feed-pagination" aria-label="Feed pages">
-            <?php if ($page > 1): ?>
-                <a href="<?= htmlspecialchars(
-                                "feed.php?" . http_build_query([
-                                    "feed" => $feedMode,
-                                    "page" => $page - 1
-                                ]),
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>">Previous</a>
+
+<?php if ($totalPages > 1): ?>
+    <nav class="feed-pagination" aria-label="Feed pages">
+
+        <?php if ($page > 1): ?>
+            <a
+                href="<?= htmlspecialchars(
+                    "feed.php?" . http_build_query([
+                        "feed" => $feedMode,
+                        "page" => $page - 1
+                    ]),
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>"
+                class="pagination-arrow"
+                aria-label="Previous page">
+                &laquo;
+            </a>
+        <?php endif; ?>
+
+        <?php
+        $startPage = max(1, $page - 2);
+        $endPage = min($totalPages, $page + 2);
+        ?>
+
+        <?php if ($startPage > 1): ?>
+            <a href="<?= htmlspecialchars(
+                "feed.php?" . http_build_query([
+                    "feed" => $feedMode,
+                    "page" => 1
+                ]),
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>">
+                1
+            </a>
+
+            <?php if ($startPage > 2): ?>
+                <span class="pagination-dots">...</span>
+            <?php endif; ?>
+        <?php endif; ?>
+
+        <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+            <a
+                href="<?= htmlspecialchars(
+                    "feed.php?" . http_build_query([
+                        "feed" => $feedMode,
+                        "page" => $i
+                    ]),
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>"
+                class="<?= $i === $page ? "active" : "" ?>"
+                <?= $i === $page ? 'aria-current="page"' : "" ?>>
+                <?= $i ?>
+            </a>
+        <?php endfor; ?>
+
+        <?php if ($endPage < $totalPages): ?>
+
+            <?php if ($endPage < $totalPages - 1): ?>
+                <span class="pagination-dots">...</span>
             <?php endif; ?>
 
-            <?php if ($hasNextPage): ?>
-                <a href="<?= htmlspecialchars(
-                                "feed.php?" . http_build_query([
-                                    "feed" => $feedMode,
-                                    "page" => $page + 1
-                                ]),
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>">Next</a>
-            <?php endif; ?>
-        </nav>
+            <a href="<?= htmlspecialchars(
+                "feed.php?" . http_build_query([
+                    "feed" => $feedMode,
+                    "page" => $totalPages
+                ]),
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>">
+                <?= $totalPages ?>
+            </a>
+
+        <?php endif; ?>
+
+        <?php if ($page < $totalPages): ?>
+            <a
+                href="<?= htmlspecialchars(
+                    "feed.php?" . http_build_query([
+                        "feed" => $feedMode,
+                        "page" => $page + 1
+                    ]),
+                    ENT_QUOTES,
+                    "UTF-8"
+                ) ?>"
+                class="pagination-arrow"
+                aria-label="Next page">
+                &raquo;
+            </a>
+        <?php endif; ?>
+
+    </nav>
+<?php endif; ?>
+
 
     </section>
 </section>

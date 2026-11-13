@@ -83,6 +83,42 @@ class PostFeed
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getFeedPostCount(
+        int $userId,
+        bool $followingOnly = false
+    ): int {
+        $sql = "
+            SELECT COUNT(*)
+            FROM post
+
+            JOIN users
+                ON users.user_id = post.user_id
+
+            JOIN v_post_engagement v
+                ON v.post_id = post.post_id
+        ";
+
+        $params = [];
+
+        if ($followingOnly) {
+            $sql .= "
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM follow
+                    WHERE follow.follower_id = ?
+                    AND follow.following_id = post.user_id
+                )
+            ";
+
+            $params[] = $userId;
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return (int) $stmt->fetchColumn();
+    }
+
     public function getPostMediaForPosts(array $postIds): array
     {
         $postIds = array_values(array_filter(

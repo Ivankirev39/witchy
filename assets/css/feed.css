@@ -718,37 +718,74 @@
     background: rgba(210, 75, 75, 0.12);
     color: #b83232;
 }
-/* PAGINATION STLYING */
+/* PAGINATION */
+
 .feed-pagination {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
-    margin: 24px 0 36px;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 32px 0 40px;
 }
+
 .feed-pagination a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 96px;
-    min-height: 42px;
-    padding: 8px 16px;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
     border: 1px solid var(--border);
-    border-radius: 6px;
+    border-radius: 8px;
     background: var(--surface);
     color: var(--text);
     font: inherit;
+    font-size: 14px;
     text-decoration: none;
-    transition: background-color 0.15s ease, border-color 0.15s ease;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
 }
+
 .feed-pagination a:hover {
     border-color: var(--accent);
     background: var(--surface-hover, var(--surface));
 }
+
+.feed-pagination a.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--brand-plum);
+    font-weight: 700;
+    cursor: default;
+}
+
+.feed-pagination a.active:hover {
+    background: var(--accent);
+}
+
+.feed-pagination .pagination-arrow {
+    min-width: 40px;
+    font-size: 19px;
+}
+
+.feed-pagination .pagination-dots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    user-select: none;
+}
+
 .feed-pagination a:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
+
 /* ADMIN COMMUNITY PIN */
 .admin-pinned-badge {
     display: inline-flex;
@@ -970,15 +1007,33 @@ html.dark-mode .report-message.error {
     background: rgba(210, 75, 75, 0.12);
     color: #f19b9b;
 }
+/* DARK MODE — PAGINATION */
+
 html.dark-mode .feed-pagination a {
     border-color: #343039;
     background: #1f1d24;
     color: #f1e8dc;
 }
+
 html.dark-mode .feed-pagination a:hover {
     border-color: #806b84;
     background: #292630;
 }
+
+html.dark-mode .feed-pagination a.active {
+    border-color: #c084cc;
+    background: #c084cc;
+    color: #100e12;
+}
+
+html.dark-mode .feed-pagination a.active:hover {
+    background: #c5a6ca;
+}
+
+html.dark-mode .feed-pagination .pagination-dots {
+    color: #aaa2aa;
+}
+
 html.dark-mode .feed-pagination a:focus-visible {
     outline-color: #c5a6ca;
 }
@@ -1069,12 +1124,21 @@ html.dark-mode .save-button.active:hover {
     .feed-page h1 {
         font-size: 30px;
     }
-      .feed-pagination {
-        gap: 8px;
+    .feed-pagination {
+        gap: 6px;
+        margin: 24px 0 32px;
     }
+
     .feed-pagination a {
-        flex: 1;
-        max-width: 160px;
+        flex: 0 0 auto;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 9px;
+        font-size: 13px;
+    }
+
+    .feed-pagination .pagination-arrow {
+        min-width: 36px;
     }
     .post-card {
         border-radius: 12px;
