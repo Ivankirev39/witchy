@@ -1055,8 +1055,6 @@ html.dark-mode .profile-pin-warning {
 .profile-back-button:hover {
     color: var(--focus);
 }
-
-
 /* DARK MODE */
 
 html.dark-mode .profile-cover {
@@ -1258,7 +1256,7 @@ html.dark-mode .profile-stat-button:focus-visible {
     .profile-info-grid {
         grid-template-columns: 1fr;
     }
-}
+  }   
 /* MOBILE */
 @media (max-width: 600px) {
     .profile-cover {
@@ -1335,7 +1333,13 @@ html.dark-mode .profile-stat-button:focus-visible {
         width: 100%;
     }
 }
-
+@media (min-width: 601px) and (max-width: 1032px) {
+    .profile-back-button {
+        font-size: 1.1rem;
+        padding: 10px 14px;
+        min-height: 44px;
+    }
+}
 
 /* Profile buttons */
 .profile-owner-actions {

@@ -1720,7 +1720,13 @@ html.dark-mode .report-message.error {
         font-size: 16px;
     }
 }
-
+@media (min-width: 761px) and (max-width: 1032px) {
+    .post-detail-back {
+        font-size: 1rem;
+        padding: 12px 16px;
+        min-height: 44px;
+    }
+}
 @media (max-width: 500px) {
     .post-detail-page {
         padding: 20px 16px 45px;
