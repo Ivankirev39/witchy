@@ -125,7 +125,7 @@ if ($isLoggedIn) {
 ?>
 
 <section
-    class="post-detail-page"
+    class="post-detail-page<?= !$isLoggedIn ? ' post-detail-page--public' : '' ?>"
     data-user-id="<?= (int) $user_id ?>"
     data-replies-csrf="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
 
