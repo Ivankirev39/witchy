@@ -196,7 +196,7 @@ require_once __DIR__ . "/includes/user_header.php";
                         <button
                             type="submit"
                             class="post-action-button like-button <?= $post["user_liked"] ? "active" : "" ?>"
-                            aria-label="<?= $post["user_liked"] ? "Unlike post" : "Like post" ?>">
+                            aria-label="<?= $post["user_liked"] ? "Unlike post" : "Like post" ?>, <?= (int) $post["like_count"] ?>">
                             <span class="like-heart"><?= $post["user_liked"] ? "♥" : "♡" ?></span>
                             <span class="like-count"><?= (int) $post["like_count"] ?></span>
                         </button>
@@ -205,7 +205,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     <button
                         type="button"
                         class="post-action-button comments-toggle"
-                        aria-label="View comments">
+                        aria-label="View comments, <?= (int) $post["comment_count"] ?>">
                         <svg
                             class="comment-icon"
                             viewBox="0 0 24 24"
@@ -352,7 +352,7 @@ require_once __DIR__ . "/includes/user_header.php";
                                         <button
                                             type="submit"
                                             class="comment-like-button <?= $userLiked ? "active" : "" ?>"
-                                            aria-label="<?= $userLiked ? "Unlike comment" : "Like comment" ?>">
+                                            aria-label="<?= $userLiked ? "Unlike comment" : "Like comment" ?>, <?= $likeCount ?>">
                                             <span class="comment-like-heart"><?= $userLiked ? "♥" : "♡" ?></span>
                                             <span class="comment-like-count"><?= $likeCount ?></span>
                                         </button>

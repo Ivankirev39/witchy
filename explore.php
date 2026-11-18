@@ -301,65 +301,64 @@ require_once __DIR__ . "/includes/user_header.php";
 
     <?php if ($search !== ""): ?>
 
-    <section class="explore-people">
+        <section class="explore-people">
 
-        <div class="explore-section-heading">
-            <h2>People</h2>
-            <span><?= count($users) ?> found</span>
-        </div>
-
-        <?php if (!empty($users)): ?>
-
-            <div class="explore-people-grid">
-
-                <?php foreach ($users as $person): ?>
-
-                    <?php
-                    $profileImage = !empty($person["profile_image"])
-                        ? $person["profile_image"]
-                        : "images/default-profile.jpg";
-                    ?>
-
-                    <a href="<?= BASE_URL ?>profile.php?id=<?= (int) $person["user_id"] ?>&return=<?= urlencode($_SERVER["REQUEST_URI"]) ?>"
-                    class="explore-person-card">
-
-                        <img
-                            src="<?= htmlspecialchars(
-                                BASE_URL . ltrim($profileImage, "/"),
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>"
-                            alt="<?= htmlspecialchars(
-                                $person["username"],
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>'s profile picture"
-                            loading="lazy"
-                        >
-
-                        <span>
-                            @<?= htmlspecialchars(
-                                $person["username"],
-                                ENT_QUOTES,
-                                "UTF-8"
-                            ) ?>
-                        </span>
-
-                    </a>
-
-                <?php endforeach; ?>
-
+            <div class="explore-section-heading">
+                <h2>People</h2>
+                <span><?= count($users) ?> found</span>
             </div>
 
-        <?php else: ?>
+            <?php if (!empty($users)): ?>
 
-            <p class="explore-people-empty">
-                No matching people found.
-            </p>
+                <div class="explore-people-grid">
 
-        <?php endif; ?>
+                    <?php foreach ($users as $person): ?>
 
-    </section>
+                        <?php
+                        $profileImage = !empty($person["profile_image"])
+                            ? $person["profile_image"]
+                            : "images/default-profile.jpg";
+                        ?>
+
+                        <a href="<?= BASE_URL ?>profile.php?id=<?= (int) $person["user_id"] ?>&return=<?= urlencode($_SERVER["REQUEST_URI"]) ?>"
+                            class="explore-person-card">
+
+                            <img
+                                src="<?= htmlspecialchars(
+                                            BASE_URL . ltrim($profileImage, "/"),
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        ) ?>"
+                                alt="<?= htmlspecialchars(
+                                            $person["username"],
+                                            ENT_QUOTES,
+                                            "UTF-8"
+                                        ) ?>'s profile picture"
+                                loading="lazy">
+
+                            <span>
+                                @<?= htmlspecialchars(
+                                        $person["username"],
+                                        ENT_QUOTES,
+                                        "UTF-8"
+                                    ) ?>
+                            </span>
+
+                        </a>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            <?php else: ?>
+
+                <p class="explore-people-empty">
+                    No matching people found.
+                </p>
+
+            <?php endif; ?>
+
+        </section>
 
     <?php endif; ?>
 
@@ -611,7 +610,7 @@ require_once __DIR__ . "/includes/user_header.php";
                                     data-post-id="<?php echo (int) $post["post_id"]; ?>"
                                     data-liked="<?php echo $userLiked ? "1" : "0"; ?>"
                                     data-csrf-token="<?php echo htmlspecialchars($csrfToken, ENT_QUOTES, "UTF-8"); ?>"
-                                    aria-label="<?php echo $userLiked ? "Unlike post" : "Like post"; ?>"
+                                    aria-label="<?php echo $userLiked ? "Unlike post" : "Like post"; ?>, <?php echo (int) ($post["like_count"] ?? 0); ?>"
                                     aria-pressed="<?php echo $userLiked ? "true" : "false"; ?>"
                                     title="<?php echo (int) ($post["like_count"] ?? 0); ?> likes">
 
@@ -620,7 +619,7 @@ require_once __DIR__ . "/includes/user_header.php";
                                         viewBox="0 0 24 24"
                                         aria-hidden="true">
 
-                                        <path d="M20.8 8.7c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11A4.7 4.7 0 0 1 12 6.2a4.7 4.7 0 0 1 8.8 2.5Z"/>
+                                        <path d="M20.8 8.7c0 5.2-8.8 11-8.8 11s-8.8-5.8-8.8-11A4.7 4.7 0 0 1 12 6.2a4.7 4.7 0 0 1 8.8 2.5Z" />
 
                                     </svg>
 
@@ -641,7 +640,7 @@ require_once __DIR__ . "/includes/user_header.php";
                                         viewBox="0 0 24 24"
                                         aria-hidden="true">
 
-                                        <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/>
+                                        <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z" />
 
                                     </svg>
 
@@ -754,69 +753,72 @@ require_once __DIR__ . "/includes/user_header.php";
 </section>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const likeButtons = document.querySelectorAll(".engagement-like-button");
+    document.addEventListener("DOMContentLoaded", function() {
+        const likeButtons = document.querySelectorAll(".engagement-like-button");
 
-    likeButtons.forEach(function (button) {
-        button.addEventListener("click", async function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-
-            if (button.disabled) {
-                return;
-            }
-
-            button.disabled = true;
-
-            const formData = new FormData();
-            formData.append("post_id", button.dataset.postId);
-            formData.append("csrf_token", button.dataset.csrfToken);
-
-            try {
-                const response = await fetch("like_post.php", {
-                    method: "POST",
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest"
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-                    throw new Error("The like could not be updated.");
-                }
-
-                const liked = data.liked === true || data.liked === 1 || data.liked === "1";
-
-                button.dataset.liked = liked ? "1" : "0";
-                button.setAttribute("aria-pressed", liked ? "true" : "false");
-                button.setAttribute("aria-label", liked ? "Unlike post" : "Like post");
-
-                const countElement = button.querySelector(".engagement-count");
-
-                if (countElement) {
-                    countElement.textContent = data.like_count;
-                }
-
-                button.title = data.like_count + " likes";
-
-            } catch (error) {
-                alert("Unable to update your like. Please refresh the page and try again.");
-            } finally {
-                button.disabled = false;
-            }
-        });
-
-        // Prevent the card's keyboard navigation from handling
-        // Enter or Space when the like button has focus.
-        button.addEventListener("keydown", function (event) {
-            if (event.key === "Enter" || event.key === " ") {
+        likeButtons.forEach(function(button) {
+            button.addEventListener("click", async function(event) {
+                event.preventDefault();
                 event.stopPropagation();
-            }
+
+                if (button.disabled) {
+                    return;
+                }
+
+                button.disabled = true;
+
+                const formData = new FormData();
+                formData.append("post_id", button.dataset.postId);
+                formData.append("csrf_token", button.dataset.csrfToken);
+
+                try {
+                    const response = await fetch("like_post.php", {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok || !data.success) {
+                        throw new Error("The like could not be updated.");
+                    }
+
+                    const liked = data.liked === true || data.liked === 1 || data.liked === "1";
+
+                    button.dataset.liked = liked ? "1" : "0";
+                    button.setAttribute("aria-pressed", liked ? "true" : "false");
+                    button.setAttribute(
+                        "aria-label",
+                        (liked ? "Unlike post" : "Like post") + ", " + data.like_count
+                    );
+
+                    const countElement = button.querySelector(".engagement-count");
+
+                    if (countElement) {
+                        countElement.textContent = data.like_count;
+                    }
+
+                    button.title = data.like_count + " likes";
+
+                } catch (error) {
+                    alert("Unable to update your like. Please refresh the page and try again.");
+                } finally {
+                    button.disabled = false;
+                }
+            });
+
+            // Prevent the card's keyboard navigation from handling
+            // Enter or Space when the like button has focus.
+            button.addEventListener("keydown", function(event) {
+                if (event.key === "Enter" || event.key === " ") {
+                    event.stopPropagation();
+                }
+            });
         });
     });
-});
 </script>
 
 <?php
