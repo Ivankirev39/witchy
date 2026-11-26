@@ -18,13 +18,28 @@ $error = "";
 $username = "";
 $email = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+// Check CSRF before processing registration.
+if (
+    $_SERVER["REQUEST_METHOD"] === "POST" &&
+    !csrf_valid($_POST["csrf_token"] ?? null)
+) {
+    http_response_code(403);
 
-    if (!csrf_valid($_POST["csrf_token"] ?? null)) {
-        http_response_code(403);
-        exit("Invalid request.");
-    }
-    
+    $error = "Your request could not be verified. Please refresh the page and try again.";
+
+    // Preserve entered information.
+    $username = is_string($_POST["username"] ?? null)
+        ? trim($_POST["username"])
+        : "";
+
+    $email = is_string($_POST["email"] ?? null)
+        ? trim($_POST["email"])
+        : "";
+}
+
+// Only process registration when the CSRF check passed.
+if ($_SERVER["REQUEST_METHOD"] === "POST" && $error === "") {
+
     try {
         $limiter = new RegistrationRateLimiter($conn);
         $ip = $_SERVER["REMOTE_ADDR"] ?? "";
@@ -43,12 +58,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($error === "") {
 
 
-    $website = trim($_POST["website"] ?? "");
+        // Detect whether the hidden honeypot field was filled.
+    $website = $_POST["website"] ?? "";
 
-    if ($website !== "") {
-        http_response_code(400);
-        exit("Invalid request.");
-    }
+    $honeypotTriggered = !is_string($website) || trim($website) !== "";
 
     $username = trim($_POST["username"] ?? "");
     $email = trim($_POST["email"] ?? "");
@@ -58,7 +71,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $formStarted = $_SESSION["register_form_started"] ?? 0;
     $secondsTaken = time() - $formStarted;
 
-    if ($formStarted === 0 || $secondsTaken < 3) {
+    if ($honeypotTriggered) {
+
+        http_response_code(400);
+
+        $error = "Your registration request could not be processed. Please refresh the page and try again.";
+
+    } elseif ($formStarted === 0 || $secondsTaken < 3) {
 
         $error = "Please wait a moment before creating your account, then try again.";
         $_SESSION["register_form_started"] = time();
@@ -104,9 +123,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $error = "This password is too simple and easy to guess. Please choose a stronger password.";
 
-    } elseif ($password !== $confirmPassword) {
-
-        $error = "Password is too long.";
 
     } elseif ($password !== $confirmPassword) {
 

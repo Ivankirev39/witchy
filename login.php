@@ -14,14 +14,25 @@ if (isset($_SESSION["user_id"])) {
 $error = "";
 $login = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-
-    if (!csrf_valid($_POST["csrf_token"] ?? null)) {
+    // Check CSRF before processing login credentials.
+    if (
+        $_SERVER["REQUEST_METHOD"] === "POST" &&
+        !csrf_valid($_POST["csrf_token"] ?? null)
+    ) {
         http_response_code(403);
-        exit("Invalid request.");
+
+        $error = "Your request could not be verified. Please refresh the page and try again.";
+
+        // Keep the entered username/email.
+        $login = is_string($_POST["login"] ?? null)
+            ? trim($_POST["login"])
+            : "";
     }
 
-    $rawLogin = $_POST["login"] ?? "";
+    // Only attempt login if the request passed validation.
+    if ($_SERVER["REQUEST_METHOD"] === "POST" && $error === "") {
+
+        $rawLogin = $_POST["login"] ?? "";
     $password = $_POST["password"] ?? "";
 
     if (

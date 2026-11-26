@@ -5,13 +5,18 @@ require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/models/User.php";
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    http_response_code(405);
-    exit("Method not allowed.");
-}
+    $_SESSION["delete_error"] =
+        "Please use the form in Account Settings to delete your account.";
 
+    header("Location: settings.php", true, 303);
+    exit;
+}
 if (!csrf_valid($_POST["csrf_token"] ?? null)) {
-    http_response_code(403);
-    exit("Invalid request.");
+    $_SESSION["delete_error"] =
+        "Your request could not be verified. Please try again.";
+
+    header("Location: settings.php", true, 303);
+    exit;
 }
 
 $password = $_POST["password"] ?? "";
