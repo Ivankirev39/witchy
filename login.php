@@ -101,7 +101,6 @@ $login = "";
 
 
 $pageTitle = "Log in | Witchy";
-$pageCss = "login.css";
 require_once __DIR__ . "/includes/public-header.php";
 ?>
 

@@ -22,9 +22,39 @@ $user = $profile_id > 0
     ? $userModel->getPublicProfile($profile_id)
     : null;
 
+// Show a styled error page when the profile doesn't exist.
 if (!$user) {
     http_response_code(404);
-    exit("User not found.");
+
+    $pageTitle = "Profile Not Found | Witchy";
+
+    require_once __DIR__ . "/includes/user_header.php";
+    ?>
+
+    <section class="post-not-found-page">
+        <div class="post-not-found-card">
+
+            <div class="post-not-found-icon">
+                ☾
+            </div>
+
+            <h1>Profile not found</h1>
+
+            <p>
+                This profile may have been deleted,
+                removed, or no longer exists.
+            </p>
+
+            <a href="feed.php" class="post-not-found-button">
+                Back to feed
+            </a>
+
+        </div>
+    </section>
+
+    <?php
+    require_once __DIR__ . "/includes/user_footer.php";
+    exit;
 }
 
 // Get the user's badges

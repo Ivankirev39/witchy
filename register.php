@@ -63,10 +63,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && $error === "") {
 
     $honeypotTriggered = !is_string($website) || trim($website) !== "";
 
-    $username = trim($_POST["username"] ?? "");
-    $email = trim($_POST["email"] ?? "");
-    $password = $_POST["password"] ?? "";
-    $confirmPassword = $_POST["confirm_password"] ?? "";
+    // Validate input types before processing registration.
+    $username = is_string($_POST["username"] ?? null)
+        ? trim($_POST["username"])
+        : "";
+
+    $email = is_string($_POST["email"] ?? null)
+        ? trim($_POST["email"])
+        : "";
+
+    $password = is_string($_POST["password"] ?? null)
+        ? $_POST["password"]
+        : "";
+
+    $confirmPassword = is_string($_POST["confirm_password"] ?? null)
+        ? $_POST["confirm_password"]
+        : "";
 
     $formStarted = $_SESSION["register_form_started"] ?? 0;
     $secondsTaken = time() - $formStarted;
