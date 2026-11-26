@@ -490,3 +490,14 @@ html.dark-mode .button-secondary:hover {
         width: 100%;
     }
 }
+/* Error messages on the create post page */
+.create-error {
+    background-color: #3a1f2b;
+    color: #ffb8c6;
+    border: 1px solid #c75b76;
+    border-radius: 10px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
