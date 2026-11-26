@@ -84,11 +84,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $error = "Email is too long.";
 
-    } elseif (strlen($password) < 8) {
+    } elseif (strlen($password) < 15) {
 
-        $error = "Password must be at least 8 characters.";
+    $error = "Your password is too short. Please use at least 15 characters.";
 
     } elseif (strlen($password) > 255) {
+
+        $error = "Password is too long.";
+
+    } elseif (
+        preg_match('/^[0-9]+$/', $password) ||
+        in_array(strtolower(trim($password)), [
+            "password123456789",
+            "qwerty123456789",
+            "123456789abcdef",
+            "abcdefghijklmnop"
+        ], true)
+    ) {
+
+        $error = "This password is too simple and easy to guess. Please choose a stronger password.";
+
+    } elseif ($password !== $confirmPassword) {
 
         $error = "Password is too long.";
 
