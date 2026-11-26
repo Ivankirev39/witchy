@@ -63,12 +63,27 @@ $profileImageUrl = BASE_URL . ltrim($profileImage, "/");
         >
     <?php endif; ?>
 
-    <script>
-        const savedTheme = localStorage.getItem("theme");
+    <script>(function () {
+        let savedTheme = null;
 
-        if (savedTheme === "dark") {
-            document.documentElement.classList.add("dark-mode");
+        try {
+            savedTheme = localStorage.getItem("theme")
+                ?? localStorage.getItem("witchy-theme");
+        } catch (error) {
+            // Continue using the device preference.
         }
+
+        const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+        ).matches;
+
+        const isDark = savedTheme === "dark" ||
+            (savedTheme === null && prefersDark);
+
+        document.documentElement.classList.toggle(
+            "dark-mode",
+            isDark
+        );})();
     </script>
 
     <script src="<?= BASE_URL ?>assets/js/user_header.js" defer></script>

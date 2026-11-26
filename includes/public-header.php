@@ -15,6 +15,40 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, "UTF-8") ?></title>
+    <!-- Apply the saved theme before the page is displayed -->
+    <script>
+    (function () {
+        let savedTheme = null;
+
+        try {
+            savedTheme = localStorage.getItem("theme")
+                ?? localStorage.getItem("witchy-theme");
+
+            // Transfer the old public theme preference.
+            if (
+                savedTheme !== null &&
+                localStorage.getItem("theme") === null
+            ) {
+                localStorage.setItem("theme", savedTheme);
+            }
+
+        } catch (error) {
+            // Continue if browser storage is unavailable.
+        }
+
+        const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)"
+        ).matches;
+
+        const isDark = savedTheme === "dark" ||
+            (savedTheme === null && prefersDark);
+
+        document.documentElement.classList.toggle(
+            "dark-mode",
+            isDark
+        );
+    })();
+    </script>
 
     <!-- MAIN STYLES -->
     <link rel="stylesheet" href="<?= BASE_URL ?>assets/css/style.css">
@@ -35,6 +69,11 @@ $isLoggedIn = isset($_SESSION["user_id"]) && !($isLandingPreview ?? false);
 </head>
 
 <body>
+    <script>
+     document.body.classList.toggle(
+        "dark-mode",
+        document.documentElement.classList.contains("dark-mode"));
+    </script>
 
     <header class="site-header">
 

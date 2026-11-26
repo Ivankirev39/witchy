@@ -18,13 +18,28 @@ $error = "";
 $username = "";
 $email = "";
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+// Check CSRF before processing registration.
+if (
+    $_SERVER["REQUEST_METHOD"] === "POST" &&
+    !csrf_valid($_POST["csrf_token"] ?? null)
+) {
+    http_response_code(403);
 
-    if (!csrf_valid($_POST["csrf_token"] ?? null)) {
-        http_response_code(403);
-        exit("Invalid request.");
-    }
-    
+    $error = "Your request could not be verified. Please refresh the page and try again.";
+
+    // Preserve entered information.
+    $username = is_string($_POST["username"] ?? null)
+        ? trim($_POST["username"])
+        : "";
+
+    $email = is_string($_POST["email"] ?? null)
+        ? trim($_POST["email"])
+        : "";
+}
+
+// Only process registration when the CSRF check passed.
+if ($_SERVER["REQUEST_METHOD"] === "POST" && $error === "") {
+
     try {
         $limiter = new RegistrationRateLimiter($conn);
         $ip = $_SERVER["REMOTE_ADDR"] ?? "";
@@ -43,22 +58,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($error === "") {
 
 
-    $website = trim($_POST["website"] ?? "");
+        // Detect whether the hidden honeypot field was filled.
+    $website = $_POST["website"] ?? "";
 
-    if ($website !== "") {
-        http_response_code(400);
-        exit("Invalid request.");
-    }
+    $honeypotTriggered = !is_string($website) || trim($website) !== "";
 
-    $username = trim($_POST["username"] ?? "");
-    $email = trim($_POST["email"] ?? "");
-    $password = $_POST["password"] ?? "";
-    $confirmPassword = $_POST["confirm_password"] ?? "";
+    // Validate input types before processing registration.
+    $username = is_string($_POST["username"] ?? null)
+        ? trim($_POST["username"])
+        : "";
+
+    $email = is_string($_POST["email"] ?? null)
+        ? trim($_POST["email"])
+        : "";
+
+    $password = is_string($_POST["password"] ?? null)
+        ? $_POST["password"]
+        : "";
+
+    $confirmPassword = is_string($_POST["confirm_password"] ?? null)
+        ? $_POST["confirm_password"]
+        : "";
 
     $formStarted = $_SESSION["register_form_started"] ?? 0;
     $secondsTaken = time() - $formStarted;
 
-    if ($formStarted === 0 || $secondsTaken < 3) {
+    if ($honeypotTriggered) {
+
+        http_response_code(400);
+
+        $error = "Your registration request could not be processed. Please refresh the page and try again.";
+
+    } elseif ($formStarted === 0 || $secondsTaken < 3) {
 
         $error = "Please wait a moment before creating your account, then try again.";
         $_SESSION["register_form_started"] = time();
@@ -84,13 +115,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $error = "Email is too long.";
 
-    } elseif (strlen($password) < 8) {
+    } elseif (strlen($password) < 15) {
 
-        $error = "Password must be at least 8 characters.";
+    $error = "Your password is too short. Please use at least 15 characters.";
 
     } elseif (strlen($password) > 255) {
 
         $error = "Password is too long.";
+
+    } elseif (
+        preg_match('/^[0-9]+$/', $password) ||
+        in_array(strtolower(trim($password)), [
+            "password123456789",
+            "qwerty123456789",
+            "123456789abcdef",
+            "abcdefghijklmnop"
+        ], true)
+    ) {
+
+        $error = "This password is too simple and easy to guess. Please choose a stronger password.";
+
 
     } elseif ($password !== $confirmPassword) {
 
@@ -296,8 +340,8 @@ require_once __DIR__ . "/includes/public-header.php";
                             type="password"
                             id="password"
                             name="password"
-                            placeholder="At least 8 characters"
-                            minlength="8"
+                            placeholder="At least 15 characters"
+                            minlength="15"
                             maxlength="255"
                             autocomplete="new-password"
                             required
@@ -345,7 +389,7 @@ require_once __DIR__ . "/includes/public-header.php";
                             id="confirm_password"
                             name="confirm_password"
                             placeholder="Enter your password again"
-                            minlength="8"
+                            minlength="15"
                             maxlength="255"
                             autocomplete="new-password"
                             required

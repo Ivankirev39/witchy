@@ -7,6 +7,7 @@ require_once __DIR__ . "/models/User.php";
 require_once __DIR__ . "/models/Follow.php";
 require_once __DIR__ . "/models/Report.php";
 require_once __DIR__ . "/models/Badge.php";
+require_once __DIR__ . "/includes/flash.php";
 
 $pageTitle = "Profile | Witchy";
 $pageCss = "profile.css";
@@ -21,9 +22,39 @@ $user = $profile_id > 0
     ? $userModel->getPublicProfile($profile_id)
     : null;
 
+// Show a styled error page when the profile doesn't exist.
 if (!$user) {
     http_response_code(404);
-    exit("User not found.");
+
+    $pageTitle = "Profile Not Found | Witchy";
+
+    require_once __DIR__ . "/includes/user_header.php";
+    ?>
+
+    <section class="post-not-found-page">
+        <div class="post-not-found-card">
+
+            <div class="post-not-found-icon">
+                ☾
+            </div>
+
+            <h1>Profile not found</h1>
+
+            <p>
+                This profile may have been deleted,
+                removed, or no longer exists.
+            </p>
+
+            <a href="feed.php" class="post-not-found-button">
+                Back to feed
+            </a>
+
+        </div>
+    </section>
+
+    <?php
+    require_once __DIR__ . "/includes/user_footer.php";
+    exit;
 }
 
 // Get the user's badges
@@ -89,11 +120,33 @@ $mediaStmt = $conn->prepare("
     ORDER BY sort_order ASC, media_id ASC
 ");
 
+// Retrieve any flash message.
+$flash = flash_get();
 // Load page
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 
 <section class="profile-page">
+
+    <?php if ($flash !== null): ?>
+
+        <div
+            class="profile-flash <?= htmlspecialchars(
+                $flash["type"],
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>"
+            role="<?= $flash["type"] === "error" ? "alert" : "status" ?>"
+        >
+            <?= htmlspecialchars(
+                $flash["message"],
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>
+        </div>
+
+    <?php endif; ?>
+
 
     <?php
     $isOwnProfile = ($profile_id === (int) $user_id);

@@ -8,16 +8,25 @@ const themeButton =
 
 function setTheme(theme) {
 
-    if (theme === "dark") {
-        document.body.classList.add("dark-mode");
-    } else {
-        document.body.classList.remove("dark-mode");
-    }
+    const isDark = theme === "dark";
 
-    localStorage.setItem(
-        "witchy-theme",
-        theme
+    // Update both HTML and body.
+    document.documentElement.classList.toggle(
+        "dark-mode",
+        isDark
     );
+
+    document.body.classList.toggle(
+        "dark-mode",
+        isDark
+    );
+
+    // Use the same preference as logged-in pages.
+    try {
+        localStorage.setItem("theme", theme);
+    } catch (error) {
+        // Switching still works for the current page.
+    }
 
     updateThemeButton();
 }
@@ -46,8 +55,14 @@ function updateThemeButton() {
 }
 
 
-const savedTheme =
-    localStorage.getItem("witchy-theme");
+let savedTheme = null;
+
+try {
+    savedTheme = localStorage.getItem("theme")
+        ?? localStorage.getItem("witchy-theme");
+} catch (error) {
+    // Continue using the device preference.
+}
 
 
 if (savedTheme === "dark") {
