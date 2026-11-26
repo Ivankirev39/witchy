@@ -312,8 +312,8 @@ require_once __DIR__ . "/includes/public-header.php";
                             type="password"
                             id="password"
                             name="password"
-                            placeholder="At least 8 characters"
-                            minlength="8"
+                            placeholder="At least 15 characters"
+                            minlength="15"
                             maxlength="255"
                             autocomplete="new-password"
                             required
@@ -361,7 +361,7 @@ require_once __DIR__ . "/includes/public-header.php";
                             id="confirm_password"
                             name="confirm_password"
                             placeholder="Enter your password again"
-                            minlength="8"
+                            minlength="15"
                             maxlength="255"
                             autocomplete="new-password"
                             required

@@ -4,6 +4,9 @@ class User
 {
     private PDO $db;
 
+    private const DEFAULT_SEARCH_LIMIT = 12;
+    private const MAX_SEARCH_LIMIT = 50;
+
     public function __construct(PDO $db)
     {
         $this->db = $db;
@@ -140,22 +143,40 @@ class User
     }
 
     // Search for users by username
-    public function searchUsers(string $search, int $currentUserId): array
-    {
+    public function searchUsers(
+        string $search,
+        int $currentUserId,
+        int $limit = self::DEFAULT_SEARCH_LIMIT
+    ): array {
+
+        // Keep the requested limit within allowed boundaries
+        $limit = max(1, min($limit, self::MAX_SEARCH_LIMIT));
         $sql = "
             SELECT user_id, username, profile_image
             FROM users
             WHERE username LIKE ?
             AND user_id != ?
             ORDER BY username ASC
-            LIMIT 12
+            LIMIT ?
         ";
 
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([
+        $stmt->bindValue(
+            1,
             "%" . $search . "%",
-            $currentUserId
-        ]);
+            PDO::PARAM_STR
+        );
+        $stmt->bindValue(
+            2,
+            $currentUserId,
+            PDO::PARAM_INT
+        );
+        $stmt->bindValue(
+            3,
+            $limit,
+            PDO::PARAM_INT
+        );
+        $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
