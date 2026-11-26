@@ -4,6 +4,7 @@ require_once __DIR__ . "/config/db.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/User.php";
 require_once __DIR__ . "/models/KeywordFilter.php";
+require_once __DIR__ . "/includes/flash.php";
 
 $pageTitle = "Edit Profile | Witchy";
 $pageCss = "edit_profile.css";
@@ -237,7 +238,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 $_SESSION["username"] = $username;
 
-                header("Location: profile.php?updated=1");
+                // Store a success message for the profile page.
+                flash_set(
+                    "success",
+                    "Your profile has been updated successfully!"
+                );
+
+                // Redirect to the profile page.
+                header("Location: profile.php");
                 exit;
 
             } catch (Throwable $e) {

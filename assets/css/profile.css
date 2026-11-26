@@ -1538,3 +1538,30 @@ html.dark-mode .profile-stat-button:focus-visible {
         gap: 16px 24px;
     }
 }
+/* ========================================
+   PROFILE FLASH MESSAGES
+   ======================================== */
+
+.profile-flash {
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.profile-flash.success {
+    background: var(--success-background);
+    color: var(--success);
+}
+
+.profile-flash.error {
+    background: var(--danger-background);
+    color: var(--danger);
+}
+
+.profile-flash.info {
+    background: var(--surface-soft);
+    color: var(--text);
+}

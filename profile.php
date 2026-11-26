@@ -7,6 +7,7 @@ require_once __DIR__ . "/models/User.php";
 require_once __DIR__ . "/models/Follow.php";
 require_once __DIR__ . "/models/Report.php";
 require_once __DIR__ . "/models/Badge.php";
+require_once __DIR__ . "/includes/flash.php";
 
 $pageTitle = "Profile | Witchy";
 $pageCss = "profile.css";
@@ -89,11 +90,33 @@ $mediaStmt = $conn->prepare("
     ORDER BY sort_order ASC, media_id ASC
 ");
 
+// Retrieve any flash message.
+$flash = flash_get();
 // Load page
 require_once __DIR__ . "/includes/user_header.php";
 ?>
 
 <section class="profile-page">
+
+    <?php if ($flash !== null): ?>
+
+        <div
+            class="profile-flash <?= htmlspecialchars(
+                $flash["type"],
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>"
+            role="<?= $flash["type"] === "error" ? "alert" : "status" ?>"
+        >
+            <?= htmlspecialchars(
+                $flash["message"],
+                ENT_QUOTES,
+                "UTF-8"
+            ) ?>
+        </div>
+
+    <?php endif; ?>
+
 
     <?php
     $isOwnProfile = ($profile_id === (int) $user_id);
