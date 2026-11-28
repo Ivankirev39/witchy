@@ -1,17 +1,15 @@
 <?php
-
 require_once __DIR__ . "/includes/auth.php";
 require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/models/UploadQuota.php";
 require_once __DIR__ . "/models/KeywordFilter.php";
+require_once __DIR__ . "/models/ImageConverter.php";
 
 // Only errors caused by the user's input should be displayed in detail.
 // Unexpected server/database errors are logged and shown as a generic message.
-final class UploadFormValidationException extends RuntimeException
-{
-}
+final class UploadFormValidationException extends RuntimeException {}
 
 $pdoConnector = new \DataAccess\DB\DBConnector();
 $pdo = $pdoConnector->connectToDB();
@@ -28,8 +26,15 @@ $maxImageSide = 6000;                 // Pixels
 $maxImagePixels = 24_000_000;        // 24 megapixels
 
 $allowedTopics = [
-    "spells", "altars", "tarot", "herbs", "crystals",
-    "books", "artwork", "occult-studies", "others"
+    "spells",
+    "altars",
+    "tarot",
+    "herbs",
+    "crystals",
+    "books",
+    "artwork",
+    "occult-studies",
+    "others"
 ];
 
 // Variables are also used by the form to keep the user's input after an error.
@@ -84,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if ($keywordFilter->containsBlockedContent($fieldValue)) {
                 throw new UploadFormValidationException(
                     "Your " . strtolower($fieldName) .
-                    " contains inappropriate language. Please edit it and try again."
+                        " contains inappropriate language. Please edit it and try again."
                 );
             }
         }
@@ -230,28 +235,61 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             ];
         }
 
-        $newFileSize = array_sum(array_column($validatedMedia, "file_size"));
-        if (!$uploadQuota->canUpload($userId, $newFileSize)) {
-            throw new UploadFormValidationException(
-                "Your upload quota has been reached. Please try again later."
-            );
-        }
 
-        // Save files only after every file passed validation and quota checks.
+        // Create the directory before converting images or moving videos.
         if ($validatedMedia !== [] && !is_dir($uploadDirectory)) {
             if (!mkdir($uploadDirectory, 0755, true) && !is_dir($uploadDirectory)) {
                 throw new RuntimeException("Could not create the upload directory.");
             }
         }
 
+        // Convert validated images. Videos remain unchanged.
+        $converter = new ImageConverter();
+
+        foreach ($validatedMedia as $index => $media) {
+            if ($media["media_type"] !== "image") {
+                continue;
+            }
+
+            $converted = $converter->convert(
+                $media["tmp_name"],
+                $uploadDirectory
+            );
+
+            $validatedMedia[$index]["file_name"] = $converted["file"];
+            $validatedMedia[$index]["upload_path"] =
+                $uploadDirectory . $converted["file"];
+            $validatedMedia[$index]["file_size"] = $converted["file_size"];
+
+            // The existing catch block will delete this if anything later fails.
+            $movedFiles[] = $validatedMedia[$index]["upload_path"];
+        }
+
+        $newFileSize = array_sum(array_column($validatedMedia, "file_size"));
+
+        if ($newFileSize > $maxTotalMediaSize) {
+            throw new UploadFormValidationException(
+                "Your media files are too large. Keep the total under 35 MB."
+            );
+        }
+
+        if (!$uploadQuota->canUpload($userId, $newFileSize)) {
+            throw new UploadFormValidationException(
+                "Your upload quota has been reached. Please try again later."
+            );
+        }
+
         $mediaRecords = [];
 
         foreach ($validatedMedia as $media) {
-            if (!move_uploaded_file($media["tmp_name"], $media["upload_path"])) {
-                throw new RuntimeException("Failed to save one of the uploaded files.");
+            if ($media["media_type"] === "video") {
+                if (!move_uploaded_file($media["tmp_name"], $media["upload_path"])) {
+                    throw new RuntimeException("Failed to save one of the uploaded files.");
+                }
+
+                $movedFiles[] = $media["upload_path"];
             }
 
-            $movedFiles[] = $media["upload_path"];
             $mediaRecords[] = [
                 "file" => $media["file_name"],
                 "media_type" => $media["media_type"],
@@ -282,7 +320,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if (http_response_code() !== 403) {
                 http_response_code(400);
             }
+
             $errorMessage = $e->getMessage();
+        } elseif (
+            $e->getMessage() ===
+            "Image requires too much memory to process. Try uploading a smaller image."
+        ) {
+            http_response_code(400);
+            $errorMessage = "This image requires too much memory to process. Try uploading a smaller image.";
         } else {
             error_log("Post creation failed: " . $e->getMessage());
             http_response_code(500);

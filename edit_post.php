@@ -4,6 +4,7 @@ require_once __DIR__ . "/models/DBConnector.php";
 require_once __DIR__ . "/includes/csrf.php";
 require_once __DIR__ . "/models/Post.php";
 require_once __DIR__ . "/models/KeywordFilter.php";
+require_once __DIR__ . "/models/ImageConverter.php";
 
 function getSafeEditReturnUrl($url)
 {
@@ -184,24 +185,48 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $validatedMedia = [];
     $movedFiles = [];
 
-    if (
-        $errorMessage === "" &&
-        isset($_FILES["media"]) &&
-        is_array($_FILES["media"]["name"])
-    ) {
-        $fileCount = count($_FILES["media"]["name"]);
+    if ($errorMessage === "" && isset($_FILES["media"])) {
+        $uploads = $_FILES["media"];
 
-        for ($i = 0; $i < $fileCount; $i++) {
-            if ($_FILES["media"]["error"][$i] === UPLOAD_ERR_NO_FILE) {
-                continue;
+        if (
+            !isset(
+                $uploads["name"],
+                $uploads["tmp_name"],
+                $uploads["size"],
+                $uploads["error"]
+            ) ||
+            !is_array($uploads["name"]) ||
+            !is_array($uploads["tmp_name"]) ||
+            !is_array($uploads["size"]) ||
+            !is_array($uploads["error"])
+        ) {
+            $errorMessage = "The uploaded files could not be read. Please select them again.";
+        } else {
+            foreach ($uploads["name"] as $index => $name) {
+                $uploadError = $uploads["error"][$index] ?? null;
+                $tmpName = $uploads["tmp_name"][$index] ?? null;
+                $fileSize = $uploads["size"][$index] ?? null;
+
+                if (
+                    !is_int($uploadError) ||
+                    !is_string($tmpName) ||
+                    !is_int($fileSize)
+                ) {
+                    $errorMessage = "One of your files is invalid. Please select it again.";
+                    break;
+                }
+
+                if ($uploadError === UPLOAD_ERR_NO_FILE) {
+                    continue;
+                }
+
+                $mediaFiles[] = [
+                    "name" => $name,
+                    "tmp_name" => $tmpName,
+                    "size" => $fileSize,
+                    "error" => $uploadError
+                ];
             }
-
-            $mediaFiles[] = [
-                "name" => $_FILES["media"]["name"][$i],
-                "tmp_name" => $_FILES["media"]["tmp_name"][$i],
-                "size" => $_FILES["media"]["size"][$i],
-                "error" => $_FILES["media"]["error"][$i]
-            ];
         }
     }
 
@@ -217,6 +242,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $uploadDirectory = __DIR__ . "/uploads/posts/";
     $maxTotalMediaSize = 35 * 1024 * 1024;
     $totalMediaSize = 0;
+    $remainingSize = 0;
 
     if ($errorMessage === "") {
         $remainingMedia = array_filter(
@@ -275,7 +301,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $mimeType = $finfo->file($media["tmp_name"]);
 
-            if (!isset($allowedTypes[$mimeType])) {
+            if (!is_string($mimeType) || !isset($allowedTypes[$mimeType])) {
                 $errorMessage = "One of your files has an unsupported file type.";
                 break;
             }
@@ -283,7 +309,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $typeInfo = $allowedTypes[$mimeType];
 
             if ($typeInfo["type"] === "image") {
-                $imageInfo = getimagesize($media["tmp_name"]);
+                $imageInfo = @getimagesize($media["tmp_name"]);
 
                 if ($imageInfo === false) {
                     $errorMessage = "One of your images is invalid.";
@@ -332,15 +358,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $remainingSize = array_sum(
             array_column($remainingMedia, "file_size")
         );
-
-        if ($remainingSize + $totalMediaSize > $maxTotalMediaSize) {
-            $errorMessage = "The total media size cannot exceed 35 MB.";
-        }
     }
 
     if ($errorMessage === "") {
         try {
-            foreach ($validatedMedia as $media) {
+            $converter = new ImageConverter();
+
+            foreach ($validatedMedia as $index => $media) {
+                if ($media["media_type"] === "image") {
+                    $converted = $converter->convert(
+                        $media["tmp_name"],
+                        $uploadDirectory
+                    );
+
+                    $validatedMedia[$index]["file"] = $converted["file"];
+                    $validatedMedia[$index]["upload_path"] =
+                        $uploadDirectory . $converted["file"];
+                    $validatedMedia[$index]["file_size"] = $converted["file_size"];
+
+                    $movedFiles[] = $validatedMedia[$index]["upload_path"];
+                    continue;
+                }
+
                 if (!move_uploaded_file(
                     $media["tmp_name"],
                     $media["upload_path"]
@@ -349,6 +388,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 }
 
                 $movedFiles[] = $media["upload_path"];
+            }
+
+            $storedMediaSize = array_sum(
+                array_column($validatedMedia, "file_size")
+            );
+
+            if ($remainingSize + $storedMediaSize > $maxTotalMediaSize) {
+                throw new RuntimeException("Post media size limit exceeded.");
             }
 
             $mediaRecords = [];
@@ -392,7 +439,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             header("Location: " . $redirectUrl);
             exit;
-
         } catch (Throwable $e) {
             foreach ($movedFiles as $filePath) {
                 if (is_file($filePath)) {
@@ -412,6 +458,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $errorMessage = "The total media size cannot exceed 35 MB.";
             } elseif ($e->getMessage() === "Invalid media selection.") {
                 $errorMessage = "One of the selected media files is invalid.";
+            } elseif (
+                $e->getMessage() ===
+                "Image requires too much memory to process. Try uploading a smaller image."
+            ) {
+                http_response_code(400);
+                $errorMessage = "This image requires too much memory to process. Try uploading a smaller image.";
             } else {
                 $errorMessage = "Something went wrong. Please try again.";
             }
@@ -448,20 +500,17 @@ require_once __DIR__ . "/includes/user_header.php";
         <input
             type="hidden"
             name="csrf_token"
-            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>"
-        >
+            value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES, "UTF-8") ?>">
 
         <input
             type="hidden"
             name="post_id"
-            value="<?= $postId ?>"
-        >
+            value="<?= $postId ?>">
 
         <input
             type="hidden"
             name="return"
-            value="<?= htmlspecialchars($returnUrl ?? "", ENT_QUOTES, "UTF-8") ?>"
-        >
+            value="<?= htmlspecialchars($returnUrl ?? "", ENT_QUOTES, "UTF-8") ?>">
 
         <section class="edit-card">
 
@@ -479,8 +528,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     name="title"
                     maxlength="150"
                     value="<?= htmlspecialchars($title, ENT_QUOTES, "UTF-8") ?>"
-                    required
-                >
+                    required>
 
                 <small>Maximum 150 characters.</small>
             </div>
@@ -491,8 +539,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 <textarea
                     id="description"
                     name="description"
-                    rows="7"
-                ><?= htmlspecialchars($description, ENT_QUOTES, "UTF-8") ?></textarea>
+                    rows="7"><?= htmlspecialchars($description, ENT_QUOTES, "UTF-8") ?></textarea>
             </div>
 
         </section>
@@ -521,13 +568,11 @@ require_once __DIR__ . "/includes/user_header.php";
                                 <?php if ($media["media_type"] === "image"): ?>
                                     <img
                                         src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
-                                        alt="Current post media"
-                                    >
+                                        alt="Current post media">
                                 <?php else: ?>
                                     <video controls>
                                         <source
-                                            src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>"
-                                        >
+                                            src="<?= htmlspecialchars($mediaPath, ENT_QUOTES, "UTF-8") ?>">
                                     </video>
                                 <?php endif; ?>
 
@@ -555,8 +600,7 @@ require_once __DIR__ . "/includes/user_header.php";
                     id="media"
                     name="media[]"
                     accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
-                    multiple
-                >
+                    multiple>
 
                 <small>
                     Keep your current media, remove individual files, or add more.
@@ -608,8 +652,7 @@ require_once __DIR__ . "/includes/user_header.php";
                 <textarea
                     id="sources"
                     name="sources"
-                    rows="4"
-                ><?= htmlspecialchars($sources, ENT_QUOTES, "UTF-8") ?></textarea>
+                    rows="4"><?= htmlspecialchars($sources, ENT_QUOTES, "UTF-8") ?></textarea>
             </div>
 
         </section>
